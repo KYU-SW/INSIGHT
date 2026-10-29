@@ -1,0 +1,34 @@
+{
+  "rules": {
+    "subjects": {
+      ".read": true,
+      "$subject_id": {
+        ".write": true,
+        ".validate": "newData.hasChildren(['subject_id', 'created_at'])"
+      }
+    },
+    "recordings": {
+      ".read": true,
+      ".indexOn": ["subject_id"],
+      "$recording_id": {
+        ".write": true,
+        ".validate": "newData.hasChildren(['recording_id', 'subject_id', 'recorded_at', 'uploaded_at', 'task_code', 'duration_seconds', 'rms_dbfs', 'near_full_scale_percent'])"
+      }
+    },
+    "analyses": {
+      ".read": true,
+      ".indexOn": ["recording_id"],
+      "$analysis_id": {
+        ".write": true,
+        ".validate": "newData.hasChildren(['analysis_id', 'recording_id', 'analyzed_at', 'model_name', 'model_version', 'model_score', 'pipeline_version'])"
+      }
+    },
+    "acoustic_metrics": {
+      ".read": true,
+      "$analysis_id": {
+        ".write": true,
+        ".validate": "newData.hasChildren(['analysis_id', 'mean_pitch_hz', 'pitch_sd_hz', 'pitch_cv', 'intensity_cv', 'mean_intensity_dbfs'])"
+      }
+    }
+  }
+}

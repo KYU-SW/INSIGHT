@@ -1,0 +1,911 @@
+<!DOCTYPE html>
+
+<html lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        "colors": {
+          "on-primary-fixed": "#031c38",
+          "inverse-surface": "#2d3133",
+          "surface-bright": "#f7f9fb",
+          "primary": "#000d21",
+          "surface-dim": "#d8dadc",
+          "on-error-container": "#93000a",
+          "primary-fixed": "#d5e3ff",
+          "tertiary": "#000d1e",
+          "on-background": "#191c1e",
+          "surface-container-highest": "#e0e3e5",
+          "on-tertiary": "#ffffff",
+          "inverse-primary": "#b3c7ec",
+          "on-tertiary-fixed-variant": "#3a485b",
+          "on-secondary-fixed-variant": "#184975",
+          "surface-container-lowest": "#ffffff",
+          "tertiary-fixed": "#d5e3fc",
+          "background": "#f7f9fb",
+          "secondary-fixed-dim": "#9fcafd",
+          "error": "#ba1a1a",
+          "surface-container": "#eceef0",
+          "inverse-on-surface": "#eff1f3",
+          "on-primary-container": "#778bad",
+          "tertiary-fixed-dim": "#b9c7df",
+          "on-surface-variant": "#44474d",
+          "on-secondary": "#ffffff",
+          "on-surface": "#191c1e",
+          "surface": "#f7f9fb",
+          "outline-variant": "#c4c6ce",
+          "on-primary": "#ffffff",
+          "surface-container-high": "#e6e8ea",
+          "secondary": "#35618e",
+          "primary-fixed-dim": "#b3c7ec",
+          "tertiary-container": "#152335",
+          "secondary-container": "#9fcafd",
+          "on-tertiary-fixed": "#0d1c2e",
+          "on-secondary-fixed": "#001d36",
+          "on-primary-fixed-variant": "#334766",
+          "surface-variant": "#e0e3e5",
+          "on-secondary-container": "#275582",
+          "error-container": "#ffdad6",
+          "secondary-fixed": "#d1e4ff",
+          "on-tertiary-container": "#7c8ba0",
+          "outline": "#74777e",
+          "surface-container-low": "#f2f4f6",
+          "primary-container": "#0c2340",
+          "surface-tint": "#4b5f7f",
+          "on-error": "#ffffff"
+        },
+        "borderRadius": {
+          "DEFAULT": "0.125rem",
+          "lg": "0.25rem",
+          "xl": "0.5rem",
+          "full": "0.75rem"
+        },
+        "spacing": {
+          "unit-2xs": "0.125rem",
+          "unit-md": "0.75rem",
+          "table-cell-y": "0.375rem",
+          "table-cell-x": "0.625rem",
+          "panel-padding": "1rem",
+          "unit-lg": "1rem",
+          "unit-xs": "0.25rem",
+          "unit-xl": "1.5rem",
+          "gutter-standard": "0.75rem",
+          "gutter-dense": "0.5rem",
+          "unit-sm": "0.5rem"
+        },
+        "fontFamily": {
+          "body-lg": [
+            "Inter"
+          ],
+          "display-lg": [
+            "Inter"
+          ],
+          "body-md": [
+            "Inter"
+          ],
+          "data-md": [
+            "JetBrains Mono"
+          ],
+          "body-sm": [
+            "Inter"
+          ],
+          "data-lg": [
+            "JetBrains Mono"
+          ],
+          "headline-sm": [
+            "Inter"
+          ],
+          "headline-lg": [
+            "Inter"
+          ],
+          "label-caps": [
+            "Inter"
+          ],
+          "data-sm": [
+            "JetBrains Mono"
+          ],
+          "headline-md": [
+            "Inter"
+          ]
+        },
+        "fontSize": {
+          "body-lg": [
+            "14px",
+            {
+              "lineHeight": "20px",
+              "fontWeight": "400"
+            }
+          ],
+          "display-lg": [
+            "28px",
+            {
+              "lineHeight": "34px",
+              "letterSpacing": "-0.02em",
+              "fontWeight": "700"
+            }
+          ],
+          "body-md": [
+            "13px",
+            {
+              "lineHeight": "18px",
+              "fontWeight": "400"
+            }
+          ],
+          "data-md": [
+            "13px",
+            {
+              "lineHeight": "16px",
+              "fontWeight": "500"
+            }
+          ],
+          "body-sm": [
+            "12px",
+            {
+              "lineHeight": "16px",
+              "fontWeight": "400"
+            }
+          ],
+          "data-lg": [
+            "18px",
+            {
+              "lineHeight": "22px",
+              "fontWeight": "600"
+            }
+          ],
+          "headline-sm": [
+            "14px",
+            {
+              "lineHeight": "18px",
+              "fontWeight": "600"
+            }
+          ],
+          "headline-lg": [
+            "20px",
+            {
+              "lineHeight": "26px",
+              "letterSpacing": "-0.01em",
+              "fontWeight": "600"
+            }
+          ],
+          "label-caps": [
+            "11px",
+            {
+              "lineHeight": "14px",
+              "letterSpacing": "0.05em",
+              "fontWeight": "600"
+            }
+          ],
+          "data-sm": [
+            "11px",
+            {
+              "lineHeight": "14px",
+              "letterSpacing": "0.02em",
+              "fontWeight": "500"
+            }
+          ],
+          "headline-md": [
+            "16px",
+            {
+              "lineHeight": "22px",
+              "letterSpacing": "-0.005em",
+              "fontWeight": "600"
+            }
+          ]
+        }
+      },
+    },
+  }</script></head><body class="bg-background font-body-md text-body-md text-on-surface antialiased"><aside class="fixed left-0 top-0 h-full w-[260px] bg-primary-container z-50 flex flex-col justify-between shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="flex flex-col"><div class="h-16 px-unit-lg flex items-center gap-unit-sm bg-tertiary-container"><img alt="INSIGHT Clinical Logo" class="h-8 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/AEtjO1W0OMoygTMoF4T7Fz6ghc9zxi253EDO4gb-d1ZB2EwuUzEvAiVdnaKQdbFqwSN14JDNXtyLV3czd7QJmG5m721h7W_bXC5ye7eG16DEBLGmbFvqcWZQpBlFUpoqvx2S704l-3jm0h574B-nuYTFDndQB6e27WukKqQ0Z1XE5jKuwIundQv6VroyvRGQyNKXHGYJ2-qsmfbCWKm58CDM2hjT1lkc2DcMjqhPZ24zJ-FDTjlKbMQan3JDKwI"/><div class="flex flex-col min-w-0"><span class="font-headline-sm text-headline-sm text-on-tertiary tracking-tight truncate">INSIGHT</span><span class="font-label-caps text-label-caps text-on-tertiary-container uppercase tracking-wider truncate">HD Voice Biomarker CDS</span></div></div><div class="px-unit-lg pt-unit-md pb-unit-xs"><span class="font-label-caps text-label-caps uppercase text-on-primary-container tracking-wider">Clinical Navigation</span></div><nav class="flex flex-col gap-unit-2xs px-unit-sm" data-active-classes="bg-secondary text-on-secondary font-headline-sm"><a class="flex items-center gap-unit-sm px-unit-md py-unit-sm rounded text-on-primary-container hover:bg-tertiary-container hover:text-on-tertiary transition-colors group" data-path="dashboard" href="#"><span class="material-symbols-outlined text-[18px]">grid_view</span><span class="font-body-md text-body-md">Dashboard</span></a><a aria-current="page" class="flex items-center gap-unit-sm px-unit-md py-unit-sm rounded transition-colors group bg-secondary text-on-secondary font-headline-sm" data-path="patients" href="#"><span class="material-symbols-outlined text-[18px]">patient_list</span><span class="font-body-md text-body-md">Patients</span></a><a class="flex items-center gap-unit-sm px-unit-md py-unit-sm rounded text-on-primary-container hover:bg-tertiary-container hover:text-on-tertiary transition-colors group" data-path="ai-analysis" href="#"><span class="material-symbols-outlined text-[18px]">neurology</span><span class="font-body-md text-body-md">AI Analysis</span></a><a class="flex items-center gap-unit-sm px-unit-md py-unit-sm rounded text-on-primary-container hover:bg-tertiary-container hover:text-on-tertiary transition-colors group" data-path="examination-history" href="#"><span class="material-symbols-outlined text-[18px]">clinical_notes</span><span class="font-body-md text-body-md">Examination History</span></a></nav></div><div class="p-unit-md m-unit-sm rounded bg-tertiary-container flex flex-col gap-unit-xs"><div class="flex items-center justify-between"><span class="font-label-caps text-label-caps uppercase text-on-tertiary-container">Clinical Engine</span><span class="flex items-center gap-unit-2xs text-[#0f766e] font-data-sm text-data-sm"><span class="inline-block w-1.5 h-1.5 rounded-full bg-[#0f766e]"></span>Online</span></div><div class="flex flex-col gap-unit-2xs font-data-sm text-data-sm text-on-tertiary-container"><div class="flex items-center justify-between"><span class="truncate">EMR Sync</span><span class="font-medium text-on-tertiary">HL7 Connected</span></div><div class="flex items-center justify-between"><span class="truncate">Inference Model</span><span class="font-medium text-on-tertiary">v1.02-HD</span></div><div class="flex items-center justify-between"><span class="truncate">PACS Gateway</span><span class="font-medium text-on-tertiary">DICOM v3.0</span></div></div></div></aside><div class="pl-[260px]"><header class="fixed top-0 left-[260px] right-0 h-16 bg-surface-container-lowest shadow-[0_1px_8px_rgba(0,0,0,0.04)] z-40 flex items-center justify-between px-unit-xl"><div class="flex items-center gap-unit-md"><div class="flex items-center gap-unit-xs text-on-surface-variant font-body-sm text-body-sm"><span class="material-symbols-outlined text-[18px] text-secondary">local_hospital</span><span class="font-headline-sm text-headline-sm text-on-surface">INSIGHT CDS</span><span class="text-outline-variant">/</span><span class="text-on-surface-variant font-body-sm text-body-sm">Konyang University Hospital</span><span class="text-outline-variant">/</span><span class="text-secondary font-medium">Neurology Dept</span></div></div><div class="flex items-center gap-unit-lg"><div class="flex items-center gap-unit-sm px-unit-md py-unit-xs bg-surface-container-low rounded"><span class="material-symbols-outlined text-[16px] text-secondary">security</span><span class="font-data-sm text-data-sm text-on-surface-variant">HIPAA · Workstation 04</span></div><div class="flex items-center gap-unit-xs"><button aria-label="Notifications" class="w-8 h-8 rounded flex items-center justify-center text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors relative" type="button"><span class="material-symbols-outlined text-[20px]">notifications</span><span class="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-error"></span></button><button aria-label="System Settings" class="w-8 h-8 rounded flex items-center justify-center text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" type="button"><span class="material-symbols-outlined text-[20px]">tune</span></button></div><div class="flex items-center gap-unit-sm pl-unit-sm bg-surface-container-lowest"><img alt="Profile" class="w-8 h-8 rounded-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCLkxJpeMigD7u9cG9Mss64oDnwaQKr2QaoCgDg_crSspgNUAU74v9y389bKtjPpgrAlfNMsmS-t6toCIE2Uui_SviWfCG4_AVO8DYKFDJtu3p3ZuMPVMtMzeitSU2Lzc7uPPQg6GX2E5Atl0Anoar4PJnrHEJluBiYrqDnN_bVtRwLaGNQUCuaXlIdXRdAJukrWLFg_3DgsIzQ3bvELP5EUzcj0jRwh6oyvxN8z714CZR-oeWelO8P"/><div class="flex flex-col text-left"><span class="font-headline-sm text-headline-sm text-on-surface leading-tight">Dr. Kim, MD, PhD</span><span class="font-data-sm text-data-sm text-on-surface-variant leading-tight">Senior Neurologist</span></div></div></div></header><main class="w-full pt-16 min-h-screen bg-background p-unit-lg"><div class="flex flex-col w-full gap-unit-lg">
+<!-- Top Banner / Clinical Context Bar -->
+<div class="flex flex-col md:flex-row md:items-center justify-between gap-unit-md p-unit-lg bg-surface-container-lowest rounded shadow-sm">
+<div class="flex flex-col gap-unit-2xs">
+<div class="flex items-center gap-unit-xs text-on-surface-variant font-label-caps text-label-caps uppercase">
+<span class="inline-block w-2 h-2 rounded-full bg-secondary"></span>
+<span>Registry Partition: HD-KOR-NORTH-A</span>
+<span class="text-outline-variant">·</span>
+<span class="font-data-sm text-data-sm text-secondary">Cohort CID: 884-26-NX</span>
+</div>
+<h1 class="font-headline-lg text-headline-lg text-on-surface font-semibold tracking-tight">Patient Management &amp; Screening Registry</h1>
+<p class="font-body-md text-body-md text-on-surface-variant">Neurology Department · Active Huntington Disease Surveillance Cohort (Konyang Workstation CDS)</p>
+</div>
+<!-- Quick Action Buttons -->
+<div class="flex items-center flex-wrap gap-unit-xs">
+<button class="inline-flex items-center gap-unit-xs px-unit-md h-7 rounded bg-surface-container hover:bg-surface-container-high text-on-surface transition-colors font-body-sm text-body-sm font-medium" type="button">
+<span class="material-symbols-outlined text-[16px] text-secondary">sync</span>
+<span>Batch Re-run Screening</span>
+</button>
+<button class="inline-flex items-center gap-unit-xs px-unit-md h-7 rounded bg-surface-container hover:bg-surface-container-high text-on-surface transition-colors font-body-sm text-body-sm font-medium" type="button">
+<span class="material-symbols-outlined text-[16px] text-secondary">file_download</span>
+<span>Export Cohort CSV</span>
+</button>
+<button class="inline-flex items-center gap-unit-xs px-unit-md h-7 rounded bg-primary-container text-on-primary hover:bg-primary transition-colors font-headline-sm text-headline-sm" type="button">
+<span class="material-symbols-outlined text-[16px]">person_add</span>
+<span>Register New Patient Profile</span>
+</button>
+</div>
+</div>
+<!-- KPI Overview Metrics Strip -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-unit-md">
+<div class="flex items-center justify-between p-unit-md bg-surface-container-lowest rounded shadow-sm">
+<div class="flex flex-col">
+<span class="font-label-caps text-label-caps uppercase text-on-surface-variant">Active Monitored</span>
+<div class="flex items-baseline gap-unit-xs mt-unit-2xs">
+<span class="font-data-lg text-data-lg text-on-surface">42</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">patients enrolled</span>
+</div>
+</div>
+<div class="w-9 h-9 rounded bg-surface-container-low flex items-center justify-center text-secondary">
+<span class="material-symbols-outlined text-[20px]">groups</span>
+</div>
+</div>
+<div class="flex items-center justify-between p-unit-md bg-surface-container-lowest rounded shadow-sm">
+<div class="flex flex-col">
+<span class="font-label-caps text-label-caps uppercase text-error">High Probability (≥70%)</span>
+<div class="flex items-baseline gap-unit-xs mt-unit-2xs">
+<span class="font-data-lg text-data-lg text-error font-semibold">8</span>
+<span class="font-data-sm text-data-sm text-error bg-error-container/40 px-unit-xs rounded">19.0%</span>
+</div>
+</div>
+<div class="w-9 h-9 rounded bg-error-container/30 flex items-center justify-center text-error">
+<span class="material-symbols-outlined text-[20px]">crisis_alert</span>
+</div>
+</div>
+<div class="flex items-center justify-between p-unit-md bg-surface-container-lowest rounded shadow-sm">
+<div class="flex flex-col">
+<span class="font-label-caps text-label-caps uppercase text-on-secondary-container">Moderate Tier (40-69%)</span>
+<div class="flex items-baseline gap-unit-xs mt-unit-2xs">
+<span class="font-data-lg text-data-lg text-on-secondary-container font-semibold">14</span>
+<span class="font-data-sm text-data-sm text-on-secondary-container bg-secondary-container/40 px-unit-xs rounded">33.3%</span>
+</div>
+</div>
+<div class="w-9 h-9 rounded bg-secondary-container/30 flex items-center justify-center text-secondary">
+<span class="material-symbols-outlined text-[20px]">troubleshoot</span>
+</div>
+</div>
+<div class="flex items-center justify-between p-unit-md bg-surface-container-lowest rounded shadow-sm">
+<div class="flex flex-col">
+<span class="font-label-caps text-label-caps uppercase text-on-surface-variant">Pending Neurologist Review</span>
+<div class="flex items-baseline gap-unit-xs mt-unit-2xs">
+<span class="font-data-lg text-data-lg text-primary font-semibold">5</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">immediate triage</span>
+</div>
+</div>
+<div class="w-9 h-9 rounded bg-surface-container-low flex items-center justify-center text-primary-container">
+<span class="material-symbols-outlined text-[20px]">rate_review</span>
+</div>
+</div>
+</div>
+<!-- Search & Dynamic Filter Control Bar -->
+<div class="flex flex-col gap-unit-sm p-unit-md bg-surface-container-lowest rounded shadow-sm">
+<div class="flex flex-col lg:flex-row lg:items-center justify-between gap-unit-sm">
+<!-- Monospaced / MRN Quick Search -->
+<div class="relative flex-1 max-w-md">
+<span class="material-symbols-outlined absolute left-2.5 top-1/2 -translate-y-1/2 text-[18px] text-on-surface-variant">search</span>
+<input class="w-full h-8 pl-8 pr-unit-md bg-surface-container-low rounded text-on-surface font-body-sm text-body-sm placeholder:text-on-surface-variant focus:outline-none focus:bg-surface-container" id="patientSearchInput" placeholder="Search by Patient ID (e.g. P-00124) or Name..." type="text"/>
+<span class="absolute right-2 top-1/2 -translate-y-1/2 font-data-sm text-data-sm text-on-surface-variant bg-surface-container px-1 py-0.5 rounded">⌘K</span>
+</div>
+<!-- Filter Tabs / Pills -->
+<div class="flex items-center gap-unit-xs overflow-x-auto pb-1 lg:pb-0 text-on-surface-variant">
+<button class="px-unit-sm h-7 rounded bg-primary text-on-primary font-body-sm text-body-sm font-medium whitespace-nowrap transition-colors" type="button">
+          All Patients (42)
+        </button>
+<button class="px-unit-sm h-7 rounded bg-surface-container-low hover:bg-surface-container text-on-surface font-body-sm text-body-sm font-medium whitespace-nowrap transition-colors flex items-center gap-unit-2xs" type="button">
+<span class="w-1.5 h-1.5 rounded-full bg-error"></span>
+<span>High Risk (≥70%) [8]</span>
+</button>
+<button class="px-unit-sm h-7 rounded bg-surface-container-low hover:bg-surface-container text-on-surface font-body-sm text-body-sm font-medium whitespace-nowrap transition-colors flex items-center gap-unit-2xs" type="button">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
+<span>Moderate Risk (40-69%) [14]</span>
+</button>
+<button class="px-unit-sm h-7 rounded bg-surface-container-low hover:bg-surface-container text-on-surface font-body-sm text-body-sm font-medium whitespace-nowrap transition-colors flex items-center gap-unit-2xs" type="button">
+<span class="w-1.5 h-1.5 rounded-full bg-surface-tint"></span>
+<span>Low Risk (&lt;40%) [20]</span>
+</button>
+</div>
+<!-- Right secondary selectors -->
+<div class="flex items-center gap-unit-xs">
+<div class="relative">
+<select class="h-8 pl-unit-sm pr-7 rounded bg-surface-container-low text-on-surface font-body-sm text-body-sm appearance-none focus:outline-none focus:bg-surface-container cursor-pointer">
+<option>All Review States</option>
+<option>Pending Review (5)</option>
+<option>Reviewed (37)</option>
+</select>
+<span class="material-symbols-outlined absolute right-1.5 top-1/2 -translate-y-1/2 text-[16px] text-on-surface-variant pointer-events-none">arrow_drop_down</span>
+</div>
+<div class="relative">
+<select class="h-8 pl-unit-sm pr-7 rounded bg-surface-container-low text-on-surface font-body-sm text-body-sm appearance-none focus:outline-none focus:bg-surface-container cursor-pointer">
+<option>Sort: Latest Exam Date</option>
+<option>Sort: Risk Score (High to Low)</option>
+<option>Sort: Age</option>
+</select>
+<span class="material-symbols-outlined absolute right-1.5 top-1/2 -translate-y-1/2 text-[16px] text-on-surface-variant pointer-events-none">sort</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Primary Workstation Patient Table -->
+<div class="w-full overflow-hidden bg-surface-container-lowest rounded shadow-sm">
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse" id="patientMasterTable">
+<thead>
+<tr class="bg-surface-container-low font-label-caps text-label-caps uppercase text-on-surface-variant">
+<th class="py-2.5 px-3 w-10 text-center">
+<input class="rounded accent-primary cursor-pointer" id="selectAllCheckbox" type="checkbox"/>
+</th>
+<th class="py-2.5 px-3">Patient ID</th>
+<th class="py-2.5 px-3">Patient Name</th>
+<th class="py-2.5 px-3">Age / Sex</th>
+<th class="py-2.5 px-3">Attending Physician</th>
+<th class="py-2.5 px-3">Last Exam Date</th>
+<th class="py-2.5 px-3">Sessions</th>
+<th class="py-2.5 px-3 w-48">Acoustic Biomarker Index</th>
+<th class="py-2.5 px-3">Diagnostic Tier</th>
+<th class="py-2.5 px-3">Review Status</th>
+<th class="py-2.5 px-3 text-right">Clinical Action</th>
+</tr>
+</thead>
+<tbody class="divide-y-0 text-on-surface font-body-md text-body-md" id="patientTableBody">
+<!-- Row 1: High Risk / Pending -->
+<tr class="hover:bg-surface-container-low transition-colors group">
+<td class="py-2 px-3 text-center">
+<input class="row-checkbox rounded accent-primary cursor-pointer" type="checkbox"/>
+</td>
+<td class="py-2 px-3 font-data-md text-data-md text-primary font-semibold">P-2026-00124</td>
+<td class="py-2 px-3">
+<div class="flex items-center gap-unit-xs">
+<span class="w-6 h-6 rounded-full bg-surface-container flex items-center justify-center font-label-caps text-label-caps text-secondary font-bold">KO</span>
+<span class="font-headline-sm text-headline-sm text-on-surface">Kim O.O.</span>
+</div>
+</td>
+<td class="py-2 px-3 font-data-sm text-data-sm text-on-surface-variant">48 / M</td>
+<td class="py-2 px-3 font-body-sm text-body-sm text-on-surface-variant">Dr. Kim, MD</td>
+<td class="py-2 px-3 font-data-sm text-data-sm">2026-09-07</td>
+<td class="py-2 px-3 font-data-sm text-data-sm text-on-surface-variant">4 exams</td>
+<td class="py-2 px-3">
+<div class="flex items-center gap-unit-xs">
+<div class="flex-1 h-2 bg-surface-container rounded-full overflow-hidden">
+<div class="h-full bg-error rounded-full" style="width: 78%"></div>
+</div>
+<span class="font-data-sm text-data-sm font-semibold text-error w-8 text-right">78%</span>
+</div>
+</td>
+<td class="py-2 px-3">
+<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-error-container text-error font-data-sm text-data-sm font-semibold">
+<span class="material-symbols-outlined text-[13px]">warning</span>
+                HIGH RISK
+              </span>
+</td>
+<td class="py-2 px-3">
+<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-surface-container text-on-surface font-body-sm text-body-sm">
+<span class="inline-block w-1.5 h-1.5 rounded-full bg-primary-container"></span>
+                Pending Review
+              </span>
+</td>
+<td class="py-2 px-3 text-right">
+<button class="inline-flex items-center gap-unit-2xs px-unit-sm h-6 rounded bg-primary-container text-on-primary hover:bg-primary transition-colors font-headline-sm text-body-sm" type="button">
+<span>Open Analysis</span>
+<span class="material-symbols-outlined text-[14px]">chevron_right</span>
+</button>
+</td>
+</tr>
+<!-- Row 2: Moderate / Reviewed -->
+<tr class="hover:bg-surface-container-low transition-colors group">
+<td class="py-2 px-3 text-center">
+<input class="row-checkbox rounded accent-primary cursor-pointer" type="checkbox"/>
+</td>
+<td class="py-2 px-3 font-data-md text-data-md text-primary font-semibold">P-2026-00123</td>
+<td class="py-2 px-3">
+<div class="flex items-center gap-unit-xs">
+<span class="w-6 h-6 rounded-full bg-surface-container flex items-center justify-center font-label-caps text-label-caps text-secondary font-bold">LS</span>
+<span class="font-headline-sm text-headline-sm text-on-surface">Lee S.H.</span>
+</div>
+</td>
+<td class="py-2 px-3 font-data-sm text-data-sm text-on-surface-variant">55 / F</td>
+<td class="py-2 px-3 font-body-sm text-body-sm text-on-surface-variant">Dr. Kim, MD</td>
+<td class="py-2 px-3 font-data-sm text-data-sm">2026-09-07</td>
+<td class="py-2 px-3 font-data-sm text-data-sm text-on-surface-variant">3 exams</td>
+<td class="py-2 px-3">
+<div class="flex items-center gap-unit-xs">
+<div class="flex-1 h-2 bg-surface-container rounded-full overflow-hidden">
+<div class="h-full bg-secondary rounded-full" style="width: 64%"></div>
+</div>
+<span class="font-data-sm text-data-sm font-semibold text-secondary w-8 text-right">64%</span>
+</div>
+</td>
+<td class="py-2 px-3">
+<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-secondary-container/50 text-on-secondary-container font-data-sm text-data-sm font-semibold">
+<span class="material-symbols-outlined text-[13px]">info</span>
+                MODERATE
+              </span>
+</td>
+<td class="py-2 px-3">
+<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-surface-container-low text-on-surface-variant font-body-sm text-body-sm">
+<span class="material-symbols-outlined text-[13px] text-secondary">check_circle</span>
+                Reviewed
+              </span>
+</td>
+<td class="py-2 px-3 text-right">
+<button class="inline-flex items-center gap-unit-2xs px-unit-sm h-6 rounded bg-surface-container hover:bg-surface-container-high text-on-surface transition-colors font-headline-sm text-body-sm" type="button">
+<span>Open Analysis</span>
+<span class="material-symbols-outlined text-[14px]">chevron_right</span>
+</button>
+</td>
+</tr>
+<!-- Row 3: High Risk / Pending -->
+<tr class="hover:bg-surface-container-low transition-colors group">
+<td class="py-2 px-3 text-center">
+<input class="row-checkbox rounded accent-primary cursor-pointer" type="checkbox"/>
+</td>
+<td class="py-2 px-3 font-data-md text-data-md text-primary font-semibold">P-2026-00121</td>
+<td class="py-2 px-3">
+<div class="flex items-center gap-unit-xs">
+<span class="w-6 h-6 rounded-full bg-surface-container flex items-center justify-center font-label-caps text-label-caps text-secondary font-bold">PJ</span>
+<span class="font-headline-sm text-headline-sm text-on-surface">Park J.W.</span>
+</div>
+</td>
+<td class="py-2 px-3 font-data-sm text-data-sm text-on-surface-variant">61 / F</td>
+<td class="py-2 px-3 font-body-sm text-body-sm text-on-surface-variant">Dr. Kim, MD</td>
+<td class="py-2 px-3 font-data-sm text-data-sm">2026-09-07</td>
+<td class="py-2 px-3 font-data-sm text-data-sm text-on-surface-variant">5 exams</td>
+<td class="py-2 px-3">
+<div class="flex items-center gap-unit-xs">
+<div class="flex-1 h-2 bg-surface-container rounded-full overflow-hidden">
+<div class="h-full bg-error rounded-full" style="width: 81%"></div>
+</div>
+<span class="font-data-sm text-data-sm font-semibold text-error w-8 text-right">81%</span>
+</div>
+</td>
+<td class="py-2 px-3">
+<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-error-container text-error font-data-sm text-data-sm font-semibold">
+<span class="material-symbols-outlined text-[13px]">warning</span>
+                HIGH RISK
+              </span>
+</td>
+<td class="py-2 px-3">
+<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-surface-container text-on-surface font-body-sm text-body-sm">
+<span class="inline-block w-1.5 h-1.5 rounded-full bg-primary-container"></span>
+                Pending Review
+              </span>
+</td>
+<td class="py-2 px-3 text-right">
+<button class="inline-flex items-center gap-unit-2xs px-unit-sm h-6 rounded bg-primary-container text-on-primary hover:bg-primary transition-colors font-headline-sm text-body-sm" type="button">
+<span>Open Analysis</span>
+<span class="material-symbols-outlined text-[14px]">chevron_right</span>
+</button>
+</td>
+</tr>
+<!-- Row 4: Low Risk / Reviewed -->
+<tr class="hover:bg-surface-container-low transition-colors group">
+<td class="py-2 px-3 text-center">
+<input class="row-checkbox rounded accent-primary cursor-pointer" type="checkbox"/>
+</td>
+<td class="py-2 px-3 font-data-md text-data-md text-primary font-semibold">P-2026-00122</td>
+<td class="py-2 px-3">
+<div class="flex items-center gap-unit-xs">
+<span class="w-6 h-6 rounded-full bg-surface-container flex items-center justify-center font-label-caps text-label-caps text-secondary font-bold">CY</span>
+<span class="font-headline-sm text-headline-sm text-on-surface">Choi Y.S.</span>
+</div>
+</td>
+<td class="py-2 px-3 font-data-sm text-data-sm text-on-surface-variant">39 / M</td>
+<td class="py-2 px-3 font-body-sm text-body-sm text-on-surface-variant">Dr. Kim, MD</td>
+<td class="py-2 px-3 font-data-sm text-data-sm">2026-09-07</td>
+<td class="py-2 px-3 font-data-sm text-data-sm text-on-surface-variant">2 exams</td>
+<td class="py-2 px-3">
+<div class="flex items-center gap-unit-xs">
+<div class="flex-1 h-2 bg-surface-container rounded-full overflow-hidden">
+<div class="h-full bg-surface-tint rounded-full" style="width: 18%"></div>
+</div>
+<span class="font-data-sm text-data-sm font-semibold text-on-surface-variant w-8 text-right">18%</span>
+</div>
+</td>
+<td class="py-2 px-3">
+<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-surface-container text-on-surface-variant font-data-sm text-data-sm font-medium">
+<span class="material-symbols-outlined text-[13px] text-secondary">check</span>
+                LOW RISK
+              </span>
+</td>
+<td class="py-2 px-3">
+<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-surface-container-low text-on-surface-variant font-body-sm text-body-sm">
+<span class="material-symbols-outlined text-[13px] text-secondary">check_circle</span>
+                Reviewed
+              </span>
+</td>
+<td class="py-2 px-3 text-right">
+<button class="inline-flex items-center gap-unit-2xs px-unit-sm h-6 rounded bg-surface-container hover:bg-surface-container-high text-on-surface transition-colors font-headline-sm text-body-sm" type="button">
+<span>Open Analysis</span>
+<span class="material-symbols-outlined text-[14px]">chevron_right</span>
+</button>
+</td>
+</tr>
+<!-- Row 5: High Risk / Reviewed -->
+<tr class="hover:bg-surface-container-low transition-colors group">
+<td class="py-2 px-3 text-center">
+<input class="row-checkbox rounded accent-primary cursor-pointer" type="checkbox"/>
+</td>
+<td class="py-2 px-3 font-data-md text-data-md text-primary font-semibold">P-2026-00119</td>
+<td class="py-2 px-3">
+<div class="flex items-center gap-unit-xs">
+<span class="w-6 h-6 rounded-full bg-surface-container flex items-center justify-center font-label-caps text-label-caps text-secondary font-bold">JM</span>
+<span class="font-headline-sm text-headline-sm text-on-surface">Jung M.H.</span>
+</div>
+</td>
+<td class="py-2 px-3 font-data-sm text-data-sm text-on-surface-variant">52 / M</td>
+<td class="py-2 px-3 font-body-sm text-body-sm text-on-surface-variant">Dr. Kim, MD</td>
+<td class="py-2 px-3 font-data-sm text-data-sm">2026-09-06</td>
+<td class="py-2 px-3 font-data-sm text-data-sm text-on-surface-variant">3 exams</td>
+<td class="py-2 px-3">
+<div class="flex items-center gap-unit-xs">
+<div class="flex-1 h-2 bg-surface-container rounded-full overflow-hidden">
+<div class="h-full bg-error rounded-full" style="width: 71%"></div>
+</div>
+<span class="font-data-sm text-data-sm font-semibold text-error w-8 text-right">71%</span>
+</div>
+</td>
+<td class="py-2 px-3">
+<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-error-container text-error font-data-sm text-data-sm font-semibold">
+<span class="material-symbols-outlined text-[13px]">warning</span>
+                HIGH RISK
+              </span>
+</td>
+<td class="py-2 px-3">
+<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-surface-container-low text-on-surface-variant font-body-sm text-body-sm">
+<span class="material-symbols-outlined text-[13px] text-secondary">check_circle</span>
+                Reviewed
+              </span>
+</td>
+<td class="py-2 px-3 text-right">
+<button class="inline-flex items-center gap-unit-2xs px-unit-sm h-6 rounded bg-surface-container hover:bg-surface-container-high text-on-surface transition-colors font-headline-sm text-body-sm" type="button">
+<span>Open Analysis</span>
+<span class="material-symbols-outlined text-[14px]">chevron_right</span>
+</button>
+</td>
+</tr>
+<!-- Row 6: Low Risk / Reviewed -->
+<tr class="hover:bg-surface-container-low transition-colors group">
+<td class="py-2 px-3 text-center">
+<input class="row-checkbox rounded accent-primary cursor-pointer" type="checkbox"/>
+</td>
+<td class="py-2 px-3 font-data-md text-data-md text-primary font-semibold">P-2026-00118</td>
+<td class="py-2 px-3">
+<div class="flex items-center gap-unit-xs">
+<span class="w-6 h-6 rounded-full bg-surface-container flex items-center justify-center font-label-caps text-label-caps text-secondary font-bold">KD</span>
+<span class="font-headline-sm text-headline-sm text-on-surface">Kang D.H.</span>
+</div>
+</td>
+<td class="py-2 px-3 font-data-sm text-data-sm text-on-surface-variant">44 / F</td>
+<td class="py-2 px-3 font-body-sm text-body-sm text-on-surface-variant">Dr. Kim, MD</td>
+<td class="py-2 px-3 font-data-sm text-data-sm">2026-09-05</td>
+<td class="py-2 px-3 font-data-sm text-data-sm text-on-surface-variant">1 exam</td>
+<td class="py-2 px-3">
+<div class="flex items-center gap-unit-xs">
+<div class="flex-1 h-2 bg-surface-container rounded-full overflow-hidden">
+<div class="h-full bg-surface-tint rounded-full" style="width: 29%"></div>
+</div>
+<span class="font-data-sm text-data-sm font-semibold text-on-surface-variant w-8 text-right">29%</span>
+</div>
+</td>
+<td class="py-2 px-3">
+<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-surface-container text-on-surface-variant font-data-sm text-data-sm font-medium">
+<span class="material-symbols-outlined text-[13px] text-secondary">check</span>
+                LOW RISK
+              </span>
+</td>
+<td class="py-2 px-3">
+<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-surface-container-low text-on-surface-variant font-body-sm text-body-sm">
+<span class="material-symbols-outlined text-[13px] text-secondary">check_circle</span>
+                Reviewed
+              </span>
+</td>
+<td class="py-2 px-3 text-right">
+<button class="inline-flex items-center gap-unit-2xs px-unit-sm h-6 rounded bg-surface-container hover:bg-surface-container-high text-on-surface transition-colors font-headline-sm text-body-sm" type="button">
+<span>Open Analysis</span>
+<span class="material-symbols-outlined text-[14px]">chevron_right</span>
+</button>
+</td>
+</tr>
+<!-- Row 7: Moderate / Reviewed -->
+<tr class="hover:bg-surface-container-low transition-colors group">
+<td class="py-2 px-3 text-center">
+<input class="row-checkbox rounded accent-primary cursor-pointer" type="checkbox"/>
+</td>
+<td class="py-2 px-3 font-data-md text-data-md text-primary font-semibold">P-2026-00115</td>
+<td class="py-2 px-3">
+<div class="flex items-center gap-unit-xs">
+<span class="w-6 h-6 rounded-full bg-surface-container flex items-center justify-center font-label-caps text-label-caps text-secondary font-bold">YS</span>
+<span class="font-headline-sm text-headline-sm text-on-surface">Yoon S.K.</span>
+</div>
+</td>
+<td class="py-2 px-3 font-data-sm text-data-sm text-on-surface-variant">58 / M</td>
+<td class="py-2 px-3 font-body-sm text-body-sm text-on-surface-variant">Dr. Kim, MD</td>
+<td class="py-2 px-3 font-data-sm text-data-sm">2026-09-04</td>
+<td class="py-2 px-3 font-data-sm text-data-sm text-on-surface-variant">4 exams</td>
+<td class="py-2 px-3">
+<div class="flex items-center gap-unit-xs">
+<div class="flex-1 h-2 bg-surface-container rounded-full overflow-hidden">
+<div class="h-full bg-secondary rounded-full" style="width: 58%"></div>
+</div>
+<span class="font-data-sm text-data-sm font-semibold text-secondary w-8 text-right">58%</span>
+</div>
+</td>
+<td class="py-2 px-3">
+<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-secondary-container/50 text-on-secondary-container font-data-sm text-data-sm font-semibold">
+<span class="material-symbols-outlined text-[13px]">info</span>
+                MODERATE
+              </span>
+</td>
+<td class="py-2 px-3">
+<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-surface-container-low text-on-surface-variant font-body-sm text-body-sm">
+<span class="material-symbols-outlined text-[13px] text-secondary">check_circle</span>
+                Reviewed
+              </span>
+</td>
+<td class="py-2 px-3 text-right">
+<button class="inline-flex items-center gap-unit-2xs px-unit-sm h-6 rounded bg-surface-container hover:bg-surface-container-high text-on-surface transition-colors font-headline-sm text-body-sm" type="button">
+<span>Open Analysis</span>
+<span class="material-symbols-outlined text-[14px]">chevron_right</span>
+</button>
+</td>
+</tr>
+<!-- Row 8: Moderate / Reviewed -->
+<tr class="hover:bg-surface-container-low transition-colors group">
+<td class="py-2 px-3 text-center">
+<input class="row-checkbox rounded accent-primary cursor-pointer" type="checkbox"/>
+</td>
+<td class="py-2 px-3 font-data-md text-data-md text-primary font-semibold">P-2026-00112</td>
+<td class="py-2 px-3">
+<div class="flex items-center gap-unit-xs">
+<span class="w-6 h-6 rounded-full bg-surface-container flex items-center justify-center font-label-caps text-label-caps text-secondary font-bold">HT</span>
+<span class="font-headline-sm text-headline-sm text-on-surface">Hwang T.Y.</span>
+</div>
+</td>
+<td class="py-2 px-3 font-data-sm text-data-sm text-on-surface-variant">50 / F</td>
+<td class="py-2 px-3 font-body-sm text-body-sm text-on-surface-variant">Dr. Kim, MD</td>
+<td class="py-2 px-3 font-data-sm text-data-sm">2026-09-02</td>
+<td class="py-2 px-3 font-data-sm text-data-sm text-on-surface-variant">2 exams</td>
+<td class="py-2 px-3">
+<div class="flex items-center gap-unit-xs">
+<div class="flex-1 h-2 bg-surface-container rounded-full overflow-hidden">
+<div class="h-full bg-secondary rounded-full" style="width: 45%"></div>
+</div>
+<span class="font-data-sm text-data-sm font-semibold text-secondary w-8 text-right">45%</span>
+</div>
+</td>
+<td class="py-2 px-3">
+<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-secondary-container/50 text-on-secondary-container font-data-sm text-data-sm font-semibold">
+<span class="material-symbols-outlined text-[13px]">info</span>
+                MODERATE
+              </span>
+</td>
+<td class="py-2 px-3">
+<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-surface-container-low text-on-surface-variant font-body-sm text-body-sm">
+<span class="material-symbols-outlined text-[13px] text-secondary">check_circle</span>
+                Reviewed
+              </span>
+</td>
+<td class="py-2 px-3 text-right">
+<button class="inline-flex items-center gap-unit-2xs px-unit-sm h-6 rounded bg-surface-container hover:bg-surface-container-high text-on-surface transition-colors font-headline-sm text-body-sm" type="button">
+<span>Open Analysis</span>
+<span class="material-symbols-outlined text-[14px]">chevron_right</span>
+</button>
+</td>
+</tr>
+<!-- Row 9: High Risk / Reviewed -->
+<tr class="hover:bg-surface-container-low transition-colors group">
+<td class="py-2 px-3 text-center">
+<input class="row-checkbox rounded accent-primary cursor-pointer" type="checkbox"/>
+</td>
+<td class="py-2 px-3 font-data-md text-data-md text-primary font-semibold">P-2026-00109</td>
+<td class="py-2 px-3">
+<div class="flex items-center gap-unit-xs">
+<span class="w-6 h-6 rounded-full bg-surface-container flex items-center justify-center font-label-caps text-label-caps text-secondary font-bold">BH</span>
+<span class="font-headline-sm text-headline-sm text-on-surface">Bae H.R.</span>
+</div>
+</td>
+<td class="py-2 px-3 font-data-sm text-data-sm text-on-surface-variant">66 / M</td>
+<td class="py-2 px-3 font-body-sm text-body-sm text-on-surface-variant">Dr. Kim, MD</td>
+<td class="py-2 px-3 font-data-sm text-data-sm">2026-08-30</td>
+<td class="py-2 px-3 font-data-sm text-data-sm text-on-surface-variant">6 exams</td>
+<td class="py-2 px-3">
+<div class="flex items-center gap-unit-xs">
+<div class="flex-1 h-2 bg-surface-container rounded-full overflow-hidden">
+<div class="h-full bg-error rounded-full" style="width: 84%"></div>
+</div>
+<span class="font-data-sm text-data-sm font-semibold text-error w-8 text-right">84%</span>
+</div>
+</td>
+<td class="py-2 px-3">
+<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-error-container text-error font-data-sm text-data-sm font-semibold">
+<span class="material-symbols-outlined text-[13px]">warning</span>
+                HIGH RISK
+              </span>
+</td>
+<td class="py-2 px-3">
+<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-surface-container-low text-on-surface-variant font-body-sm text-body-sm">
+<span class="material-symbols-outlined text-[13px] text-secondary">check_circle</span>
+                Reviewed
+              </span>
+</td>
+<td class="py-2 px-3 text-right">
+<button class="inline-flex items-center gap-unit-2xs px-unit-sm h-6 rounded bg-surface-container hover:bg-surface-container-high text-on-surface transition-colors font-headline-sm text-body-sm" type="button">
+<span>Open Analysis</span>
+<span class="material-symbols-outlined text-[14px]">chevron_right</span>
+</button>
+</td>
+</tr>
+<!-- Row 10: Low Risk / Reviewed -->
+<tr class="hover:bg-surface-container-low transition-colors group">
+<td class="py-2 px-3 text-center">
+<input class="row-checkbox rounded accent-primary cursor-pointer" type="checkbox"/>
+</td>
+<td class="py-2 px-3 font-data-md text-data-md text-primary font-semibold">P-2026-00104</td>
+<td class="py-2 px-3">
+<div class="flex items-center gap-unit-xs">
+<span class="w-6 h-6 rounded-full bg-surface-container flex items-center justify-center font-label-caps text-label-caps text-secondary font-bold">SK</span>
+<span class="font-headline-sm text-headline-sm text-on-surface">Song K.B.</span>
+</div>
+</td>
+<td class="py-2 px-3 font-data-sm text-data-sm text-on-surface-variant">42 / F</td>
+<td class="py-2 px-3 font-body-sm text-body-sm text-on-surface-variant">Dr. Kim, MD</td>
+<td class="py-2 px-3 font-data-sm text-data-sm">2026-08-28</td>
+<td class="py-2 px-3 font-data-sm text-data-sm text-on-surface-variant">2 exams</td>
+<td class="py-2 px-3">
+<div class="flex items-center gap-unit-xs">
+<div class="flex-1 h-2 bg-surface-container rounded-full overflow-hidden">
+<div class="h-full bg-surface-tint rounded-full" style="width: 22%"></div>
+</div>
+<span class="font-data-sm text-data-sm font-semibold text-on-surface-variant w-8 text-right">22%</span>
+</div>
+</td>
+<td class="py-2 px-3">
+<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-surface-container text-on-surface-variant font-data-sm text-data-sm font-medium">
+<span class="material-symbols-outlined text-[13px] text-secondary">check</span>
+                LOW RISK
+              </span>
+</td>
+<td class="py-2 px-3">
+<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-surface-container-low text-on-surface-variant font-body-sm text-body-sm">
+<span class="material-symbols-outlined text-[13px] text-secondary">check_circle</span>
+                Reviewed
+              </span>
+</td>
+<td class="py-2 px-3 text-right">
+<button class="inline-flex items-center gap-unit-2xs px-unit-sm h-6 rounded bg-surface-container hover:bg-surface-container-high text-on-surface transition-colors font-headline-sm text-body-sm" type="button">
+<span>Open Analysis</span>
+<span class="material-symbols-outlined text-[14px]">chevron_right</span>
+</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Selected Rows Batch Action Banner (Hidden initially, toggled via JS) -->
+<div class="hidden items-center justify-between px-unit-lg py-unit-xs bg-tertiary-container text-on-tertiary" id="batchActionStrip">
+<div class="flex items-center gap-unit-sm font-body-sm text-body-sm">
+<span class="material-symbols-outlined text-[18px] text-secondary-container">checklist</span>
+<span class="font-headline-sm text-headline-sm" id="selectedCountText">3 patients selected</span>
+</div>
+<div class="flex items-center gap-unit-xs">
+<button class="px-unit-sm h-6 rounded bg-secondary-container text-on-secondary-container font-headline-sm text-body-sm" type="button">
+          Export Selected Clinical Data
+        </button>
+<button class="px-unit-sm h-6 rounded bg-surface-container-highest text-on-surface font-headline-sm text-body-sm" type="button">
+          Mark as Reviewed
+        </button>
+</div>
+</div>
+</div>
+<!-- Bottom Workspace: Pagination & Clinical Cohort Summary Grid -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-unit-md items-center">
+<!-- Pagination Controls -->
+<div class="lg:col-span-6 flex flex-col sm:flex-row sm:items-center justify-between p-unit-md bg-surface-container-lowest rounded shadow-sm gap-unit-sm">
+<div class="font-data-sm text-data-sm text-on-surface-variant">
+        Showing <span class="font-semibold text-on-surface">1 - 10</span> of <span class="font-semibold text-on-surface">42</span> patients
+      </div>
+<div class="flex items-center gap-unit-xs">
+<button class="w-7 h-7 rounded flex items-center justify-center bg-surface-container-low text-on-surface-variant hover:bg-surface-container disabled:opacity-40" disabled="" type="button">
+<span class="material-symbols-outlined text-[16px]">chevron_left</span>
+</button>
+<button class="w-7 h-7 rounded flex items-center justify-center bg-primary text-on-primary font-data-sm text-data-sm font-semibold" type="button">1</button>
+<button class="w-7 h-7 rounded flex items-center justify-center bg-surface-container-low text-on-surface font-data-sm text-data-sm hover:bg-surface-container" type="button">2</button>
+<button class="w-7 h-7 rounded flex items-center justify-center bg-surface-container-low text-on-surface font-data-sm text-data-sm hover:bg-surface-container" type="button">3</button>
+<button class="w-7 h-7 rounded flex items-center justify-center bg-surface-container-low text-on-surface font-data-sm text-data-sm hover:bg-surface-container" type="button">4</button>
+<button class="w-7 h-7 rounded flex items-center justify-center bg-surface-container-low text-on-surface font-data-sm text-data-sm hover:bg-surface-container" type="button">5</button>
+<button class="w-7 h-7 rounded flex items-center justify-center bg-surface-container-low text-on-surface-variant hover:bg-surface-container" type="button">
+<span class="material-symbols-outlined text-[16px]">chevron_right</span>
+</button>
+</div>
+</div>
+<!-- Cohort Risk Distribution Bar Summary Widget -->
+<div class="lg:col-span-6 p-unit-md bg-surface-container-lowest rounded shadow-sm flex flex-col gap-unit-xs">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-unit-xs">
+<span class="material-symbols-outlined text-[16px] text-secondary">stacked_bar_chart</span>
+<span class="font-headline-sm text-headline-sm text-on-surface">Cohort Acoustic Risk Spectrum</span>
+</div>
+<span class="font-data-sm text-data-sm text-on-surface-variant">HD Motor Triangulation v1.02</span>
+</div>
+<!-- Segmented Stacked Bar -->
+<div class="w-full h-3 rounded-full bg-surface-container flex overflow-hidden">
+<div class="h-full bg-error" style="width: 19%" title="High Risk: 8 Patients (19%)"></div>
+<div class="h-full bg-secondary" style="width: 33%" title="Moderate Risk: 14 Patients (33%)"></div>
+<div class="h-full bg-surface-tint" style="width: 48%" title="Low Risk: 20 Patients (48%)"></div>
+</div>
+<!-- Legend & Stats -->
+<div class="flex items-center justify-between text-on-surface-variant font-data-sm text-data-sm pt-0.5">
+<div class="flex items-center gap-unit-xs">
+<span class="w-2 h-2 rounded-full bg-error"></span>
+<span>High: 8 (19%)</span>
+</div>
+<div class="flex items-center gap-unit-xs">
+<span class="w-2 h-2 rounded-full bg-secondary"></span>
+<span>Moderate: 14 (33%)</span>
+</div>
+<div class="flex items-center gap-unit-xs">
+<span class="w-2 h-2 rounded-full bg-surface-tint"></span>
+<span>Low: 20 (48%)</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<script>
+  (function() {
+    // Select All Checkbox Handling
+    const selectAll = document.getElementById('selectAllCheckbox');
+    const rowCheckboxes = document.querySelectorAll('.row-checkbox');
+    const batchStrip = document.getElementById('batchActionStrip');
+    const selectedCountText = document.getElementById('selectedCountText');
+
+    function updateBatchStrip() {
+      const checked = document.querySelectorAll('.row-checkbox:checked');
+      if (checked.length > 0) {
+        batchStrip.classList.remove('hidden');
+        batchStrip.classList.add('flex');
+        selectedCountText.textContent = checked.length + ' patient' + (checked.length > 1 ? 's' : '') + ' selected';
+      } else {
+        batchStrip.classList.add('hidden');
+        batchStrip.classList.remove('flex');
+      }
+    }
+
+    if (selectAll) {
+      selectAll.addEventListener('change', function() {
+        rowCheckboxes.forEach(cb => cb.checked = selectAll.checked);
+        updateBatchStrip();
+      });
+    }
+
+    rowCheckboxes.forEach(cb => {
+      cb.addEventListener('change', function() {
+        if (!cb.checked && selectAll) {
+          selectAll.checked = false;
+        }
+        updateBatchStrip();
+      });
+    });
+
+    // Instant Monospaced Table Search Filter
+    const searchInput = document.getElementById('patientSearchInput');
+    const tableBody = document.getElementById('patientTableBody');
+    if (searchInput && tableBody) {
+      searchInput.addEventListener('input', function(e) {
+        const query = e.target.value.toLowerCase().trim();
+        const rows = tableBody.querySelectorAll('tr');
+        rows.forEach(row => {
+          const text = row.innerText.toLowerCase();
+          row.style.display = text.includes(query) ? '' : 'none';
+        });
+      });
+    }
+
+    // Keyboard shortcut (Cmd/Ctrl + K to focus search)
+    window.addEventListener('keydown', function(e) {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        if (searchInput) {
+          searchInput.focus();
+          searchInput.select();
+        }
+      }
+    });
+  })();
+</script></main></div></body></html>

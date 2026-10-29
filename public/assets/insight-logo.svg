@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 32" width="120" height="32" fill="none">
+  <g transform="translate(2, 4)">
+    <rect width="24" height="24" rx="4" fill="#0C2340"/>
+    <!-- Precision acoustic waveform / clinical neural soundwave mark -->
+    <path d="M4 12h2.5l1.5-5 2.5 10 2.5-7 2 4h5" stroke="#38BDF8" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="8" cy="7" r="1.2" fill="#FFFFFF"/>
+    <circle cx="10.5" cy="17" r="1.2" fill="#FFFFFF"/>
+  </g>
+  <text x="34" y="21" font-family="system-ui, -apple-system, sans-serif" font-weight="800" font-size="15" fill="#0C2340" letter-spacing="0.08em">INSIGHT</text>
+  <text x="34" y="27" font-family="system-ui, -apple-system, sans-serif" font-weight="600" font-size="6.5" fill="#64748B" letter-spacing="0.12em">NEUROLOGY CDS</text>
+</svg>

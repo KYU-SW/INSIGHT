@@ -1,0 +1,20 @@
+# dependencies / build
+node_modules/
+.next/
+out/
+*.tsbuildinfo
+
+# python
+.venv/
+__pycache__/
+*.pyc
+hf-cache/
+
+# env / secrets
+.env*
+!.env.example
+
+# OS / editor
+.DS_Store
+.vscode/
+.idea/

@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+
+<html lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        "colors": {
+          "on-primary-fixed": "#031c38",
+          "inverse-surface": "#2d3133",
+          "surface-bright": "#f7f9fb",
+          "primary": "#000d21",
+          "surface-dim": "#d8dadc",
+          "on-error-container": "#93000a",
+          "primary-fixed": "#d5e3ff",
+          "tertiary": "#000d1e",
+          "on-background": "#191c1e",
+          "surface-container-highest": "#e0e3e5",
+          "on-tertiary": "#ffffff",
+          "inverse-primary": "#b3c7ec",
+          "on-tertiary-fixed-variant": "#3a485b",
+          "on-secondary-fixed-variant": "#184975",
+          "surface-container-lowest": "#ffffff",
+          "tertiary-fixed": "#d5e3fc",
+          "background": "#f7f9fb",
+          "secondary-fixed-dim": "#9fcafd",
+          "error": "#ba1a1a",
+          "surface-container": "#eceef0",
+          "inverse-on-surface": "#eff1f3",
+          "on-primary-container": "#778bad",
+          "tertiary-fixed-dim": "#b9c7df",
+          "on-surface-variant": "#44474d",
+          "on-secondary": "#ffffff",
+          "on-surface": "#191c1e",
+          "surface": "#f7f9fb",
+          "outline-variant": "#c4c6ce",
+          "on-primary": "#ffffff",
+          "surface-container-high": "#e6e8ea",
+          "secondary": "#35618e",
+          "primary-fixed-dim": "#b3c7ec",
+          "tertiary-container": "#152335",
+          "secondary-container": "#9fcafd",
+          "on-tertiary-fixed": "#0d1c2e",
+          "on-secondary-fixed": "#001d36",
+          "on-primary-fixed-variant": "#334766",
+          "surface-variant": "#e0e3e5",
+          "on-secondary-container": "#275582",
+          "error-container": "#ffdad6",
+          "secondary-fixed": "#d1e4ff",
+          "on-tertiary-container": "#7c8ba0",
+          "outline": "#74777e",
+          "surface-container-low": "#f2f4f6",
+          "primary-container": "#0c2340",
+          "surface-tint": "#4b5f7f",
+          "on-error": "#ffffff"
+        },
+        "borderRadius": {
+          "DEFAULT": "0.125rem",
+          "lg": "0.25rem",
+          "xl": "0.5rem",
+          "full": "0.75rem"
+        },
+        "spacing": {
+          "unit-2xs": "0.125rem",
+          "unit-md": "0.75rem",
+          "table-cell-y": "0.375rem",
+          "table-cell-x": "0.625rem",
+          "panel-padding": "1rem",
+          "unit-lg": "1rem",
+          "unit-xs": "0.25rem",
+          "unit-xl": "1.5rem",
+          "gutter-standard": "0.75rem",
+          "gutter-dense": "0.5rem",
+          "unit-sm": "0.5rem"
+        },
+        "fontFamily": {
+          "body-lg": [
+            "Inter"
+          ],
+          "display-lg": [
+            "Inter"
+          ],
+          "body-md": [
+            "Inter"
+          ],
+          "data-md": [
+            "JetBrains Mono"
+          ],
+          "body-sm": [
+            "Inter"
+          ],
+          "data-lg": [
+            "JetBrains Mono"
+          ],
+          "headline-sm": [
+            "Inter"
+          ],
+          "headline-lg": [
+            "Inter"
+          ],
+          "label-caps": [
+            "Inter"
+          ],
+          "data-sm": [
+            "JetBrains Mono"
+          ],
+          "headline-md": [
+            "Inter"
+          ]
+        },
+        "fontSize": {
+          "body-lg": [
+            "14px",
+            {
+              "lineHeight": "20px",
+              "fontWeight": "400"
+            }
+          ],
+          "display-lg": [
+            "28px",
+            {
+              "lineHeight": "34px",
+              "letterSpacing": "-0.02em",
+              "fontWeight": "700"
+            }
+          ],
+          "body-md": [
+            "13px",
+            {
+              "lineHeight": "18px",
+              "fontWeight": "400"
+            }
+          ],
+          "data-md": [
+            "13px",
+            {
+              "lineHeight": "16px",
+              "fontWeight": "500"
+            }
+          ],
+          "body-sm": [
+            "12px",
+            {
+              "lineHeight": "16px",
+              "fontWeight": "400"
+            }
+          ],
+          "data-lg": [
+            "18px",
+            {
+              "lineHeight": "22px",
+              "fontWeight": "600"
+            }
+          ],
+          "headline-sm": [
+            "14px",
+            {
+              "lineHeight": "18px",
+              "fontWeight": "600"
+            }
+          ],
+          "headline-lg": [
+            "20px",
+            {
+              "lineHeight": "26px",
+              "letterSpacing": "-0.01em",
+              "fontWeight": "600"
+            }
+          ],
+          "label-caps": [
+            "11px",
+            {
+              "lineHeight": "14px",
+              "letterSpacing": "0.05em",
+              "fontWeight": "600"
+            }
+          ],
+          "data-sm": [
+            "11px",
+            {
+              "lineHeight": "14px",
+              "letterSpacing": "0.02em",
+              "fontWeight": "500"
+            }
+          ],
+          "headline-md": [
+            "16px",
+            {
+              "lineHeight": "22px",
+              "letterSpacing": "-0.005em",
+              "fontWeight": "600"
+            }
+          ]
+        }
+      },
+    },
+  }</script></head><body class="bg-background font-body-md text-body-md text-on-surface antialiased"><aside class="fixed left-0 top-0 h-full w-[260px] bg-primary-container z-50 flex flex-col justify-between shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="flex flex-col"><div class="h-16 px-unit-lg flex items-center gap-unit-sm bg-tertiary-container"><img alt="INSIGHT Clinical Logo" class="h-8 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/AEtjO1W0OMoygTMoF4T7Fz6ghc9zxi253EDO4gb-d1ZB2EwuUzEvAiVdnaKQdbFqwSN14JDNXtyLV3czd7QJmG5m721h7W_bXC5ye7eG16DEBLGmbFvqcWZQpBlFUpoqvx2S704l-3jm0h574B-nuYTFDndQB6e27WukKqQ0Z1XE5jKuwIundQv6VroyvRGQyNKXHGYJ2-qsmfbCWKm58CDM2hjT1lkc2DcMjqhPZ24zJ-FDTjlKbMQan3JDKwI"/><div class="flex flex-col min-w-0"><span class="font-headline-sm text-headline-sm text-on-tertiary tracking-tight truncate">INSIGHT</span><span class="font-label-caps text-label-caps text-on-tertiary-container uppercase tracking-wider truncate">HD Voice Biomarker CDS</span></div></div><div class="px-unit-lg pt-unit-md pb-unit-xs"><span class="font-label-caps text-label-caps uppercase text-on-primary-container tracking-wider">Clinical Navigation</span></div><nav class="flex flex-col gap-unit-2xs px-unit-sm" data-active-classes="bg-secondary text-on-secondary font-headline-sm"><a aria-current="page" class="flex items-center gap-unit-sm px-unit-md py-unit-sm rounded transition-colors group bg-secondary text-on-secondary font-headline-sm" data-path="dashboard" href="#"><span class="material-symbols-outlined text-[18px]">grid_view</span><span class="font-body-md text-body-md">Dashboard</span></a><a class="flex items-center gap-unit-sm px-unit-md py-unit-sm rounded text-on-primary-container hover:bg-tertiary-container hover:text-on-tertiary transition-colors group" data-path="patients" href="#"><span class="material-symbols-outlined text-[18px]">patient_list</span><span class="font-body-md text-body-md">Patients</span></a><a class="flex items-center gap-unit-sm px-unit-md py-unit-sm rounded text-on-primary-container hover:bg-tertiary-container hover:text-on-tertiary transition-colors group" data-path="ai-analysis" href="#"><span class="material-symbols-outlined text-[18px]">neurology</span><span class="font-body-md text-body-md">AI Analysis</span></a><a class="flex items-center gap-unit-sm px-unit-md py-unit-sm rounded text-on-primary-container hover:bg-tertiary-container hover:text-on-tertiary transition-colors group" data-path="examination-history" href="#"><span class="material-symbols-outlined text-[18px]">clinical_notes</span><span class="font-body-md text-body-md">Examination History</span></a></nav></div><div class="p-unit-md m-unit-sm rounded bg-tertiary-container flex flex-col gap-unit-xs"><div class="flex items-center justify-between"><span class="font-label-caps text-label-caps uppercase text-on-tertiary-container">Clinical Engine</span><span class="flex items-center gap-unit-2xs text-[#0f766e] font-data-sm text-data-sm"><span class="inline-block w-1.5 h-1.5 rounded-full bg-[#0f766e]"></span>Online</span></div><div class="flex flex-col gap-unit-2xs font-data-sm text-data-sm text-on-tertiary-container"><div class="flex items-center justify-between"><span class="truncate">EMR Sync</span><span class="font-medium text-on-tertiary">HL7 Connected</span></div><div class="flex items-center justify-between"><span class="truncate">Inference Model</span><span class="font-medium text-on-tertiary">v1.02-HD</span></div><div class="flex items-center justify-between"><span class="truncate">PACS Gateway</span><span class="font-medium text-on-tertiary">DICOM v3.0</span></div></div></div></aside><div class="pl-[260px]"><header class="fixed top-0 left-[260px] right-0 h-16 bg-surface-container-lowest shadow-[0_1px_8px_rgba(0,0,0,0.04)] z-40 flex items-center justify-between px-unit-xl"><div class="flex items-center gap-unit-md"><div class="flex items-center gap-unit-xs text-on-surface-variant font-body-sm text-body-sm"><span class="material-symbols-outlined text-[18px] text-secondary">local_hospital</span><span class="font-headline-sm text-headline-sm text-on-surface">INSIGHT CDS</span><span class="text-outline-variant">/</span><span class="text-on-surface-variant font-body-sm text-body-sm">Konyang University Hospital</span><span class="text-outline-variant">/</span><span class="text-secondary font-medium">Neurology Dept</span></div></div><div class="flex items-center gap-unit-lg"><div class="flex items-center gap-unit-sm px-unit-md py-unit-xs bg-surface-container-low rounded"><span class="material-symbols-outlined text-[16px] text-secondary">security</span><span class="font-data-sm text-data-sm text-on-surface-variant">HIPAA · Workstation 04</span></div><div class="flex items-center gap-unit-xs"><button aria-label="Notifications" class="w-8 h-8 rounded flex items-center justify-center text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors relative" type="button"><span class="material-symbols-outlined text-[20px]">notifications</span><span class="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-error"></span></button><button aria-label="System Settings" class="w-8 h-8 rounded flex items-center justify-center text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" type="button"><span class="material-symbols-outlined text-[20px]">tune</span></button></div><div class="flex items-center gap-unit-sm pl-unit-sm bg-surface-container-lowest"><img alt="Profile" class="w-8 h-8 rounded-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCLkxJpeMigD7u9cG9Mss64oDnwaQKr2QaoCgDg_crSspgNUAU74v9y389bKtjPpgrAlfNMsmS-t6toCIE2Uui_SviWfCG4_AVO8DYKFDJtu3p3ZuMPVMtMzeitSU2Lzc7uPPQg6GX2E5Atl0Anoar4PJnrHEJluBiYrqDnN_bVtRwLaGNQUCuaXlIdXRdAJukrWLFg_3DgsIzQ3bvELP5EUzcj0jRwh6oyvxN8z714CZR-oeWelO8P"/><div class="flex flex-col text-left"><span class="font-headline-sm text-headline-sm text-on-surface leading-tight">Dr. Kim, MD, PhD</span><span class="font-data-sm text-data-sm text-on-surface-variant leading-tight">Senior Neurologist</span></div></div></div></header><main class="w-full pt-16 min-h-screen bg-background p-unit-lg"><div class="flex flex-col w-full gap-unit-md">
+<!-- Top Operational Control Bar -->
+<div class="flex flex-col lg:flex-row lg:items-center justify-between gap-unit-sm bg-surface-container-lowest p-unit-md rounded shadow-sm">
+<div class="flex flex-col">
+<div class="flex items-center gap-unit-xs">
+<span class="inline-block w-2 h-2 rounded-full bg-secondary"></span>
+<h1 class="font-headline-lg text-headline-lg text-on-surface tracking-tight">Clinical Neurology Decision Support</h1>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Operational Clinical Overview &amp; Daily AI Screening Triage · Workstation 04</p>
+</div>
+<div class="flex flex-wrap items-center gap-unit-xs">
+<!-- MRN / Patient Quick Search -->
+<div class="relative flex items-center">
+<span class="material-symbols-outlined absolute left-2 text-[16px] text-on-surface-variant pointer-events-none">search</span>
+<input class="h-7 pl-7 pr-unit-md text-data-sm font-data-sm bg-surface-container-low text-on-surface rounded outline-none w-64 focus:bg-surface-container transition-colors" placeholder="Quick Search Patient [ID or Name] (Ctrl+K)" type="text"/>
+</div>
+<!-- Date Filter -->
+<div class="flex items-center h-7 px-unit-sm bg-surface-container-low rounded text-on-surface-variant text-data-sm font-data-sm gap-unit-xs">
+<span class="material-symbols-outlined text-[15px]">calendar_today</span>
+<span>Today: <strong class="text-on-surface font-semibold">2026-09-07</strong></span>
+</div>
+<!-- Export Action -->
+<button class="h-7 px-unit-sm flex items-center gap-unit-xs bg-surface-container-high hover:bg-surface-container-highest text-on-surface rounded text-data-sm font-data-sm transition-colors" type="button">
+<span class="material-symbols-outlined text-[15px]">file_download</span>
+<span>Export CDS Summary</span>
+</button>
+</div>
+</div>
+<!-- 4 Compact Clinical KPI Metric Cards -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-unit-sm">
+<!-- Patients Today -->
+<div class="bg-surface-container-lowest p-unit-md rounded flex flex-col justify-between shadow-sm relative overflow-hidden">
+<div class="flex items-center justify-between">
+<span class="font-label-caps text-label-caps uppercase text-on-surface-variant tracking-wider">Patients Today</span>
+<span class="material-symbols-outlined text-secondary text-[18px]">group</span>
+</div>
+<div class="mt-unit-xs flex items-baseline gap-unit-sm">
+<span class="font-data-lg text-[26px] leading-tight font-bold text-on-surface">14</span>
+<span class="font-data-sm text-data-sm text-on-surface-variant flex items-center gap-unit-2xs">
+<span class="material-symbols-outlined text-[14px]">arrow_upward</span>+2 vs yesterday
+        </span>
+</div>
+<div class="w-full bg-surface-container h-1 mt-unit-sm rounded overflow-hidden">
+<div class="bg-secondary h-full w-[72%]"></div>
+</div>
+</div>
+<!-- AI Analyses -->
+<div class="bg-surface-container-lowest p-unit-md rounded flex flex-col justify-between shadow-sm relative overflow-hidden">
+<div class="flex items-center justify-between">
+<span class="font-label-caps text-label-caps uppercase text-on-surface-variant tracking-wider">AI Analyses</span>
+<span class="material-symbols-outlined text-secondary text-[18px]">neurology</span>
+</div>
+<div class="mt-unit-xs flex items-baseline gap-unit-sm">
+<span class="font-data-lg text-[26px] leading-tight font-bold text-on-surface">12</span>
+<span class="font-data-sm text-data-sm text-secondary font-medium flex items-center gap-unit-2xs">
+          10 done · 2 in pipeline
+        </span>
+</div>
+<div class="w-full bg-surface-container h-1 mt-unit-sm rounded overflow-hidden">
+<div class="bg-secondary h-full w-[83%]"></div>
+</div>
+</div>
+<!-- High Risk Cases -->
+<div class="bg-surface-container-lowest p-unit-md rounded flex flex-col justify-between shadow-sm relative overflow-hidden">
+<div class="flex items-center justify-between">
+<span class="font-label-caps text-label-caps uppercase text-error tracking-wider font-semibold">High Risk Cases</span>
+<span class="material-symbols-outlined text-error text-[18px]">warning</span>
+</div>
+<div class="mt-unit-xs flex items-baseline gap-unit-sm">
+<span class="font-data-lg text-[26px] leading-tight font-bold text-error">3</span>
+<span class="px-1.5 py-0.5 rounded text-[10px] font-label-caps uppercase font-semibold bg-error-container text-on-error-container">
+          Action Required
+        </span>
+</div>
+<div class="mt-unit-xs flex items-center justify-between text-on-surface-variant font-data-sm text-[11px]">
+<span>Cohort Risk Mean</span>
+<span class="text-error font-medium">78% severity</span>
+</div>
+</div>
+<!-- Pending Review -->
+<div class="bg-surface-container-lowest p-unit-md rounded flex flex-col justify-between shadow-sm relative overflow-hidden">
+<div class="flex items-center justify-between">
+<span class="font-label-caps text-label-caps uppercase text-on-surface-variant tracking-wider">Pending Review</span>
+<span class="material-symbols-outlined text-on-secondary-container text-[18px]">pending_actions</span>
+</div>
+<div class="mt-unit-xs flex items-baseline gap-unit-sm">
+<span class="font-data-lg text-[26px] leading-tight font-bold text-on-surface">2</span>
+<span class="px-1.5 py-0.5 rounded text-[10px] font-label-caps uppercase font-semibold bg-surface-container-highest text-on-surface-variant">
+          Awaiting Clinician
+        </span>
+</div>
+<div class="mt-unit-xs flex items-center justify-between text-on-surface-variant font-data-sm text-[11px]">
+<span>Sign-off SLA</span>
+<span class="text-secondary font-medium">&lt; 25 min</span>
+</div>
+</div>
+</div>
+<!-- Main Asymmetric Workspace Layout -->
+<div class="grid grid-cols-1 xl:grid-cols-12 gap-unit-md">
+<!-- Left Column (8 Columns): Recent Patient AI Screening Triage -->
+<div class="xl:col-span-8 flex flex-col bg-surface-container-lowest rounded shadow-sm overflow-hidden">
+<div class="p-unit-md flex items-center justify-between bg-surface-container-lowest">
+<div class="flex flex-col">
+<div class="flex items-center gap-unit-xs">
+<span class="font-headline-md text-headline-md text-on-surface">Recent Patient AI Screening Triage</span>
+<span class="px-1.5 py-0.5 bg-surface-container-high rounded text-on-surface-variant font-data-sm text-[11px]">6 Records</span>
+</div>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Voice-based precomputed acoustic biomarker screening results</span>
+</div>
+<div class="flex items-center gap-unit-xs">
+<button class="h-7 px-unit-sm bg-surface-container-low hover:bg-surface-container text-on-surface rounded text-data-sm font-data-sm flex items-center gap-unit-2xs" type="button">
+<span class="material-symbols-outlined text-[15px]">filter_list</span>
+<span>Filter</span>
+</button>
+<button class="h-7 px-unit-sm bg-surface-container-low hover:bg-surface-container text-on-surface rounded text-data-sm font-data-sm flex items-center gap-unit-2xs" type="button">
+<span class="material-symbols-outlined text-[15px]">refresh</span>
+<span>Sync</span>
+</button>
+</div>
+</div>
+<!-- Clinical Dense Table -->
+<div class="w-full overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-surface-container-low text-on-surface-variant font-label-caps text-label-caps uppercase">
+<th class="py-unit-xs px-unit-sm font-semibold">Patient ID</th>
+<th class="py-unit-xs px-unit-sm font-semibold">Name</th>
+<th class="py-unit-xs px-unit-sm font-semibold">Age/Sex</th>
+<th class="py-unit-xs px-unit-sm font-semibold">Time</th>
+<th class="py-unit-xs px-unit-sm font-semibold">Acoustic Signal</th>
+<th class="py-unit-xs px-unit-sm text-right font-semibold">Risk Score</th>
+<th class="py-unit-xs px-unit-sm font-semibold text-center">Risk Status</th>
+<th class="py-unit-xs px-unit-sm font-semibold">Review</th>
+<th class="py-unit-xs px-unit-sm text-right font-semibold">Action</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-surface-container">
+<!-- Row 1: P-00124 (High Risk, Pending) -->
+<tr class="hover:bg-surface-container-low transition-colors bg-surface-container-lowest">
+<td class="py-unit-sm px-unit-sm font-data-sm text-data-sm font-semibold text-secondary">P-00124</td>
+<td class="py-unit-sm px-unit-sm font-body-md text-body-md font-medium text-on-surface">Kim O.O.</td>
+<td class="py-unit-sm px-unit-sm font-data-sm text-data-sm text-on-surface-variant">48 M</td>
+<td class="py-unit-sm px-unit-sm font-data-sm text-data-sm text-on-surface-variant">10:21 AM</td>
+<td class="py-unit-sm px-unit-sm">
+<div class="flex items-center gap-unit-xs font-data-sm text-data-sm text-on-surface">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
+<span>98%</span>
+<span class="text-[10px] text-on-surface-variant uppercase">(Clean)</span>
+</div>
+</td>
+<td class="py-unit-sm px-unit-sm text-right font-data-md text-data-md font-bold text-error">78%</td>
+<td class="py-unit-sm px-unit-sm text-center">
+<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-label-caps font-semibold uppercase bg-error-container text-on-error-container">
+<span class="material-symbols-outlined text-[12px]">warning</span>HIGH RISK
+                </span>
+</td>
+<td class="py-unit-sm px-unit-sm">
+<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-label-caps font-semibold uppercase bg-surface-container-high text-on-surface-variant">
+<span class="material-symbols-outlined text-[12px]">schedule</span>Pending
+                </span>
+</td>
+<td class="py-unit-sm px-unit-sm text-right">
+<button class="h-6 px-unit-xs bg-primary text-on-primary rounded text-data-sm font-data-sm hover:bg-primary-container transition-colors inline-flex items-center gap-1" type="button">
+<span>Review</span>
+<span class="material-symbols-outlined text-[13px]">arrow_forward</span>
+</button>
+</td>
+</tr>
+<!-- Row 2: P-00123 (Moderate, Reviewed) -->
+<tr class="hover:bg-surface-container-low transition-colors bg-surface-container-lowest">
+<td class="py-unit-sm px-unit-sm font-data-sm text-data-sm font-semibold text-secondary">P-00123</td>
+<td class="py-unit-sm px-unit-sm font-body-md text-body-md font-medium text-on-surface">Lee O.O.</td>
+<td class="py-unit-sm px-unit-sm font-data-sm text-data-sm text-on-surface-variant">55 F</td>
+<td class="py-unit-sm px-unit-sm font-data-sm text-data-sm text-on-surface-variant">09:55 AM</td>
+<td class="py-unit-sm px-unit-sm">
+<div class="flex items-center gap-unit-xs font-data-sm text-data-sm text-on-surface">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
+<span>94%</span>
+<span class="text-[10px] text-on-surface-variant uppercase">(Good)</span>
+</div>
+</td>
+<td class="py-unit-sm px-unit-sm text-right font-data-md text-data-md font-bold text-on-secondary-container">64%</td>
+<td class="py-unit-sm px-unit-sm text-center">
+<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-label-caps font-semibold uppercase bg-surface-container-high text-on-secondary-container">
+<span class="material-symbols-outlined text-[12px]">remove</span>MODERATE
+                </span>
+</td>
+<td class="py-unit-sm px-unit-sm">
+<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-label-caps font-semibold uppercase bg-secondary-fixed text-on-secondary-fixed">
+<span class="material-symbols-outlined text-[12px]">check_circle</span>Reviewed
+                </span>
+</td>
+<td class="py-unit-sm px-unit-sm text-right">
+<button class="h-6 px-unit-xs bg-surface-container-low hover:bg-surface-container text-on-surface rounded text-data-sm font-data-sm transition-colors" type="button">
+                  View Detail
+                </button>
+</td>
+</tr>
+<!-- Row 3: P-00121 (High Risk, Pending) -->
+<tr class="hover:bg-surface-container-low transition-colors bg-surface-container-lowest">
+<td class="py-unit-sm px-unit-sm font-data-sm text-data-sm font-semibold text-secondary">P-00121</td>
+<td class="py-unit-sm px-unit-sm font-body-md text-body-md font-medium text-on-surface">Park O.O.</td>
+<td class="py-unit-sm px-unit-sm font-data-sm text-data-sm text-on-surface-variant">61 F</td>
+<td class="py-unit-sm px-unit-sm font-data-sm text-data-sm text-on-surface-variant">09:05 AM</td>
+<td class="py-unit-sm px-unit-sm">
+<div class="flex items-center gap-unit-xs font-data-sm text-data-sm text-on-surface">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
+<span>91%</span>
+<span class="text-[10px] text-on-surface-variant uppercase">(Good)</span>
+</div>
+</td>
+<td class="py-unit-sm px-unit-sm text-right font-data-md text-data-md font-bold text-error">81%</td>
+<td class="py-unit-sm px-unit-sm text-center">
+<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-label-caps font-semibold uppercase bg-error-container text-on-error-container">
+<span class="material-symbols-outlined text-[12px]">warning</span>HIGH RISK
+                </span>
+</td>
+<td class="py-unit-sm px-unit-sm">
+<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-label-caps font-semibold uppercase bg-surface-container-high text-on-surface-variant">
+<span class="material-symbols-outlined text-[12px]">schedule</span>Pending
+                </span>
+</td>
+<td class="py-unit-sm px-unit-sm text-right">
+<button class="h-6 px-unit-xs bg-primary text-on-primary rounded text-data-sm font-data-sm hover:bg-primary-container transition-colors inline-flex items-center gap-1" type="button">
+<span>Review</span>
+<span class="material-symbols-outlined text-[13px]">arrow_forward</span>
+</button>
+</td>
+</tr>
+<!-- Row 4: P-00122 (Low Risk, Reviewed) -->
+<tr class="hover:bg-surface-container-low transition-colors bg-surface-container-lowest">
+<td class="py-unit-sm px-unit-sm font-data-sm text-data-sm font-semibold text-secondary">P-00122</td>
+<td class="py-unit-sm px-unit-sm font-body-md text-body-md font-medium text-on-surface">Choi O.O.</td>
+<td class="py-unit-sm px-unit-sm font-data-sm text-data-sm text-on-surface-variant">39 M</td>
+<td class="py-unit-sm px-unit-sm font-data-sm text-data-sm text-on-surface-variant">09:32 AM</td>
+<td class="py-unit-sm px-unit-sm">
+<div class="flex items-center gap-unit-xs font-data-sm text-data-sm text-on-surface">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
+<span>96%</span>
+<span class="text-[10px] text-on-surface-variant uppercase">(Clean)</span>
+</div>
+</td>
+<td class="py-unit-sm px-unit-sm text-right font-data-md text-data-md font-semibold text-secondary">18%</td>
+<td class="py-unit-sm px-unit-sm text-center">
+<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-label-caps font-semibold uppercase bg-secondary-fixed text-on-secondary-fixed">
+<span class="material-symbols-outlined text-[12px]">check</span>LOW RISK
+                </span>
+</td>
+<td class="py-unit-sm px-unit-sm">
+<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-label-caps font-semibold uppercase bg-secondary-fixed text-on-secondary-fixed">
+<span class="material-symbols-outlined text-[12px]">check_circle</span>Reviewed
+                </span>
+</td>
+<td class="py-unit-sm px-unit-sm text-right">
+<button class="h-6 px-unit-xs bg-surface-container-low hover:bg-surface-container text-on-surface rounded text-data-sm font-data-sm transition-colors" type="button">
+                  View Detail
+                </button>
+</td>
+</tr>
+<!-- Row 5: P-00119 (High Risk, Reviewed) -->
+<tr class="hover:bg-surface-container-low transition-colors bg-surface-container-lowest">
+<td class="py-unit-sm px-unit-sm font-data-sm text-data-sm font-semibold text-secondary">P-00119</td>
+<td class="py-unit-sm px-unit-sm font-body-md text-body-md font-medium text-on-surface">Jung O.O.</td>
+<td class="py-unit-sm px-unit-sm font-data-sm text-data-sm text-on-surface-variant">52 M</td>
+<td class="py-unit-sm px-unit-sm font-data-sm text-data-sm text-on-surface-variant">08:40 AM</td>
+<td class="py-unit-sm px-unit-sm">
+<div class="flex items-center gap-unit-xs font-data-sm text-data-sm text-on-surface">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
+<span>89%</span>
+<span class="text-[10px] text-on-surface-variant uppercase">(Acceptable)</span>
+</div>
+</td>
+<td class="py-unit-sm px-unit-sm text-right font-data-md text-data-md font-bold text-error">71%</td>
+<td class="py-unit-sm px-unit-sm text-center">
+<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-label-caps font-semibold uppercase bg-error-container text-on-error-container">
+<span class="material-symbols-outlined text-[12px]">warning</span>HIGH RISK
+                </span>
+</td>
+<td class="py-unit-sm px-unit-sm">
+<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-label-caps font-semibold uppercase bg-secondary-fixed text-on-secondary-fixed">
+<span class="material-symbols-outlined text-[12px]">check_circle</span>Reviewed
+                </span>
+</td>
+<td class="py-unit-sm px-unit-sm text-right">
+<button class="h-6 px-unit-xs bg-surface-container-low hover:bg-surface-container text-on-surface rounded text-data-sm font-data-sm transition-colors" type="button">
+                  View Detail
+                </button>
+</td>
+</tr>
+<!-- Row 6: P-00118 (Low Risk, Reviewed) -->
+<tr class="hover:bg-surface-container-low transition-colors bg-surface-container-lowest">
+<td class="py-unit-sm px-unit-sm font-data-sm text-data-sm font-semibold text-secondary">P-00118</td>
+<td class="py-unit-sm px-unit-sm font-body-md text-body-md font-medium text-on-surface">Kang O.O.</td>
+<td class="py-unit-sm px-unit-sm font-data-sm text-data-sm text-on-surface-variant">44 F</td>
+<td class="py-unit-sm px-unit-sm font-data-sm text-data-sm text-on-surface-variant">Yesterday</td>
+<td class="py-unit-sm px-unit-sm">
+<div class="flex items-center gap-unit-xs font-data-sm text-data-sm text-on-surface">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
+<span>95%</span>
+<span class="text-[10px] text-on-surface-variant uppercase">(Clean)</span>
+</div>
+</td>
+<td class="py-unit-sm px-unit-sm text-right font-data-md text-data-md font-semibold text-secondary">29%</td>
+<td class="py-unit-sm px-unit-sm text-center">
+<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-label-caps font-semibold uppercase bg-secondary-fixed text-on-secondary-fixed">
+<span class="material-symbols-outlined text-[12px]">check</span>LOW RISK
+                </span>
+</td>
+<td class="py-unit-sm px-unit-sm">
+<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-label-caps font-semibold uppercase bg-secondary-fixed text-on-secondary-fixed">
+<span class="material-symbols-outlined text-[12px]">check_circle</span>Reviewed
+                </span>
+</td>
+<td class="py-unit-sm px-unit-sm text-right">
+<button class="h-6 px-unit-xs bg-surface-container-low hover:bg-surface-container text-on-surface rounded text-data-sm font-data-sm transition-colors" type="button">
+                  View Detail
+                </button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Table Footer / Status summary -->
+<div class="p-unit-sm bg-surface-container-low flex items-center justify-between text-on-surface-variant font-data-sm text-[11px]">
+<div class="flex items-center gap-unit-sm">
+<span>Displaying 6 of 14 sessions</span>
+<span class="text-outline-variant">·</span>
+<span>Sampling Rate: 48 kHz 24-bit PCM</span>
+</div>
+<div class="flex items-center gap-unit-xs">
+<button class="px-2 py-0.5 bg-surface-container hover:bg-surface-container-high rounded text-on-surface transition-colors disabled:opacity-40" disabled="" type="button">Previous</button>
+<span class="px-1 text-on-surface font-semibold">1</span>
+<button class="px-2 py-0.5 bg-surface-container hover:bg-surface-container-high rounded text-on-surface transition-colors" type="button">Next</button>
+</div>
+</div>
+</div>
+<!-- Right Column (4 Columns): Triage Queue & AI Engine Status -->
+<div class="xl:col-span-4 flex flex-col gap-unit-md">
+<!-- Card 1: Immediate Action Triage (High Risk Queue) -->
+<div class="bg-surface-container-lowest rounded p-unit-md shadow-sm flex flex-col gap-unit-sm">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-unit-xs">
+<span class="material-symbols-outlined text-error text-[20px]">notification_important</span>
+<h2 class="font-headline-md text-headline-md text-on-surface">Immediate Action Triage</h2>
+</div>
+<span class="px-1.5 py-0.5 rounded text-[10px] font-label-caps uppercase bg-error-container text-on-error-container font-semibold">2 Critical</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Awaiting clinical validation before speech report dispatch to hospital EMR.</p>
+<!-- Critical Item 1 -->
+<div class="p-unit-sm rounded bg-surface-container-low flex flex-col gap-unit-xs">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-unit-xs">
+<span class="font-data-md text-data-md font-bold text-on-surface">P-00124</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Kim O.O. (48M)</span>
+</div>
+<span class="font-data-md text-data-md font-bold text-error">Risk: 78%</span>
+</div>
+<div class="flex flex-col gap-1 text-[11px] font-data-sm text-on-surface-variant bg-surface-container-lowest p-unit-xs rounded">
+<div class="flex items-center justify-between">
+<span>Primary Anomaly:</span>
+<span class="text-error font-medium">Pitch Instability (-39%)</span>
+</div>
+<div class="flex items-center justify-between">
+<span>Jitter Delta:</span>
+<span class="text-error font-medium">3.84% (Threshold &gt; 1.04%)</span>
+</div>
+</div>
+<!-- Micro Acoustic Sparkline Visualizer -->
+<div class="w-full h-8 bg-surface-container-lowest rounded p-1 flex items-end justify-between gap-0.5">
+<div class="w-full bg-error-container rounded-t" style="height: 45%;"></div>
+<div class="w-full bg-error rounded-t" style="height: 82%;"></div>
+<div class="w-full bg-error-container rounded-t" style="height: 60%;"></div>
+<div class="w-full bg-error rounded-t" style="height: 94%;"></div>
+<div class="w-full bg-error rounded-t" style="height: 75%;"></div>
+<div class="w-full bg-error-container rounded-t" style="height: 52%;"></div>
+<div class="w-full bg-error rounded-t" style="height: 88%;"></div>
+<div class="w-full bg-error rounded-t" style="height: 91%;"></div>
+<div class="w-full bg-error-container rounded-t" style="height: 64%;"></div>
+<div class="w-full bg-error rounded-t" style="height: 78%;"></div>
+</div>
+<button class="w-full h-7 bg-primary text-on-primary rounded font-data-sm text-data-sm flex items-center justify-center gap-1 hover:bg-primary-container transition-colors" type="button">
+<span class="material-symbols-outlined text-[15px]">clinical_notes</span>
+<span>Open Patient Screening File</span>
+</button>
+</div>
+<!-- Critical Item 2 -->
+<div class="p-unit-sm rounded bg-surface-container-low flex flex-col gap-unit-xs">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-unit-xs">
+<span class="font-data-md text-data-md font-bold text-on-surface">P-00121</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Park O.O. (61F)</span>
+</div>
+<span class="font-data-md text-data-md font-bold text-error">Risk: 81%</span>
+</div>
+<div class="flex flex-col gap-1 text-[11px] font-data-sm text-on-surface-variant bg-surface-container-lowest p-unit-xs rounded">
+<div class="flex items-center justify-between">
+<span>Primary Anomaly:</span>
+<span class="text-error font-medium">Voice Tremor (+51 vs ref)</span>
+</div>
+<div class="flex items-center justify-between">
+<span>Dysarthria Index:</span>
+<span class="text-error font-medium">Severe Dysdiadochokinesia</span>
+</div>
+</div>
+<button class="w-full h-7 bg-surface-container-high hover:bg-surface-container-highest text-on-surface rounded font-data-sm text-data-sm flex items-center justify-center gap-1 transition-colors" type="button">
+<span class="material-symbols-outlined text-[15px]">clinical_notes</span>
+<span>Open Patient Screening File</span>
+</button>
+</div>
+</div>
+<!-- Card 2: Acoustic AI Model Status & Calibration -->
+<div class="bg-surface-container-lowest rounded p-unit-md shadow-sm flex flex-col gap-unit-sm">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-unit-xs">
+<span class="material-symbols-outlined text-secondary text-[20px]">tune</span>
+<h2 class="font-headline-md text-headline-md text-on-surface">Model Calibration Status</h2>
+</div>
+<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-data-sm bg-secondary-fixed text-on-secondary-fixed">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>Active
+          </span>
+</div>
+<div class="flex flex-col gap-unit-xs font-data-sm text-data-sm">
+<div class="flex items-center justify-between py-1 bg-surface-container-low px-unit-xs rounded">
+<span class="text-on-surface-variant">Engine Model</span>
+<span class="font-semibold text-on-surface">Huntington-Acoustic-Net v1.02</span>
+</div>
+<div class="flex items-center justify-between py-1 bg-surface-container-low px-unit-xs rounded">
+<span class="text-on-surface-variant">Validated AUROC</span>
+<span class="font-semibold text-secondary">0.941 (Multicenter 2025)</span>
+</div>
+<div class="flex items-center justify-between py-1 bg-surface-container-low px-unit-xs rounded">
+<span class="text-on-surface-variant">Signal Threshold</span>
+<span class="font-semibold text-on-surface">SNR &gt; 22 dB (Mic Calibrated)</span>
+</div>
+<div class="flex items-center justify-between py-1 bg-surface-container-low px-unit-xs rounded">
+<span class="text-on-surface-variant">HL7 Integration</span>
+<span class="font-semibold text-on-surface">Konyang Hospital PACS/EMR</span>
+</div>
+</div>
+<!-- Compliance & Guidance Notice -->
+<div class="p-unit-xs bg-surface-container-low rounded flex items-start gap-unit-xs">
+<span class="material-symbols-outlined text-secondary text-[16px] mt-0.5">info</span>
+<p class="font-body-sm text-[11px] text-on-surface-variant leading-tight">
+            Clinical Decision Support interface. For clinician interpretive validation. Does not replace comprehensive UHDRS neurological assessment.
+          </p>
+</div>
+</div>
+</div>
+</div>
+</div></main></div></body></html>
