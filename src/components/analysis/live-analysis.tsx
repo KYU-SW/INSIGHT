@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState, type FormEvent } from "react";
-import { Activity, FileAudio } from "lucide-react";
+import { Activity, CircleHelp, FileAudio, OctagonAlert, ShieldCheck, TriangleAlert } from "lucide-react";
 import { useClinicalData } from "@/components/clinical-data-provider";
 import { VOICE_TASKS } from "@/data/tasks";
 import { convertToWav, needsConversion } from "@/lib/audio-convert";
@@ -13,7 +13,8 @@ function metric(value: number | null, unit: string, digits = 1) {
 }
 
 function Metric({ title, subtitle, value, compact = false }: { title: string; subtitle?: string; value: string; compact?: boolean }) {
-  return <div className="result-metric rounded bg-surface-container-low p-unit-md"><dt className="text-[11px] font-semibold text-on-surface-variant">{title}</dt>{subtitle && <p className="text-[10px] text-on-surface-variant">{subtitle}</p>}<dd className={`mt-2 break-words text-primary ${compact ? "text-[15px] font-semibold" : "font-data-lg text-data-lg"}`}>{value}</dd></div>;
+  const unavailable = value === "Unavailable";
+  return <div className="result-metric rounded bg-surface-container-low p-unit-md" data-unavailable={unavailable || undefined}><dt className="text-[11px] font-semibold text-on-surface-variant">{title}</dt>{subtitle && <p className="text-[10px] text-on-surface-variant">{subtitle}</p>}<dd className={`mt-2 break-words text-primary ${compact ? "text-[15px] font-semibold" : "font-data-lg text-data-lg"}`}>{value}</dd></div>;
 }
 
 export function Result({ result, sessionId }: { result: ClinicalInference; sessionId?: string }) {
@@ -33,6 +34,8 @@ export function Result({ result, sessionId }: { result: ClinicalInference; sessi
   const a = result.acoustic;
   const quality = result.recording_quality;
   const statusLabel = result.model.status === "normal" ? "정상 / Normal" : result.model.status === "caution" ? "주의 / Caution" : result.model.status === "high_risk" ? "위험 / High Risk" : "미분류 / Unclassified";
+  const StatusIcon = result.model.status === "normal" ? ShieldCheck : result.model.status === "caution" ? TriangleAlert : result.model.status === "high_risk" ? OctagonAlert : CircleHelp;
+  const statusTone = result.model.status ?? "unclassified";
   return <div className="result-workspace flex flex-col gap-unit-md">
     <section className="patient-banner rounded bg-surface-container-lowest p-unit-lg shadow-sm">
       <div className="mb-unit-md flex flex-wrap items-center justify-between gap-2 border-b border-surface-container pb-unit-xs"><h2 className="text-headline-lg text-primary">Patient / Recording Information</h2></div>
@@ -45,9 +48,9 @@ export function Result({ result, sessionId }: { result: ClinicalInference; sessi
     <section className="rounded bg-surface-container-lowest p-unit-lg shadow-sm" aria-labelledby="analysis-result-title">
       <div className="flex items-center gap-2 border-b border-surface-container pb-unit-xs"><Activity size={20} className="text-secondary" /><h2 id="analysis-result-title" className="text-headline-lg text-primary">AI Voice Analysis Result</h2></div>
       <div className="mt-unit-md grid gap-unit-sm lg:grid-cols-12">
-        <div className="rounded bg-surface-container-low p-unit-md lg:col-span-5"><p className="text-[10px] font-semibold uppercase tracking-wide text-on-surface-variant">음성이상점수</p><h3 className="text-headline-sm text-primary">Voice Abnormality Score</h3><p className="result-score my-unit-md font-data-lg text-[48px] font-bold leading-none text-primary">{result.model.display_score.toFixed(1)}<span className="ml-2 text-headline-lg font-normal text-on-surface-variant">/ 100</span></p></div>
+        <div className="score-card rounded bg-surface-container-low p-unit-md lg:col-span-5"><p className="text-[10px] font-semibold uppercase tracking-wide text-on-surface-variant">음성이상점수</p><h3 className="text-headline-sm text-primary">Voice Abnormality Score</h3><p className="result-score my-unit-md font-data-lg text-[48px] font-bold leading-none text-primary">{result.model.display_score.toFixed(1)}<span className="ml-2 text-headline-lg font-normal text-on-surface-variant">/ 100</span></p><div className="score-track" role="meter" aria-label="Voice Abnormality Score" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.min(100, Math.max(0, result.model.display_score))}><span style={{ width: `${Math.min(100, Math.max(0, result.model.display_score))}%` }} /></div></div>
         <dl className="grid gap-unit-sm sm:grid-cols-3 lg:col-span-7">
-          <Metric compact title="분석 상태 / Status" value={statusLabel} />
+          <div className="result-metric rounded bg-surface-container-low p-unit-md"><dt className="text-[11px] font-semibold text-on-surface-variant">분석 상태 / Status</dt><dd className="mt-2"><span className="status-chip" data-tone={statusTone}><StatusIcon size={15} aria-hidden="true" />{statusLabel}</span></dd></div>
           <Metric compact title="Recording Quality" subtitle={`Duration ${quality.duration_seconds.toFixed(1)} s · RMS ${metric(quality.rms_dbfs, " dBFS")}`} value={quality.assessment ?? "등급 미설정 / Unrated"} />
           <Metric compact title="Model" value={result.model.name} />
         </dl>
@@ -116,6 +119,15 @@ export function LiveAnalysis() {
       {busy && status && <p role="status" aria-live="polite" className="mt-3 rounded bg-surface-container-low p-2 text-body-sm text-primary">{status}</p>}
       {error && <p role="alert" className="mt-3 rounded bg-error-container p-2 text-body-sm text-on-error-container">{error}</p>}
     </section>
+    {!liveResult && <section className="idle-panel" aria-label="분석 진행 순서">
+      <h2 className="text-headline-sm text-primary">분석 순서 · How it works</h2>
+      <ol>
+        <li><b>1</b><span>Subject ID, Task, 녹음 시각을 입력하고 저장된 오디오 파일을 선택합니다.</span></li>
+        <li><b>2</b><span>Analyze recording을 누르면 서버에서 HuBERT 분석이 실행됩니다 (수십 초 소요).</span></li>
+        <li><b>3</b><span>음성이상점수와 음향 지표가 이 아래에 표시되고, Patient Registry와 History에 저장됩니다.</span></li>
+      </ol>
+      <p>이 화면은 기존 오디오 파일을 분석합니다. 마이크 녹음 기능은 제공하지 않으며, 결과는 선별 보조 정보입니다.</p>
+    </section>}
     {liveResult && <Result result={liveResult} sessionId={results.find(entry => entry.result === liveResult)?.id} />}
   </div>;
 }
