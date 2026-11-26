@@ -301,7 +301,7 @@ HuBERT 체크포인트·패키지·빌드 파일에 2 GB 이상이 필요하다.
 | 가중치 증명 (`scripts/build_model_card.py --check`) | 11개 검사 통과 |
 | 합성 음성 재현 (`scripts/reproduce_inference.py`) | PASS |
 | `npm run build` | 성공, 24.9 s |
-| CI (GitHub Actions `ci.yml`) | `web`: lint·typecheck·test·build / `model`: Python 테스트·가중치 증명·OOD 보정 검사·합성 음성 재현. Linux 실행 결과는 push 후 Actions에서 확인 필요(로컬 Docker 검증은 디스크 부족으로 중단) |
+| CI (GitHub Actions `ci.yml`) | `web`: lint·typecheck·test·build / `model`: Python 테스트·가중치 증명·OOD 보정 검사·합성 음성 재현. **Ubuntu(GitHub Actions)에서 두 job 모두 통과** ([run 45752347877](https://github.com/KYU-SW/INSIGHT/actions/runs/45752347877), 커밋 `fca5b57`) |
 | E2E `/api/analyze` (3 s 녹음) | 첫 요청 8.8 s(모델 로드 포함), 이후 **1.0–1.4 s** |
 | 추론 시간 vs 녹음 길이 | 3 s → 0.97 s · 10 s → 3.1 s · 30 s → 13.3 s · 60 s → 41.3 s (초선형, self-attention) |
 | 최대 메모리 | 약 3.1 GB RSS |
