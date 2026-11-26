@@ -1,13 +1,15 @@
 # INSIGHT
 
-Clinician-facing Huntington disease voice screening decision support UI. This is a frontend prototype using fictional, precomputed data.
+ALS (amyotrophic lateral sclerosis) voice screening support research prototype: Next.js UI + FastAPI HuBERT inference (`src/backend/`) + Firebase Realtime Database. Uses anonymized/test data only; outputs are screening support, never a diagnosis.
 
-- The original `insight_*/code.html`, `screen.png`, and `clinical_diagnostic_precision/DESIGN.md` are the visual source of truth. Preserve their layout, density, colors, and typography; screenshots take priority.
-- Keep original Stitch artifacts unchanged. App code lives in `src/`.
-- Never add microphone input, recording, audio device, sensor, Bluetooth, serial, or hardware features.
-- Centralize domain types and mock data; pages use the async service layer through the shared provider. Keep it ready for later FastAPI integration.
-- Clinical wording must describe screening support, never a definitive diagnosis. Local review/export actions must clearly identify prototype data.
-- Validate with `npm run lint`, `npm run typecheck`, `npm test`, and `npm run build`. Run `npm run dev` for browser verification and compare against Stitch screenshots at desktop sizes.
+- The original `insight_*/code.html`, `screen.png`, and `clinical_diagnostic_precision/DESIGN.md` are the visual reference. Keep original Stitch artifacts unchanged. App code lives in `src/`.
+- Input is an uploaded audio file. Do not add in-app microphone recording, audio device, sensor, Bluetooth, serial, or hardware features.
+- No fictional patient or analysis fixtures in app code. Never fabricate unmeasured values (Jitter/Shimmer/HNR, status thresholds stay `null` until validated).
+- Pages use the async service layer through the shared provider (`src/components/clinical-data-provider.tsx`).
+- Firebase: rules deny all client access; only the Next.js server accesses the DB with credentials from `.env.local` (never commit them). Schema: `docs/database-schema.md`.
+- Model weights (`head.pt`, `scaler.npz`) are tied to training run 20261005T055211_070474Z by `model_card.json`; regenerate with `scripts/build_model_card.py` after any change and keep `--check` passing.
+- VHI-30 items and F/P/E domains in `src/data/vhi.ts` must match the PhenX worksheet; scores are recomputed on the server.
+- Validate with `npm run lint`, `npm run typecheck`, `npm test`, `npm run build`, `python scripts/build_model_card.py --check`, and `python scripts/reproduce_inference.py`.
 
 <!-- BEGIN:nextjs-agent-rules -->
 
