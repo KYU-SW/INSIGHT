@@ -1,0 +1,77 @@
+{
+  "distance": "sqrt(mean(z^2)), z = (h07 max-pooled feature - scaler.mean) / scaler.scale; diagonal Mahalanobis / sqrt(1024)",
+  "threshold": 1.7181,
+  "threshold_rule": "max(ID distance) x 1.5 (margin fixed before OOD probes were run; not fitted)",
+  "reference": "training-split mean of mean(z^2) is exactly 1 by StandardScaler construction",
+  "calibration_data": {
+    "source": "provenance/run_20261005T055211_070474Z/test_features_h07_max.npz",
+    "split": "test",
+    "n": 4,
+    "distances": {
+      "3c131fb3bf6848c2bc6e4d92317e350df96425c99bc007a93cc85b7843a1a398": 1.1454,
+      "6dde01311c9bda1a529566a39e6f92eb27470281dc8bcb049cac28102d7f2cfb": 0.8733,
+      "859c87914ef8d609eabcb293097ca1a8e35cd23b0130e667374abc55842a3599": 1.0173,
+      "abb904405acf4277773c48dec76bb45381601f87d6ea7113525a0d4c86129f88": 0.9106
+    },
+    "min": 0.8733,
+    "max": 1.1454
+  },
+  "caveats": [
+    "Calibrated on the TEST split: these 4 cached features are the only in-distribution features stored locally (no train/validation features). The threshold therefore used test data; it is not an independent estimate.",
+    "n = 4 ID samples: the false-rejection rate on real SAND recordings is not measured. The x1.5 margin is a guess at the unobserved ID tail.",
+    "Diagonal distance ignores feature correlations; inputs that shift features along correlated directions can stay under the threshold. Passing the gate does not mean the score is valid for that input.",
+    "No real non-SAND speech (other languages, microphones, ages) was measured; the probes are synthetic signals."
+  ],
+  "ood_probes": {
+    "note": "synthetic or example inputs through decode_audio -> HuBERT -> scaler; seeds fixed in scripts/calibrate_ood.py",
+    "results": {
+      "examples/synthetic_vowel_a_steady.wav": {
+        "distance": 2.6282,
+        "score": 0.999982
+      },
+      "examples/synthetic_vowel_a_unstable.wav": {
+        "distance": 2.1258,
+        "score": 0.999981
+      },
+      "silence": {
+        "distance": 2.9602,
+        "score": 0.999942
+      },
+      "white_noise": {
+        "distance": 2.1293,
+        "score": 0.999975
+      },
+      "tone_150hz": {
+        "distance": 2.9289,
+        "score": 0.999992
+      },
+      "tone_1khz": {
+        "distance": 2.9983,
+        "score": 0.999992
+      },
+      "square_150hz": {
+        "distance": 3.0039,
+        "score": 0.999992
+      },
+      "music_arpeggio": {
+        "distance": 1.7399,
+        "score": 0.999607
+      },
+      "clicks_4hz": {
+        "distance": 2.1517,
+        "score": 0.999563
+      }
+    },
+    "flagged": [
+      "clicks_4hz",
+      "examples/synthetic_vowel_a_steady.wav",
+      "examples/synthetic_vowel_a_unstable.wav",
+      "music_arpeggio",
+      "silence",
+      "square_150hz",
+      "tone_150hz",
+      "tone_1khz",
+      "white_noise"
+    ]
+  }
+}

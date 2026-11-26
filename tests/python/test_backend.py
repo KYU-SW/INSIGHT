@@ -25,6 +25,27 @@ def tone(f0: float, seconds: float = 2.0, sr: int = SR, amplitude: float = 0.3) 
     return (amplitude * np.sin(2 * np.pi * f0 * t)).astype(np.float32)
 
 
+def vowel(f0: float = 150, seconds: float = 2.0, period_sd: float = 0.0, amp_sd: float = 0.0,
+          snr_db: float | None = None, seed: int = 0) -> np.ndarray:
+    """Harmonic vowel-like signal built cycle by cycle, so per-cycle period and amplitude are known.
+
+    Each cycle is one period of sum_h sin(h*phase)/h (8 harmonics, <= 1.2 kHz), which is zero at the
+    cycle boundary, so per-cycle period/amplitude changes introduce no discontinuities.
+    """
+    rng = np.random.default_rng(seed)
+    cycles = int(seconds * f0) + 2
+    periods = (1 / f0) * (1 + period_sd * rng.standard_normal(cycles))
+    amps = 0.3 * (1 + amp_sd * rng.standard_normal(cycles))
+    starts = np.concatenate([[0.0], np.cumsum(periods)])
+    t = np.arange(int(seconds * SR)) / SR
+    k = np.searchsorted(starts, t, side="right") - 1
+    phase = 2 * np.pi * (t - starts[k]) / periods[k]
+    x = amps[k] * sum(np.sin(h * phase) / h for h in range(1, 9))
+    if snr_db is not None:
+        x = x + rng.standard_normal(len(x)) * np.sqrt(np.mean(x ** 2) / 10 ** (snr_db / 10))
+    return x.astype(np.float32)
+
+
 def write(audio: np.ndarray, sr: int) -> Path:
     handle = tempfile.NamedTemporaryFile(suffix=".wav", delete=False)
     sf.write(handle.name, audio, sr, subtype="FLOAT")
@@ -60,12 +81,58 @@ class AcousticsTest(unittest.TestCase):
         self.assertLess(acoustic["pitch_sd_hz"], 1)
         self.assertAlmostEqual(quality["duration_seconds"], 2.0)
 
-    def test_unmeasured_metrics_stay_null_instead_of_fabricated(self):
-        _, acoustic, quality = measure(tone(150))
-        self.assertIsNone(acoustic["jitter_percent"])
-        self.assertIsNone(acoustic["shimmer_percent"])
-        self.assertIsNone(acoustic["hnr_db"])
+    def test_undefined_summaries_stay_null_instead_of_fabricated(self):
+        phonation, _, quality = measure(vowel())
+        self.assertIsNone(phonation["stability"])
         self.assertIsNone(quality["assessment"])
+
+    def test_clean_periodic_vowel_has_low_perturbation_and_high_hnr(self):
+        _, acoustic, _ = measure(vowel())
+        self.assertLess(acoustic["jitter_percent"], 0.5)
+        self.assertLess(acoustic["shimmer_percent"], 1.0)
+        self.assertGreater(acoustic["hnr_db"], 25)
+        self.assertIsNone(acoustic["voice_quality_reason"])
+
+    def test_injected_period_perturbation_is_recovered_as_jitter(self):
+        clean = measure(vowel())[1]["jitter_percent"]
+        sd = 0.02
+        # For iid period deviations with SD sd, E|T_k - T_k+1| / T0 = 2 * sd / sqrt(pi).
+        expected = 100 * 2 * sd / np.sqrt(np.pi)
+        for seed in range(3):
+            measured = measure(vowel(period_sd=sd, seed=seed))[1]["jitter_percent"]
+            self.assertGreater(measured, 10 * clean)
+            self.assertGreater(measured, expected / 1.5)
+            self.assertLess(measured, expected * 1.5)
+
+    def test_amplitude_perturbation_increases_shimmer(self):
+        clean = measure(vowel())[1]["shimmer_percent"]
+        perturbed = measure(vowel(amp_sd=0.10))[1]["shimmer_percent"]
+        expected = 100 * 2 * 0.10 / np.sqrt(np.pi)  # same mean-absolute-difference identity as jitter
+        self.assertGreater(perturbed, expected / 1.5)
+        self.assertLess(perturbed, expected * 1.5)
+        self.assertGreater(perturbed, 10 * clean)
+
+    def test_hnr_decreases_monotonically_with_added_noise(self):
+        snrs = [40, 30, 20, 10]
+        hnrs = [measure(vowel(snr_db=snr))[1]["hnr_db"] for snr in snrs]
+        self.assertTrue(all(a > b for a, b in zip(hnrs, hnrs[1:])), hnrs)
+        for snr, hnr in zip(snrs, hnrs):  # white noise on a periodic signal: HNR ~ SNR
+            self.assertAlmostEqual(hnr, snr, delta=3)
+
+    def test_ddk_syllable_task_is_not_measured(self):
+        _, acoustic, _ = measure(vowel(), task_code="syllable_pa")
+        for key in ("jitter_percent", "shimmer_percent", "hnr_db"):
+            self.assertIsNone(acoustic[key])
+        self.assertIn("sustained vowel", acoustic["voice_quality_reason"])
+        self.assertIsNotNone(acoustic["mean_pitch_hz"])
+
+    def test_silence_and_too_short_voicing_are_not_measured(self):
+        for audio in (np.zeros(2 * SR, dtype=np.float32), vowel(seconds=0.3),
+                      np.concatenate([vowel(seconds=0.3), np.zeros(2 * SR, dtype=np.float32)])):
+            _, acoustic, _ = measure(audio)
+            for key in ("jitter_percent", "shimmer_percent", "hnr_db"):
+                self.assertIsNone(acoustic[key])
+            self.assertIsNotNone(acoustic["voice_quality_reason"])
 
     def test_silence_has_no_level_or_pitch(self):
         _, acoustic, quality = measure(np.zeros(SR, dtype=np.float32))
