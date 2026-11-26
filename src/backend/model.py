@@ -70,10 +70,21 @@ def load_model():
     return torch, extractor, backbone, head, mean, scale
 
 
+TRAINING_SOURCE_RATE = 8000  # every training recording was 8 kHz (provenance split_manifest.csv source_sr)
+
+
 def decode_audio(path: Path):
-    """Match notebook: soundfile float32, stereo mean, librosa resample."""
+    """Match training: soundfile float32, stereo mean, librosa resample to 16 kHz.
+
+    Training features were computed from 8 kHz sources upsampled to 16 kHz, so they never contained energy above
+    4 kHz. Inputs above 8 kHz are first resampled to 8 kHz to keep that bandwidth. For 8 kHz inputs this is the
+    exact training path; for others it is a parity step whose effect on real recordings has not been measured.
+    """
     audio, sample_rate = sf.read(path, dtype="float32", always_2d=True)
     mono = audio.mean(axis=1)
+    if sample_rate > TRAINING_SOURCE_RATE:
+        mono = librosa.resample(mono, orig_sr=sample_rate, target_sr=TRAINING_SOURCE_RATE)
+        sample_rate = TRAINING_SOURCE_RATE
     if sample_rate != SAMPLE_RATE:
         mono = librosa.resample(mono, orig_sr=sample_rate, target_sr=SAMPLE_RATE)
     if len(mono) < 400 or not np.isfinite(mono).all():
