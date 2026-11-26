@@ -294,7 +294,7 @@ HuBERT 체크포인트·패키지·빌드 파일에 2 GB 이상이 필요하다.
 
 | 항목 | 결과 |
 |---|---|
-| `npm run lint` / `typecheck` / `npm test` | 통과, TypeScript 테스트 **21/21** (추론 API 경로의 토큰 전달·인증 오류 은닉 포함) |
+| `npm run lint` / `typecheck` / `npm test` | 통과, TypeScript 테스트 **22/22** (추론 API 경로의 토큰 전달·인증 오류 은닉, DB 업로드 실패 시 되돌리기 포함) |
 | Python 백엔드 테스트 (`python -m unittest discover -s tests/python`) | **29/29** (8 kHz 경로 동일성, 대역 제한, F0·dBFS, Jitter·Shimmer·HNR 합성 신호 검증, API 인증, OOD 게이트, API 계약) |
 | Jitter·Shimmer·HNR 정확도 (합성 150 Hz 모음) | 주기 변동 SD 2% 주입 → jitter 2.05–2.21% (해석적 기대값 2.26%). SNR 40/30/20/10 dB → HNR 40.1/30.1/20.1/10.3 dB |
 | OOD 게이트 (`scripts/calibrate_ood.py --check`) | SAND 시험 특징 4개의 거리 0.87–1.15, 임계값 1.718. 합성 비음성 입력 9개(무음·잡음·순음·음악·합성 모음)는 1.74–3.00으로 모두 차단 |
@@ -340,6 +340,23 @@ HuBERT 체크포인트·패키지·빌드 파일에 2 GB 이상이 필요하다.
 ## 11. 구현 세부
 
 `head.pt`가 분류기 구조의 기준이다. 고정 체크포인트의 legacy positional convolution 텐서는 로드 전에 현재 Transformers 키로 매핑해 학습된 값을 유지한다. 검증된 임상 기준값이 없어 `src/backend/interpretation.py`의 상태는 `null`(미분류)이다. VHI-30 문항은 PhenX 영문판(PX201301) 기반 **개발용 한국어 번역**이며 공식 K-VHI 검증본이 아니다. 원문 번호와 F/P/E 영역을 유지하고, 한국어판 기준값이 없어 총점과 영역별 점수만 표시한다.
+
+**구현 안전장치.** 각 항목은 해당 코드와 자동 테스트로 확인할 수 있다.
+
+| 영역 | 장치 | 위치 · 테스트 |
+|---|---|---|
+| 모델 로딩 무결성 | HuBERT를 커밋 해시(`ece5fabb`)로 고정해 내려받는다. `torch.load(weights_only=True)`로 pickle 코드 실행을 차단한다. head 층 키·HuBERT 누락/초과 키·scaler 차원이 하나라도 다르면 기동을 거부한다. 가중치를 학습 당시 값 그대로 쓰도록 legacy weight-norm 텐서를 매핑한다 | `src/backend/model.py` |
+| 학습–추론 일치 | 8 kHz 입력은 학습 경로와 비트 단위로 같다. 고음질 입력은 학습 대역으로 제한한다 | `tests/python/test_backend.py` |
+| 입력 제한 | 확장자 화이트리스트(WAV·FLAC·OGG), 25 MB·120 s 상한, 너무 짧은 녹음 거부. 인증은 본문을 읽기 전에 거부한다 | `src/backend/app.py`, `test_api_auth.py` |
+| 브라우저 변환 | M4A·MP3 등은 브라우저 코덱으로 디코딩해 16 kHz mono PCM16 WAV로 바꾼다. 서버에는 원본 형식이 전달되지 않는다 | `src/lib/audio-convert.ts` |
+| 쓰기 원자성 | 분석 결과는 4개 레코드로 나누어 저장한다. 중간에 실패하면 이미 쓴 레코드를 역순으로 삭제해 부분 기록을 남기지 않는다. 정리에도 실패하면 관리자 확인을 요구한다 | `src/lib/firebase-database.ts` · "a failed upload deletes the records already written…" |
+| 임시 저장 순서 보장 | 문진 임시 저장 요청을 직렬 큐로 처리해 오래된 응답이 새 응답을 덮어쓰지 않는다. 최종 업로드는 대기 중인 임시 저장이 끝난 뒤 실행한다 | `vhi-questionnaire.tsx` |
+| 서버 측 검증 | VHI 점수는 클라이언트 값을 무시하고 서버에서 다시 계산한다. 임시 저장 응답은 0–4 정수만 받는다. DB에서 읽은 레코드가 형식에 맞지 않으면 부분 점수를 만들지 않고 건너뛴다 | `database.test.ts`, `vhi.test.ts` |
+| 측정하지 않은 값 | 없는 음향 값은 0으로 채우지 않고 `null`로 둔다. 검증된 기준값이 없는 상태 등급과 VHI 중증도는 표시하지 않는다 | `database.test.ts` "without inventing unavailable acoustic values" |
+| ID 규칙 단일화 | Subject ID 정규식을 프론트엔드·DB·추론 서버가 같은 규칙으로 쓴다. 대문자로 정규화하고 실명 대신 가명을 쓰도록 안내한다 | `src/lib/subject-id.ts`, `subject-id.test.ts`, Python API 계약 테스트 |
+| 추적성 | 저장된 모든 점수에 head·scaler·모델 카드의 SHA-256과 파이프라인 버전을 기록한다. 실행 중인 가중치가 모델 카드와 다르면 화면에 경고한다 | `model-card.test.ts` |
+| 접근성 | 본문 바로가기 링크, `aria-current` 내비게이션, 문진 진행률 `progressbar`, 임시 저장 상태 `aria-live`, 라디오 `fieldset`/`legend`, 키보드 0–4 응답 단축키, 모바일 전용 하단 내비게이션 | `app-shell.tsx`, `vhi-questionnaire.tsx` |
+| 오류 처리 | 업로드 진행률을 표시하고(XMLHttpRequest), 네트워크 오류·시간 초과·서버 오류를 구분해 한국어로 안내한다. 추론 서버의 인증 오류는 브라우저에 노출하지 않는다 | `analysisService.ts`, `analyze-route.test.ts` |
 
 ---
 

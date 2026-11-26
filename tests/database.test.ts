@@ -113,6 +113,32 @@ test("upload writes the four schema records and never includes raw audio", async
   }
 });
 
+test("a failed upload deletes the records already written instead of leaving a partial analysis", async () => {
+  const result: ClinicalInference = {
+    user_id: "S1", recording_timestamp: "2026-10-06T01:00:00Z", analyzed_at: "2026-10-06T01:01:00Z",
+    task: { code: "vowel_a", label: "Sustained /a/" },
+    model: { name: "MLP_MAX_h07", score: 0.42, display_score: 42, status: null, status_reason: null },
+    recording_quality: { assessment: null, duration_seconds: 4.8, rms_dbfs: -21, near_full_scale_percent: 0.1 },
+    phonation: { stability: null, pitch_stability: 0.07, intensity_stability: 0.06 },
+    acoustic: { jitter_percent: null, shimmer_percent: null, hnr_db: null,
+      mean_pitch_hz: 142, pitch_sd_hz: 11, pitch_cv: 0.07, intensity_cv: 0.06, mean_intensity_dbfs: -20 },
+  };
+  const deleted: string[] = [];
+  const original = globalThis.fetch;
+  globalThis.fetch = async (input, init) => {
+    const path = new URL(String(input)).pathname;
+    if (init?.method === "DELETE") { deleted.push(path.split("/")[1]); return Response.json(null); }
+    if (init?.method === "PUT" && path.startsWith("/acoustic_metrics/")) return new Response("fail", { status: 500 });
+    return Response.json(init?.method === "PUT" ? {} : null);
+  };
+  try {
+    await assert.rejects(uploadDatabaseResult(result), /요청 실패 \(500\)/);
+    assert.deepEqual(deleted, ["analyses", "recordings"]);
+  } finally {
+    globalThis.fetch = original;
+  }
+});
+
 test("VHI upload recomputes scores on the server and ignores client-sent scores", async () => {
   const writes: { path: string; body: Record<string, unknown> }[] = [];
   const original = globalThis.fetch;
