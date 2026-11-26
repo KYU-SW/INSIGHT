@@ -167,6 +167,57 @@
 
 **결론.** 배포 구성(h7 + max + MLP)의 다중 seed 결과는 없다. 다중 seed 결과는 모두 h4 구성이다. 따라서 §3.2의 신뢰구간은 피험자 재표본 불확실성만 반영하며, 학습 seed 변동은 반영하지 않는다. 같은 9bb28df8 분할에서 학습한 수기 특징 단독 모델도 없다.
 
+### 4.2 설계 결정의 실험 근거
+
+모델과 프로토콜의 주요 설계 결정은 아래 분석에 근거한다. 원본 결과 파일은 `provenance/`에 있다.
+
+**(1) 사전학습 음성 표현(HuBERT)을 택한 근거.** 구음장애 검출에서 HuBERT 특징이 eGeMAPS 등 수기 특징 기준보다 검출 정확도가 1.33–2.86%p 높았다는 선행 보고가 있다[R13]. 자체 실험에서도 수기 특징 88개를 모두 결합한 구성의 이득은 피험자 AUC +0.010(0.890 → 0.900)에 그쳤다(`HUBERT_EGEMAPS_FUSION_*`). HuBERT 표현이 수기 특징 정보의 대부분을 이미 담고 있다고 해석한다.
+
+**(2) 가설 기반 음향 특징 선정.** eGeMAPS 88개 특징을 ALS 165명과 HC 106명 사이에서 비교했다(Cliff's delta, FDR 보정, 성별·연령 공변량 보정). 그 결과 27개가 유의했다(보정 후 32개). 효과가 가장 큰 특징은 F0 범위(F0semitone_pctlrange0-2, delta +0.45, AUC 0.72)였다. 이는 F0 변동성이 ALS 식별에 유용하다는 보고[R14]와 일치한다. 이 분석에서 주파수(F0 범위)·스펙트럼(F3 상대에너지)·시간(loudnessPeaksPerSec) 묶음의 특징 3개를 골라 HuBERT와 결합했다.
+
+| 비교 (5 seed) | ΔAUC (녹음) | AUC 개선 seed |
+|---|---|---|
+| 특징 3개 추가 (pooling 후, Late3 − Baseline) | +0.004 ± 0.006 | 4/5 |
+| 특징 3개 추가 (pooling 전, Early3 − EarlyHuBERTonly) | +0.005 ± 0.004 | 4/5 |
+| 결합 위치: pooling 전 vs 후 (Early3 − Late3) | **+0.022 ± 0.008** | **5/5** |
+| 88개 → 3개 축소 (Late3 − Concat) | −0.010 ± 0.007 | 0/5 |
+
+특징을 추가해 얻는 이득은 작았다. 결합 위치(시간 집계 전)의 효과는 5개 seed 모두에서 일관되었다. 이 결과는 프레임 단위 시간 정보가 global pooling에서 일부 손실된다는 가설과 부합한다. 다만 Early3는 파라미터 수가 2.3배이므로, 구조 차이를 분리한 검증은 아직 하지 않았다.
+
+**(3) 음성 과제 구성의 근거.** 과제별로 유의한 eGeMAPS 특징 수는 /ka/ 반복 34개, /e/ 29개, /a/ 28개, /i/ 24개, /ta/ 19개, /o/ 18개, /pa/ 18개, /u/ 14개였다. 지속 모음만으로는 정보가 부족하며, 그래서 연구개 조음(/ka/)을 포함한 DDK 과제를 프로토콜에 넣었다. /ka/가 가장 많은 것은 연수 침범에 따른 혀 운동 저하로 설명될 수 있으나, 이는 해석이며 검증하지 않았다.
+
+**(4) 구음장애 없는 ALS(초기 단계) 별도 평가.** 배포 모델의 Class 4 검출(§3.2) 외에, 수기 특징 모델로도 Class 4와 HC만 따로 비교했다. 공식 검증 분할에서 ElasticNet은 AUROC 0.827(n = 35, 민감도 85.7%, 특이도 66.7%), frozen WavLM은 0.765였다(`ML_EXPERIMENT_02/03_class4_vs_class5.csv`, `ML_EXPERIMENT_T1_*/07_class4_vs_class5.csv`). 구음장애가 평정되지 않은 단계에서도 음향 신호가 존재한다는 관찰이 두 모델 계열에서 반복된다. 단, 이 결과는 공식 분할에서 얻은 값이므로 §3.2와 직접 비교하지 않는다.
+
+**(5) 누수 방지 절차.**
+- 피험자 단위로 분할하고, 분할 간 중복을 검사했다.
+- scaler는 train 분할에만 적합시켰다.
+- 증강은 train 분할에만 적용했다.
+- HPO·early stopping·임계값 선택은 validation 분할에서만 했다.
+- test는 설정을 고정한 뒤 1회만 평가했다.
+- HPO seed와 평가 seed를 분리했다.
+
+결과는 Bonferroni(×7) 보정 CI를 사전 판정 기준으로 해석했다(`research_report.md`).
+
+**(6) 비용–성능 측정.** 비교 실험에서는 성능과 함께 학습 비용도 기록했다(`computational_cost.csv`).
+
+| 구성 | 학습 파라미터 | 최대 GPU 메모리 | 추론 |
+|---|---|---|---|
+| 배포 구조(BASE) | 13.1만 | 596 MB | 0.03 ms/녹음 |
+| LoRA 미세조정(EXP07) | 26.2만 (전체 6,377만) | 1,659 MB | 43.7 ms/녹음 |
+
+LoRA는 AUROC가 0.84로 더 낮았다. 따라서 가장 단순한 구조가 비용과 성능 모두에서 우위였다.
+
+**실험 규모.**
+
+| 실험 | 학습 횟수 |
+|---|---|
+| 층 탐색 (2회 실행) | 300회 |
+| HuBERT + eGeMAPS 결합 | 60회 (5 seed) |
+| 비교 실험 | 최종 27회 (3 seed) + HPO 88 trial |
+| 수기 특징·WavLM 기준 모델 | 공식 분할, 반복 교차검증 |
+
+실패한 실험(Data2Vec, 특이도 0)과 부정 결과(대역폭 가설 기각, §8)도 함께 기록했다.
+
 ---
 
 ## 5. 기존 사전문진·음성 선별 시스템과의 비교
@@ -343,4 +394,6 @@ HuBERT 체크포인트·패키지·빌드 파일에 2 GB 이상이 필요하다.
 - [R10] Kim KH et al. *J Voice*. 2016;30(2):246.e1-7. doi:10.1016/j.jvoice.2015.04.010
 - [R11] Sannino G et al. SAND Challenge. *IEEE Open J Signal Process*. 2026;7:766-775. doi:10.1109/OJSP.2026.3713044; https://www.sand.icar.cnr.it/
 - [R12] Jacobson BH et al. *Am J Speech Lang Pathol*. 1997;6(3):66-70; PhenX Toolkit PX201301
+- [R13] Javanmardi F, Kadiri SR, Alku P. Pre-trained models for detection and severity level classification of dysarthria from speech. *Speech Commun*. 2024;158:103047. doi:10.1016/j.specom.2024.103047
+- [R14] Dubbioso R, Spisto M, Verde L, et al. Voice signals database of ALS patients with different dysarthria severity and healthy controls. *Sci Data*. 2024;11:800. doi:10.1038/s41597-024-03597-2
 - [S1] Epic MyChart Help · [S2] Phreesia Platform · [S3] Phreesia Intake Forms · [S4] CHAI Registry: Canary Speech · [S5] App Store: Speech Vitals — URL은 추적표 참조

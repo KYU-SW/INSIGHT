@@ -19,6 +19,10 @@ README의 주요 주장을 원 근거와 연결한다. 문헌은 PubMed 초록(E
 | C11 | 국내 성인 음성장애 유병률 8.12% | [R10] Kim 2016 | PubMed 초록 |
 | C12 | SAND Class 4 = "ALS with no dysarthria", Class 5 = 건강군; 8 kHz·16 bit, 스마트폰 앱(Vox4Health) 녹음, 이탈리아어 화자 339명 | [R11] SAND 공식 페이지 | 공식 웹페이지 원문 |
 | C13 | VHI-30 문항·영역·점수 체계 | [R12] Jacobson 1997, PhenX PX201301 | 기존 `src/data/vhi.ts` 대조 |
+| C14 | HuBERT 특징이 수기 특징 기준보다 구음장애 검출 정확도 +1.33–2.86%p | [R13] Javanmardi 2024 | Crossref 서지 확인, 비교 실험 보고서(`research_report.md`)의 초록 인용 |
+| C15 | F0 변동성이 ALS 식별에 유용 | [R14] Dubbioso 2024 | Crossref 서지 확인, 비교 실험 보고서의 초록 인용 |
+| E7 | eGeMAPS 군 비교 27/88 유의, 과제별 유의 특징 수, 특징 3개 결합 효과 | `provenance/EGEMAPS_GROUP_ANALYSIS_*/summary.md`, `provenance/HUBERT_EGEMAPS_FUSION_20261112T011348_511305Z/selected3_pairwise.csv` | 원본 표 (Drive 사본) |
+| E8 | Class 4 vs HC 별도 평가, 비용 측정 | `provenance/ML_EXPERIMENT_02/03_class4_vs_class5.csv`, `provenance/run_20261114T140021_240247Z_LOW_COST/computational_cost.csv` | 원본 표 (Drive 사본) |
 | E1 | 배포 가중치 = 학습 실행 `20261005T055211_070474Z`의 산출물 (11개 검사) | `provenance/run_20261005T055211_070474Z/`, `scripts/build_model_card.py` | 오프라인 재계산 |
 | E2 | 배포 모델 시험 피험자 단위 AUROC 0.898 [0.783–0.980], 민감도 92.0%, 특이도 75.0% | `model_card.json` `test_uncertainty` | 피험자 cluster bootstrap 10,000회 |
 | E3 | 구음장애 없는 ALS(SAND Class 4) 10명 중 8명 검출 | `model_card.json` `subject_sensitivity_by_sand_class`, `provenance/run_20261114T140021_240247Z_LOW_COST/subject_severity.csv` | 피험자별 확률 평균 ≥ 0.5 |
@@ -46,6 +50,8 @@ README의 주요 주장을 원 근거와 연결한다. 문헌은 PubMed 초록(E
 | R10 | Kim KH, Kim RB, Hwang DU, Won SJ, Woo SH. Prevalence of and sociodemographic factors related to voice disorders in South Korea. *J Voice*. 2016;30(2):246.e1-7. PMID 25985718 | 10.1016/j.jvoice.2015.04.010 | 음성 증상이 흔하다는 사실 → 특이도·의뢰 설계 제약 |
 | R11 | Sannino G, De Falco I, Brancati N, et al. SAND: The Challenge on Speech Analysis for Neurodegenerative Disease Assessment. *IEEE Open J Signal Process*. 2026;7:766-775 (arXiv:2604.16445); 공식 페이지 | 10.1109/OJSP.2026.3713044 · https://www.sand.icar.cnr.it/ | 데이터셋 구성, Class 정의, 녹음 조건 |
 | R12 | Jacobson BH, Johnson A, Grywalski C, et al. The Voice Handicap Index (VHI): development and validation. *Am J Speech Lang Pathol*. 1997;6(3):66-70. PhenX Toolkit PX201301 | https://www.phenxtoolkit.org/protocols/view/201301 | VHI-30 문항·점수 |
+| R13 | Javanmardi F, Kadiri SR, Alku P. Pre-trained models for detection and severity level classification of dysarthria from speech. *Speech Commun*. 2024;158:103047 | 10.1016/j.specom.2024.103047 | HuBERT 선택 근거 |
+| R14 | Dubbioso R, Spisto M, Verde L, et al. Voice signals database of ALS patients with different dysarthria severity and healthy controls. *Sci Data*. 2024;11:800 | 10.1038/s41597-024-03597-2 | F0 변동성 근거 |
 | S1 | Epic. Help — MyChart | https://www.mychart.org/help | 진료 전 문진(eCheck-In) |
 | S2 | Phreesia. Our Patient Intake Platform | https://www.phreesia.com/platform/ | 문진·채점·EHR 연동 |
 | S3 | Phreesia. Patient Check-In Software | https://www.phreesia.com/electronic-intake-forms/ | 문진 결과의 EHR 전송 |
