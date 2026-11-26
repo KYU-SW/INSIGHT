@@ -690,7 +690,7 @@ INSIGHT가 기존 시스템보다 우수하다는 주장이 아니다. 운영 �
 | 가중치 증명 (`scripts/build_model_card.py --check`) | 11개 검사 통과 |
 | 합성 음성 재현 (`scripts/reproduce_inference.py`) | PASS |
 | `npm run build` | 성공, 24.9 s |
-| CI (GitHub Actions `ci.yml`) | `web`: lint·typecheck·test·build / `model`: Python 테스트·가중치 증명·OOD 보정 검사·합성 음성 재현. **Ubuntu(GitHub Actions)에서 두 job 모두 통과** ([run 45752347877](https://github.com/KYU-SW/INSIGHT/actions/runs/45752347877), 커밋 `fca5b57`) |
+| CI (GitHub Actions `ci.yml`) | `web`: lint·typecheck·test·build / `model`: Python 테스트·가중치 증명·OOD 보정 검사·합성 음성 재현·추론 서버 E2E 스모크. **Ubuntu(GitHub Actions)에서 두 job 모두 통과** ([run 45784459989](https://github.com/KYU-SW/INSIGHT/actions/runs/45784459989), 커밋 `e199c19`). 이전에는 가중치 증명 검사가 러너 CPU에 따라 간헐적으로 실패했다. float32 1 ULP 차이가 카드 텍스트에 들어갔기 때문이며, `e199c19`에서 수정했다 |
 | E2E `/api/analyze` (3 s 녹음) | 첫 요청 8.8 s(모델 로드 포함), 이후 **1.0–1.4 s** |
 | 추론 시간 vs 녹음 길이 | 3 s → 0.97 s · 10 s → 3.1 s · 30 s → 13.3 s · 60 s → 41.3 s (초선형, self-attention) |
 | 최대 메모리 | 약 3.1 GB RSS |
