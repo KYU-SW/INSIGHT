@@ -1,0 +1,56 @@
+{
+  "run_id": "ML_EXPERIMENT_T1_WAVLM_FROZEN_ELASTICNET",
+  "retrieved": "2026-11-26",
+  "note": "sha256 = SHA-256 of the bytes downloaded from Google Drive (unmodified copies)",
+  "sources": [
+    {
+      "file": "02_metrics.csv",
+      "drive_file_id": "1ZjIjvXvvPft4Ft18zwiDjVg-gBT2_MHn",
+      "drive_path": "MyDrive/2026_2_INSIGHT/ALS_RESULTS/ALS_voice_analysis_20260921_075155/ML_EXPERIMENT_T1_WAVLM_FROZEN_ELASTICNET/02_metrics.csv",
+      "sha256": "b456f67ae5627adb4cedf0b826cc526770a6f7c6412bf4fb74142052645ee0da",
+      "bytes": 1059
+    },
+    {
+      "file": "04_repeat_metrics.csv",
+      "drive_file_id": "1BXQdm8LZCOYNWGQnGw-2Uk7LMhXYkBfr",
+      "drive_path": "MyDrive/2026_2_INSIGHT/ALS_RESULTS/ALS_voice_analysis_20260921_075155/ML_EXPERIMENT_T1_WAVLM_FROZEN_ELASTICNET/04_repeat_metrics.csv",
+      "sha256": "123500c706f87acd9da1ad3c24bc7b0581c7bb4ee297988c9a133791892a6609",
+      "bytes": 353
+    },
+    {
+      "file": "06_bootstrap_CI.csv",
+      "drive_file_id": "1XyKIdJq-YDSp5_nWpngYHTm_AO-JAC6w",
+      "drive_path": "MyDrive/2026_2_INSIGHT/ALS_RESULTS/ALS_voice_analysis_20260921_075155/ML_EXPERIMENT_T1_WAVLM_FROZEN_ELASTICNET/06_bootstrap_CI.csv",
+      "sha256": "28c1c6898111494c102c36e1497c12993d6fb7d6140291dc8bf80cd8d780cbd5",
+      "bytes": 304
+    },
+    {
+      "file": "07_class4_vs_class5.csv",
+      "drive_file_id": "1Td6YoAX1BrMhfjnW2oMXn6GktzL23Ki4",
+      "drive_path": "MyDrive/2026_2_INSIGHT/ALS_RESULTS/ALS_voice_analysis_20260921_075155/ML_EXPERIMENT_T1_WAVLM_FROZEN_ELASTICNET/07_class4_vs_class5.csv",
+      "sha256": "c49ff6188148b3699336ad690639c0ea6ee6811ae62e6df0c851870bb47cfbfa",
+      "bytes": 759
+    },
+    {
+      "file": "08_paired_T1_vs_M1.csv",
+      "drive_file_id": "1Gr-7Fq2xKqpgdm2sheXw0FNS3d3nGPlc",
+      "drive_path": "MyDrive/2026_2_INSIGHT/ALS_RESULTS/ALS_voice_analysis_20260921_075155/ML_EXPERIMENT_T1_WAVLM_FROZEN_ELASTICNET/08_paired_T1_vs_M1.csv",
+      "sha256": "95c824ebdb524bd6da1f8bf1d16997dc868c258fe8eb98007aafb4d3e9b07368",
+      "bytes": 369
+    },
+    {
+      "file": "experiment_config.json",
+      "drive_file_id": "1RzAo4eNiQtuj95ToENnIHekZmCzS9Rq0",
+      "drive_path": "MyDrive/2026_2_INSIGHT/ALS_RESULTS/ALS_voice_analysis_20260921_075155/ML_EXPERIMENT_T1_WAVLM_FROZEN_ELASTICNET/experiment_config.json",
+      "sha256": "50f601faf4246cb32bec8cb2b78eb1c12346c62b0e775cdde753b13f8a3e5595",
+      "bytes": 762
+    },
+    {
+      "file": "TRANSFORMER_SHARED_CACHE__wavlm_base_plus_last_mean_metadata.json",
+      "drive_file_id": "1wztpsVT3vq0MKmT-LDwfYQLmEWPPNaeM",
+      "drive_path": "MyDrive/2026_2_INSIGHT/ALS_RESULTS/ALS_voice_analysis_20260921_075155/TRANSFORMER_SHARED_CACHE/wavlm_base_plus_last_mean_metadata.json",
+      "sha256": "75d2443caf3e44a74c957fef617aab26529882bb9be7f06583a23ef92bce8bae",
+      "bytes": 436
+    }
+  ]
+}

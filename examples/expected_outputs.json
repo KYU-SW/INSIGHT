@@ -1,0 +1,47 @@
+{
+  "model_card_head_sha256": "f46ad9e6130f4538dab2427b78b17d501f6358d5f7c88f400fe820a656da58c6",
+  "score_atol": 0.0001,
+  "metric_rtol": 0.0001,
+  "ood_atol": 0.001,
+  "ood_threshold_at_generation": 1.7181,
+  "outputs": {
+    "synthetic_vowel_a_steady.wav": {
+      "wav_sha256": "638602154aabad765ae2e759ed221d2cccb1b7a8bfe55b9098259a9482e19221",
+      "score": 0.999982,
+      "acoustic": {
+        "jitter_percent": 0.0014552262952288592,
+        "shimmer_percent": 1.0363118615335352,
+        "hnr_db": 43.900718884444856,
+        "mean_pitch_hz": 120.00401569808255,
+        "pitch_sd_hz": 0.0008524855243092411,
+        "pitch_cv": 7.103808312998499e-06,
+        "intensity_cv": 0.0740145742893219,
+        "mean_intensity_dbfs": -12.57348895072937
+      },
+      "ood": {
+        "distance": 2.6282,
+        "in_distribution": false
+      },
+      "duration_seconds": 3.0
+    },
+    "synthetic_vowel_a_unstable.wav": {
+      "wav_sha256": "e5b88a3d9aa463bbeac6f99b8f9638be77a8b7e785e208d8c847ad748e51907a",
+      "score": 0.999981,
+      "acoustic": {
+        "jitter_percent": 2.2123535479604883,
+        "shimmer_percent": 8.250881653111973,
+        "hnr_db": 9.669605393394054,
+        "mean_pitch_hz": 119.8708733443447,
+        "pitch_sd_hz": 1.371650873340657,
+        "pitch_cv": 0.011442736964136493,
+        "intensity_cv": 0.10591290891170502,
+        "mean_intensity_dbfs": -17.117483615875244
+      },
+      "ood": {
+        "distance": 2.1258,
+        "in_distribution": false
+      },
+      "duration_seconds": 3.0
+    }
+  }
+}

@@ -1,9 +1,12 @@
 import { createHash, randomUUID } from "node:crypto";
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
-import type { ClinicalInference, SessionResult } from "@/types";
+import type { ClinicalInference, SessionResult, VhiResult } from "@/types";
 import { VOICE_TASKS } from "@/data/tasks";
+import { VHI_INSTRUMENT, VHI_ITEMS } from "@/data/vhi";
 import { isValidSubjectId, normalizeSubjectId, requireSubjectId } from "@/lib/subject-id";
+import { scoreVhi } from "@/lib/vhi";
+import { firebaseAuthParam } from "@/lib/firebase-auth";
 
 const DEFAULT_URL = "Enter your Firebase URL";
 const COLLECTIONS = ["subjects", "recordings", "analyses", "acoustic_metrics"] as const;
@@ -17,12 +20,14 @@ function databaseUrl(path: string, shallow = false) {
 }
 
 async function request(path: string, init?: RequestInit, shallow = false): Promise<unknown> {
-  const response = await fetch(databaseUrl(path, shallow), {
+  const url = new URL(databaseUrl(path, shallow));
+  url.searchParams.set(...await firebaseAuthParam());
+  const response = await fetch(url, {
     ...init, cache: "no-store", signal: AbortSignal.timeout(10000),
   });
   if (!response.ok) {
     const detail = response.status === 401 || response.status === 403
-      ? `Firebase ${path} 읽기/쓰기 권한이 없습니다 (${response.status}). 컬렉션의 .read 규칙을 확인하세요.`
+      ? `Firebase ${path} 읽기/쓰기 권한이 없습니다 (${response.status}). 서비스 계정의 Realtime Database 권한을 확인하세요.`
       : `Firebase ${path} 요청 실패 (${response.status}).`;
     throw new Error(detail);
   }
@@ -62,19 +67,28 @@ export async function loadDatabaseResults(): Promise<SessionResult[]> {
     if (!analysisId || !recording || !acoustic || !subjectId || !isValidSubjectId(subjectId) || !subjects.has(subjectId) || !task ||
         !recordedAt || !Number.isFinite(Date.parse(recordedAt)) || score === null || score < 0 || score > 1 ||
         analysis.model_name !== "MLP_MAX_h07") continue;
+    const oodDistance = number(analysis.ood_distance);
+    const oodThreshold = number(analysis.ood_threshold);
+    const oodFlag = analysis.ood_in_distribution;
+    // Older records predate the OOD gate: leave ood undefined rather than inventing an in-distribution verdict.
+    const ood = oodDistance !== null && oodThreshold !== null && typeof oodFlag === "boolean"
+      ? { distance: oodDistance, threshold: oodThreshold, in_distribution: oodFlag } : undefined;
     const result: ClinicalInference = {
       user_id: subjectId, recording_timestamp: recordedAt,
       analyzed_at: text(analysis.analyzed_at) ?? recordedAt,
       task: { code: task.code, label: task.label },
       model: { name: "MLP_MAX_h07", score, display_score: Math.round(score * 1000) / 10,
-        status: null, status_reason: "No validated three-level cutoff was supplied" },
+        status: null, status_reason: text(analysis.status_reason) ?? "No validated three-level cutoff was supplied",
+        ...(ood ? { ood } : {}) },
       recording_quality: { assessment: null,
         duration_seconds: number(recording.duration_seconds) ?? 0,
         rms_dbfs: number(recording.rms_dbfs),
         near_full_scale_percent: number(recording.near_full_scale_percent) ?? 0 },
       phonation: { stability: null, pitch_stability: number(acoustic.pitch_cv), intensity_stability: number(acoustic.intensity_cv) },
       acoustic: { jitter_percent: number(acoustic.jitter_percent), shimmer_percent: number(acoustic.shimmer_percent),
-        hnr_db: number(acoustic.hnr_db), mean_pitch_hz: number(acoustic.mean_pitch_hz),
+        hnr_db: number(acoustic.hnr_db),
+        ...(text(acoustic.voice_quality_reason) !== null ? { voice_quality_reason: text(acoustic.voice_quality_reason) } : {}),
+        mean_pitch_hz: number(acoustic.mean_pitch_hz),
         pitch_sd_hz: number(acoustic.pitch_sd_hz), pitch_cv: number(acoustic.pitch_cv),
         intensity_cv: number(acoustic.intensity_cv), mean_intensity_dbfs: number(acoustic.mean_intensity_dbfs) },
     };
@@ -102,7 +116,7 @@ export async function uploadDatabaseResult(result: ClinicalInference): Promise<{
   const recordingId = randomUUID();
   const analysisId = randomUUID();
   const now = new Date().toISOString();
-  const [head, scaler] = await Promise.all([readFile(join(process.cwd(), "head.pt")), readFile(join(process.cwd(), "scaler.npz"))]);
+  const [head, scaler, card] = await Promise.all(["head.pt", "scaler.npz", "model_card.json"].map(name => readFile(join(process.cwd(), name))));
   const headHash = createHash("sha256").update(head).digest("hex");
   const scalerHash = createHash("sha256").update(scaler).digest("hex");
   const recording: JsonRecord = {
@@ -119,7 +133,18 @@ export async function uploadDatabaseResult(result: ClinicalInference): Promise<{
     model_score: result.model.score, pipeline_version: PIPELINE_VERSION,
     backbone_revision: "ece5fabbf034c1073acae96d5401b25be96709d8",
     head_sha256: headHash, scaler_sha256: scalerHash,
+    // Links this stored score to the training config, split and validation/test evidence for these weights.
+    model_card_sha256: createHash("sha256").update(card).digest("hex"),
   };
+  // Persist the OOD verdict so a reloaded out-of-distribution recording keeps its warning.
+  const ood = result.model.ood;
+  if (ood && number(ood.distance) !== null && number(ood.threshold) !== null && typeof ood.in_distribution === "boolean") {
+    analysis.ood_distance = ood.distance;
+    analysis.ood_threshold = ood.threshold;
+    analysis.ood_in_distribution = ood.in_distribution;
+  }
+  const statusReason = text(result.model.status_reason);
+  if (statusReason !== null) analysis.status_reason = statusReason;
   const acoustic: JsonRecord = {
     analysis_id: analysisId,
     mean_pitch_hz: requiredNumber(result.acoustic.mean_pitch_hz, "mean_pitch_hz"),
@@ -132,9 +157,9 @@ export async function uploadDatabaseResult(result: ClinicalInference): Promise<{
     const value = number(result.acoustic[key]);
     if (value !== null) acoustic[key] = value;
   }
-  const subjectPath = `subjects/${encodeURIComponent(subjectId)}`;
-  const existing = await request(subjectPath);
-  if (existing === null) await put(subjectPath, { subject_id: subjectId, created_at: now });
+  const voiceQualityReason = text(result.acoustic.voice_quality_reason);
+  if (voiceQualityReason !== null) acoustic.voice_quality_reason = voiceQualityReason;
+  await ensureSubject(subjectId, now);
   const written: string[] = [];
   try {
     for (const [path, value] of [
@@ -151,4 +176,80 @@ export async function uploadDatabaseResult(result: ClinicalInference): Promise<{
     throw error;
   }
   return { analysis_id: analysisId, recording_id: recordingId };
+}
+
+async function ensureSubject(subjectId: string, now: string) {
+  const subjectPath = `subjects/${encodeURIComponent(subjectId)}`;
+  if (await request(subjectPath) === null) await put(subjectPath, { subject_id: subjectId, created_at: now });
+}
+
+/** Stores one VHI-30 response. Scores are recomputed here from the raw answers; client-sent scores are ignored. */
+export async function uploadQuestionnaire(input: Pick<VhiResult, "subject_id" | "completed_at" | "answers">): Promise<{ questionnaire_id: string }> {
+  const subjectId = requireSubjectId(input?.subject_id ?? "");
+  if (typeof input.completed_at !== "string" || !Number.isFinite(Date.parse(input.completed_at))) throw new Error("문진 완료 시각이 올바르지 않습니다.");
+  const scores = scoreVhi(input.answers);
+  const questionnaireId = randomUUID();
+  const now = new Date().toISOString();
+  await ensureSubject(subjectId, now);
+  await put(`questionnaires/${questionnaireId}`, {
+    questionnaire_id: questionnaireId, subject_id: subjectId, completed_at: input.completed_at, uploaded_at: now,
+    instrument: "VHI-30", instrument_version: VHI_INSTRUMENT.version, usage_status: VHI_INSTRUMENT.usage_status,
+    answers: [...input.answers], functional_score: scores.functional, physical_score: scores.physical,
+    emotional_score: scores.emotional, total_score: scores.total,
+  });
+  await deleteQuestionnaireDraft(subjectId); // the stored questionnaire supersedes the draft
+  return { questionnaire_id: questionnaireId };
+}
+
+export async function loadDatabaseQuestionnaires(): Promise<VhiResult[]> {
+  const loaded: VhiResult[] = [];
+  for (const row of records(await request("questionnaires"))) {
+    const id = text(row.questionnaire_id);
+    const subjectId = normalizeSubjectId(text(row.subject_id) ?? "");
+    const completedAt = text(row.completed_at);
+    const answers = Array.isArray(row.answers) ? row.answers : [];
+    if (!id || !isValidSubjectId(subjectId) || !completedAt || !Number.isFinite(Date.parse(completedAt))) continue;
+    let scores;
+    try { scores = scoreVhi(answers); } catch { continue; } // skip malformed rows rather than show partial scores
+    loaded.push({ id, databaseId: id, subject_id: subjectId, completed_at: completedAt,
+      instrument_version: text(row.instrument_version) ?? "unknown", answers: answers as number[], scores });
+  }
+  return loaded.sort((left, right) => right.completed_at.localeCompare(left.completed_at));
+}
+
+// --- VHI-30 drafts: one in-progress response per subject, removed when the questionnaire is stored. ---
+export type QuestionnaireDraft = { subject_id: string; answers: (number | null)[]; current_index: number; updated_at: string };
+const draftPath = (subjectId: string) => `questionnaire_drafts/${encodeURIComponent(requireSubjectId(subjectId))}`;
+
+export async function loadQuestionnaireDraft(subjectId: string): Promise<QuestionnaireDraft | null> {
+  const row = await request(draftPath(subjectId)) as Record<string, unknown> | null;
+  if (!row || typeof row !== "object") return null;
+  const stored = row.answers && typeof row.answers === "object" ? row.answers as Record<string, unknown> : {};
+  const answers = VHI_ITEMS.map(item => {
+    const value = stored[String(item.number)];
+    return typeof value === "number" && Number.isInteger(value) && value >= 0 && value <= 4 ? value : null;
+  });
+  const index = number(row.current_index);
+  return { subject_id: requireSubjectId(subjectId), answers, updated_at: text(row.updated_at) ?? "",
+    current_index: index !== null && Number.isInteger(index) && index >= 0 && index < VHI_ITEMS.length ? index : 0 };
+}
+
+export async function saveQuestionnaireDraft(input: { subject_id: string; answers: unknown; current_index: unknown }): Promise<{ updated_at: string }> {
+  const subjectId = requireSubjectId(input?.subject_id ?? "");
+  if (!Array.isArray(input.answers) || input.answers.length !== VHI_ITEMS.length) throw new Error("임시 저장 응답 형식이 올바르지 않습니다.");
+  const answers: Record<string, number> = {};
+  input.answers.forEach((value, i) => {
+    if (value === null) return;
+    if (typeof value !== "number" || !Number.isInteger(value) || value < 0 || value > 4) throw new Error(`VHI 문항 ${i + 1}의 응답은 0~4 정수여야 합니다.`);
+    answers[String(i + 1)] = value;
+  });
+  const index = Number(input.current_index);
+  if (!Number.isInteger(index) || index < 0 || index >= VHI_ITEMS.length) throw new Error("문항 위치가 올바르지 않습니다.");
+  const updatedAt = new Date().toISOString();
+  await put(draftPath(subjectId), { subject_id: subjectId, instrument_version: VHI_INSTRUMENT.version, answers, current_index: index, updated_at: updatedAt });
+  return { updated_at: updatedAt };
+}
+
+export async function deleteQuestionnaireDraft(subjectId: string) {
+  await request(draftPath(subjectId), { method: "DELETE" });
 }

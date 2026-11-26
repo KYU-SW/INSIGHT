@@ -1,0 +1,37 @@
+{
+  "model_id": "facebook/hubert-large-ls960-ft",
+  "hidden_index": 4,
+  "paper_layer": 5,
+  "pooling": "max",
+  "head": "MLP",
+  "split_seed": 42,
+  "train_seeds": [
+    42,
+    43,
+    44,
+    45,
+    46
+  ],
+  "split_hash": "9bb28df8f907a9b7683970f10169bc4d678de3ca5c6cf46c659531cbc8286c83",
+  "batch_size": 64,
+  "coatt_batch_size": 64,
+  "max_epochs": 20,
+  "patience": 3,
+  "lr": 0.0005,
+  "weight_decay": 0.001,
+  "head_dropout": 0.3,
+  "coattention": {
+    "dim": 128,
+    "heads": 4,
+    "dropout": 0.1,
+    "lld_pool": 2,
+    "keep_hubert_max": true
+  },
+  "egemaps": "eGeMAPSv02 functionals(88) / LLD(25), openSMILE 2.6.0",
+  "software": {
+    "torch": "2.11.0+cu130",
+    "opensmile": "2.6.0",
+    "numpy": "2.1.3",
+    "scikit-learn": "1.6.1"
+  }
+}

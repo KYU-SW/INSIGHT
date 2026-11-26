@@ -1,0 +1,18 @@
+{
+  "models": [
+    "Baseline",
+    "Concat",
+    "CoAttention",
+    "Late3",
+    "Early3",
+    "EarlyHuBERTonly"
+  ],
+  "seeds": [
+    42,
+    43,
+    44,
+    45,
+    46
+  ],
+  "split_hash": "9bb28df8f907a9b7683970f10169bc4d678de3ca5c6cf46c659531cbc8286c83"
+}

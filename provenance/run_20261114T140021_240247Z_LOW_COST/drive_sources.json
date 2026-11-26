@@ -1,0 +1,91 @@
+{
+  "run_id": "20261114T140021_240247Z_LOW_COST",
+  "pipeline": "ALS_HC_7EXP_HPO_Research_Pipeline.ipynb (RUN_MODE LOW_COST)",
+  "retrieved": "2026-11-26",
+  "sources": [
+    {
+      "file": "test_results_subject_ensemble.csv",
+      "drive_file_id": "1Nc810IUeZkDBC6GFodqVa1XGtjFEyRcZ",
+      "drive_path": "MyDrive/2026_2_INSIGHT/ALS_RESULTS/ALS_voice_analysis_20260921_075155/HUBERT_ALS_7EXP_HPO/20261114T140021_240247Z_LOW_COST/tables/test_results_subject_ensemble.csv",
+      "sha256": "33b4eeb49aac44503072c853253a4a4022aa2d758fcf9d9729e1197a68b46df7"
+    },
+    {
+      "file": "confidence_intervals.csv",
+      "drive_file_id": "11oKM7L61SqhpSYIvSAPhCxilSHhXAi8T",
+      "drive_path": "MyDrive/2026_2_INSIGHT/ALS_RESULTS/ALS_voice_analysis_20260921_075155/HUBERT_ALS_7EXP_HPO/20261114T140021_240247Z_LOW_COST/tables/confidence_intervals.csv",
+      "sha256": "e1525cce327bc2604ad2a93269f6890d22856b02bd9255a9e505d230c5de3f91"
+    },
+    {
+      "file": "baseline_comparison_paired_bootstrap.csv",
+      "drive_file_id": "1Y7l4QX_inMit2y-0Pb5ntlHfsYm6CQAp",
+      "drive_path": "MyDrive/2026_2_INSIGHT/ALS_RESULTS/ALS_voice_analysis_20260921_075155/HUBERT_ALS_7EXP_HPO/20261114T140021_240247Z_LOW_COST/tables/baseline_comparison_paired_bootstrap.csv",
+      "sha256": "fc71eb4d2c3c0eef2d3371c53750290f158414ed5bcdfcdfb1c90dabce259f25"
+    },
+    {
+      "file": "seed_summary.csv",
+      "drive_file_id": "11NppaUiKPnhQ-qPCUFfkTvexUYttzIII",
+      "drive_path": "MyDrive/2026_2_INSIGHT/ALS_RESULTS/ALS_voice_analysis_20260921_075155/HUBERT_ALS_7EXP_HPO/20261114T140021_240247Z_LOW_COST/tables/seed_summary.csv",
+      "sha256": "e38b1616c0bcef958225d10e4b8f73c68b980dd121cc393113e41adbee06a69a"
+    },
+    {
+      "file": "computational_cost.csv",
+      "drive_file_id": "1JxO2-HAaBXMkNFCxSrw_A8nroSrYHheJ",
+      "drive_path": "MyDrive/2026_2_INSIGHT/ALS_RESULTS/ALS_voice_analysis_20260921_075155/HUBERT_ALS_7EXP_HPO/20261114T140021_240247Z_LOW_COST/tables/computational_cost.csv",
+      "sha256": "5c4e053453eae87ed12786b7248178df0f87c9d00ab0c7eb6fd2543f02ed6162"
+    },
+    {
+      "file": "final_training_records.csv",
+      "drive_file_id": "17uOk1QuPe1Zy0hj5mapQgfc5uzkTo5u6",
+      "drive_path": "MyDrive/2026_2_INSIGHT/ALS_RESULTS/ALS_voice_analysis_20260921_075155/HUBERT_ALS_7EXP_HPO/20261114T140021_240247Z_LOW_COST/tables/final_training_records.csv",
+      "sha256": "a8fd565767ac905e2eb25e67e7a309cf233ddef25cc59ec8a4d8f263410e04ea"
+    },
+    {
+      "file": "sensitivity_by_severity.csv",
+      "drive_file_id": "1756u_oBHZWlOVbNhc2v8MrWEmcUr6vsz",
+      "drive_path": "MyDrive/2026_2_INSIGHT/ALS_RESULTS/ALS_voice_analysis_20260921_075155/HUBERT_ALS_7EXP_HPO/20261114T140021_240247Z_LOW_COST/tables/sensitivity_by_severity.csv",
+      "sha256": "77c0d3ea6df54b09ad3540cae4a08fe6807980ea769bc3f949851fa56b77bc76"
+    },
+    {
+      "file": null,
+      "derived_file": "subject_severity.csv (speaker_id, class_raw, severity_class, split; other columns such as age/sex dropped)",
+      "drive_file_id": "1v2cFCJZE56a43tQKTpIB5ICr8PFKw3gE",
+      "drive_path": "MyDrive/2026_2_INSIGHT/ALS_RESULTS/ALS_voice_analysis_20260921_075155/HUBERT_ALS_7EXP_HPO/20261114T140021_240247Z_LOW_COST/split_manifest.csv",
+      "sha256": "e612cd54848aec40dd8b85ce200396696c24e69b8bd047c49df2e6b0961e2138"
+    },
+    {
+      "file": "validation_results_subject_ensemble.csv",
+      "drive_file_id": "1pfQFzogfZ9mnlR0gI_9FggZwx1J1_6o5",
+      "drive_path": "MyDrive/2026_2_INSIGHT/ALS_RESULTS/ALS_voice_analysis_20260921_075155/HUBERT_ALS_7EXP_HPO/20261114T140021_240247Z_LOW_COST/tables/validation_results_subject_ensemble.csv",
+      "sha256": "96d60a33a3cfd1803a25c7282a20d12a5f93d645a2b8d15a07bc3eb3b10ba69b",
+      "bytes": 2550
+    },
+    {
+      "file": "experiment_status.csv",
+      "drive_file_id": "1YVgt1cZKRzFC1M7RoxF5983w9zC6_nUl",
+      "drive_path": "MyDrive/2026_2_INSIGHT/ALS_RESULTS/ALS_voice_analysis_20260921_075155/HUBERT_ALS_7EXP_HPO/20261114T140021_240247Z_LOW_COST/tables/experiment_status.csv",
+      "sha256": "55b88f8083490eab1fdcbd21b4a862428e78556147ae5ed36a8c55360c8a8931",
+      "bytes": 863
+    },
+    {
+      "file": "run_config.json",
+      "drive_file_id": "1pMkfUFmgTmGRp4JfNuZJw6I4FsOkIpDk",
+      "drive_path": "MyDrive/2026_2_INSIGHT/ALS_RESULTS/ALS_voice_analysis_20260921_075155/HUBERT_ALS_7EXP_HPO/20261114T140021_240247Z_LOW_COST/run_config.json",
+      "sha256": "824c84119291ff09020a8ba0307b122ffbe4db37d67e009fe14242c2b742bb0e",
+      "bytes": 834
+    },
+    {
+      "file": "hpo_configuration.csv",
+      "drive_file_id": "1yce_1dO8H6PLpOybEM21EfbGG3IQM_gN",
+      "drive_path": "MyDrive/2026_2_INSIGHT/ALS_RESULTS/ALS_voice_analysis_20260921_075155/HUBERT_ALS_7EXP_HPO/20261114T140021_240247Z_LOW_COST/tables/hpo_configuration.csv",
+      "sha256": "b5618bd5748f51914cd36a7fb9182406f3d2671562a97b191f8f1584709293e1",
+      "bytes": 5255
+    },
+    {
+      "file": "research_report.md",
+      "drive_file_id": "1BEosEqWvc1ywqbGIVi1jOSY9azBZM0o7",
+      "drive_path": "MyDrive/2026_2_INSIGHT/ALS_RESULTS/ALS_voice_analysis_20260921_075155/HUBERT_ALS_7EXP_HPO/20261114T140021_240247Z_LOW_COST/research_report.md",
+      "sha256": "72b19e09c400f88ff82ff28b1be8315244f3a973c5e62c0ac6b41ce45299b5f8",
+      "bytes": 24944
+    }
+  ]
+}

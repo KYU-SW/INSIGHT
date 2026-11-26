@@ -14,5 +14,5 @@ export const metadata: Metadata = {
 export const viewport: Viewport = { width: "device-width", initialScale: 1, viewportFit: "cover", themeColor: "#0c2340" };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
-  return <html lang="en"><body><ClinicalDataProvider><AppShell>{children}</AppShell></ClinicalDataProvider></body></html>;
+  return <html lang="ko"><body><ClinicalDataProvider><AppShell>{children}</AppShell></ClinicalDataProvider></body></html>;
 }

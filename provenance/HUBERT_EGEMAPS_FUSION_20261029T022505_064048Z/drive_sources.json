@@ -1,0 +1,42 @@
+{
+  "run_id": "HUBERT_EGEMAPS_FUSION_20261029T022505_064048Z",
+  "retrieved": "2026-11-26",
+  "note": "sha256 = SHA-256 of the bytes downloaded from Google Drive (unmodified copies)",
+  "sources": [
+    {
+      "file": "COMPLETED.json",
+      "drive_file_id": "1pODmEPClTUYg_5yGRx155XnrHxaYvUAN",
+      "drive_path": "MyDrive/2026_2_INSIGHT/ALS_RESULTS/ALS_voice_analysis_20260921_075155/HUBERT_EGEMAPS_FUSION/20261029T022505_064048Z/COMPLETED.json",
+      "sha256": "b568fa3f2c59e971260ff6173993b74209dec1b8820f361f3eda77e611f292b0",
+      "bytes": 210
+    },
+    {
+      "file": "run_config.json",
+      "drive_file_id": "18imPGZuz0Me2lR7hbKCPvu9iEUjybveb",
+      "drive_path": "MyDrive/2026_2_INSIGHT/ALS_RESULTS/ALS_voice_analysis_20260921_075155/HUBERT_EGEMAPS_FUSION/20261029T022505_064048Z/run_config.json",
+      "sha256": "831fa51e93ffe4867d6de79d99bc0e90da7e1db29118a8f93c1f1de639f96bc3",
+      "bytes": 761
+    },
+    {
+      "file": "summary_mean_std.csv",
+      "drive_file_id": "11uBjT2H6MYGWdelNNF0tod8KXJs9j4Oe",
+      "drive_path": "MyDrive/2026_2_INSIGHT/ALS_RESULTS/ALS_voice_analysis_20260921_075155/HUBERT_EGEMAPS_FUSION/20261029T022505_064048Z/summary_mean_std.csv",
+      "sha256": "d5bd985a32a9564e7992c829db87bb5cc4209b471a09b48d339cbad17592cfdf",
+      "bytes": 529
+    },
+    {
+      "file": "delta_vs_baseline.csv",
+      "drive_file_id": "18VUQ4stnrzOHFat9sn2e6OIiMyxNpj6g",
+      "drive_path": "MyDrive/2026_2_INSIGHT/ALS_RESULTS/ALS_voice_analysis_20260921_075155/HUBERT_EGEMAPS_FUSION/20261029T022505_064048Z/delta_vs_baseline.csv",
+      "sha256": "8da513efb9f769eb0c23ee5b5cebb1aa198b198ca67b2be73488687ac15ddac3",
+      "bytes": 254
+    },
+    {
+      "file": "test_results_per_seed.csv",
+      "drive_file_id": "16Pg4_jzHOpUqfpbJ4Rc2y4hQQpczERn7",
+      "drive_path": "MyDrive/2026_2_INSIGHT/ALS_RESULTS/ALS_voice_analysis_20260921_075155/HUBERT_EGEMAPS_FUSION/20261029T022505_064048Z/test_results_per_seed.csv",
+      "sha256": "260e0748bfd0fec319fd113c9c3efe1e12f08618b03223b1574c9a2e74c7faeb",
+      "bytes": 3531
+    }
+  ]
+}

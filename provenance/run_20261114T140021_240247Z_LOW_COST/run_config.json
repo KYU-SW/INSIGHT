@@ -1,0 +1,40 @@
+{
+  "run_id": "20261114T140021_240247Z_LOW_COST",
+  "run_mode": "LOW_COST",
+  "mode": {
+    "n_trials": 12,
+    "n_trials_lora": 4,
+    "hpo_max_epochs": 20,
+    "hpo_patience": 3,
+    "hpo_seeds_per_trial": 1,
+    "final_max_epochs": 20,
+    "final_patience": 3,
+    "final_seeds": [
+      42,
+      43,
+      44
+    ],
+    "tpe_startup": 4,
+    "pruner_startup": 4,
+    "pruner_warmup": 3,
+    "lora_max_epochs": 6,
+    "max_train_batches": null,
+    "n_boot": 2000,
+    "save_checkpoints": true,
+    "note": "소규모 HPO, 빠른 비교 (탐색 예산이 작아 최적점 보장 없음)"
+  },
+  "mock": false,
+  "experiments": [
+    "BASE00",
+    "BASE01",
+    "EXP01",
+    "EXP02",
+    "EXP03",
+    "EXP04",
+    "EXP05",
+    "EXP06",
+    "EXP07"
+  ],
+  "primary_comparator": "BASE01",
+  "result_label": "LOW_COST 연구 실행"
+}

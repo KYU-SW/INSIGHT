@@ -1,0 +1,34 @@
+{
+  "bundle": "ALS Transformer Model Bundle",
+  "implemented": [
+    {
+      "id": "T1",
+      "file": "01_T1_Frozen_WavLM_ElasticNet.ipynb",
+      "model": "Frozen microsoft/wavlm-base-plus + Elastic Net",
+      "status": "ready"
+    }
+  ],
+  "planned": [
+    {
+      "id": "T2",
+      "file": "02_T2_Frozen_HuBERT_ElasticNet.ipynb",
+      "model": "Frozen HuBERT + Elastic Net"
+    },
+    {
+      "id": "T3",
+      "file": "03_T3_Frozen_WavLM_SmallMLP.ipynb",
+      "model": "Frozen WavLM + small MLP"
+    },
+    {
+      "id": "T4",
+      "file": "04_T4_WavLM_TaskAttention.ipynb",
+      "model": "WavLM task embeddings + shallow attention"
+    },
+    {
+      "id": "T5",
+      "file": "05_T5_M1_Transformer_Fusion.ipynb",
+      "model": "M1 + best Transformer probability fusion"
+    }
+  ],
+  "shared_cache": "Google Drive TRANSFORMER_SHARED_CACHE; notebooks remain separate experiment units"
+}

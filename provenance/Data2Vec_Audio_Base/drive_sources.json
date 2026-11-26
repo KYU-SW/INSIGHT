@@ -1,0 +1,21 @@
+{
+  "run_id": "Data2Vec_Audio_Base",
+  "retrieved": "2026-11-26",
+  "note": "sha256 = SHA-256 of the bytes downloaded from Google Drive (unmodified copies)",
+  "sources": [
+    {
+      "file": "config.json",
+      "drive_file_id": "1entzeQOndG9pf9xoUMm3CUwIRC-UP65i",
+      "drive_path": "MyDrive/2026_2_INSIGHT/ALS_RESULTS/Data2Vec_Audio_Base/config.json",
+      "sha256": "461f420213e25282d78f7046316b18715787c77a09deedced4efc0a25df55187",
+      "bytes": 1077
+    },
+    {
+      "file": "test_metrics.json",
+      "drive_file_id": "1yvKTKUIXC1i2Xp5-pdvJAAuSB9eduD21",
+      "drive_path": "MyDrive/2026_2_INSIGHT/ALS_RESULTS/Data2Vec_Audio_Base/test_metrics.json",
+      "sha256": "bdb398e4c8c62539795f501af168106e0345d94d8c19c4bf7de02084053886f4",
+      "bytes": 223
+    }
+  ]
+}

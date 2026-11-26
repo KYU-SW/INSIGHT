@@ -1,0 +1,21 @@
+{
+  "run_id": "EGEMAPS_GROUP_ANALYSIS_20261112T003857_592281Z",
+  "retrieved": "2026-11-26",
+  "note": "sha256 = SHA-256 of the bytes downloaded from Google Drive (unmodified copies)",
+  "sources": [
+    {
+      "file": "summary.md",
+      "drive_file_id": "13OV7EzA7DYrJ8ba5dUk6sjp7Zn3202vU",
+      "drive_path": "MyDrive/2026_2_INSIGHT/ALS_RESULTS/ALS_voice_analysis_20260921_075155/EGEMAPS_GROUP_ANALYSIS/20261112T003857_592281Z/summary.md",
+      "sha256": "59e7d801db6c090f58224852ce345bef8d7e5cc932c8c9f2397688f1866027bd",
+      "bytes": 1404
+    },
+    {
+      "file": "run_config.json",
+      "drive_file_id": "1Xp0qen8s4cW9ojTWXPxjvwyRaAZIthz1",
+      "drive_path": "MyDrive/2026_2_INSIGHT/ALS_RESULTS/ALS_voice_analysis_20260921_075155/EGEMAPS_GROUP_ANALYSIS/20261112T003857_592281Z/run_config.json",
+      "sha256": "ac40bd29d9075488c572598ef9e1a4bba8a4b9b40804ec686cf7e18140b77988",
+      "bytes": 750
+    }
+  ]
+}

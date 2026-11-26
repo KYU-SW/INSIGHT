@@ -1,0 +1,49 @@
+{
+  "run_id": "ML_EXPERIMENT_02",
+  "retrieved": "2026-11-26",
+  "note": "sha256 = SHA-256 of the bytes downloaded from Google Drive (unmodified copies)",
+  "sources": [
+    {
+      "file": "01_metrics.csv",
+      "drive_file_id": "17sS_J1ioRCUflMK42e6vyLolbwt5cxCp",
+      "drive_path": "MyDrive/2026_2_INSIGHT/ALS_RESULTS/ALS_voice_analysis_20260921_075155/ML_EXPERIMENT_02/01_metrics.csv",
+      "sha256": "7ddf57608db6dddf1560307962744126b5dc1972a2634b5d5a450fe76d33b362",
+      "bytes": 3617
+    },
+    {
+      "file": "03_class4_vs_class5.csv",
+      "drive_file_id": "12ilOzs0QzeYYZ9sjTnhSOT88v6o3ujq5",
+      "drive_path": "MyDrive/2026_2_INSIGHT/ALS_RESULTS/ALS_voice_analysis_20260921_075155/ML_EXPERIMENT_02/03_class4_vs_class5.csv",
+      "sha256": "b9e34e778b59c6b0a28fc06b381fc7bc13c200e15c98be230809623f5e4ebd13",
+      "bytes": 2427
+    },
+    {
+      "file": "04_bootstrap_CI.csv",
+      "drive_file_id": "1AQz75F8GGae7cCbAg1ak18eHd3Wtu8c5",
+      "drive_path": "MyDrive/2026_2_INSIGHT/ALS_RESULTS/ALS_voice_analysis_20260921_075155/ML_EXPERIMENT_02/04_bootstrap_CI.csv",
+      "sha256": "0cb46cb72739b5d7e4067acff4aa1673af08baab8ee1ae0025031b234b8809cb",
+      "bytes": 3052
+    },
+    {
+      "file": "05_paired_model_differences.csv",
+      "drive_file_id": "1KghQukclOdhBTKrZSEEYTvVGo2jQjSIg",
+      "drive_path": "MyDrive/2026_2_INSIGHT/ALS_RESULTS/ALS_voice_analysis_20260921_075155/ML_EXPERIMENT_02/05_paired_model_differences.csv",
+      "sha256": "5615fbd1b0ef3f238ed7eed540512b97239aebe803f367b086851a205cfd98ce",
+      "bytes": 2776
+    },
+    {
+      "file": "experiment_config.json",
+      "drive_file_id": "1IT3qRu4m_MSXB_hkVVta3dqHIjgDpnTq",
+      "drive_path": "MyDrive/2026_2_INSIGHT/ALS_RESULTS/ALS_voice_analysis_20260921_075155/ML_EXPERIMENT_02/experiment_config.json",
+      "sha256": "8fdff69a27e01c259edb403c60c9742bcd98b0f1e69c486c1d483e735198d24e",
+      "bytes": 544
+    },
+    {
+      "file": "08_feature_importance.csv",
+      "drive_file_id": "1_8jkX4WNyipPyxVWskJh2zi8byTEL9TC",
+      "drive_path": "MyDrive/2026_2_INSIGHT/ALS_RESULTS/ALS_voice_analysis_20260921_075155/ML_EXPERIMENT_02/08_feature_importance.csv",
+      "sha256": "1952124cfbb8c028508d6b649c8e5e8fb70e7bac65ae4bba2ccdc2780bde60ee",
+      "bytes": 41201
+    }
+  ]
+}

@@ -18,3 +18,7 @@ hf-cache/
 .DS_Store
 .vscode/
 .idea/
+
+# Firebase service account keys must never be committed
+*service-account*.json
+secrets/

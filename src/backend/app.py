@@ -1,15 +1,19 @@
 """File upload inference API. Start with uvicorn src.backend.app:app."""
 
+import hmac
+import logging
+import os
 import re
 from datetime import datetime, timezone
 from pathlib import Path
 from tempfile import NamedTemporaryFile
 
-from fastapi import FastAPI, File, Form, HTTPException, UploadFile
+from fastapi import FastAPI, File, Form, HTTPException, Request, UploadFile
+from fastapi.responses import JSONResponse
 
 from .acoustics import measure
 from .interpretation import interpret_status
-from .model import decode_audio, infer_score
+from .model import decode_audio, infer, load_model, ood_threshold
 
 app = FastAPI(title="INSIGHT voice screening inference")
 TASKS = {
@@ -20,6 +24,46 @@ TASKS = {
 }
 MAX_BYTES = 25 * 1024 * 1024
 SUBJECT_ID_PATTERN = re.compile(r"[A-Z0-9_-]{1,80}")  # keep in sync with src/lib/subject-id.ts
+OOD_REASON = ("Input is outside the model's training feature distribution (OOD gate); "
+              "the score is shown but is not interpretable for this recording")
+
+
+# Shared-secret auth between the Next.js server and this service. Fail-closed: without INSIGHT_BACKEND_TOKEN every
+# request gets 503, unless INSIGHT_ALLOW_UNAUTHENTICATED=1 is set explicitly (local development only). Checked in a
+# middleware so unauthenticated uploads are rejected before the multipart body is read.
+if not os.environ.get("INSIGHT_BACKEND_TOKEN") and os.environ.get("INSIGHT_ALLOW_UNAUTHENTICATED") != "1":
+    logging.getLogger("uvicorn.error").warning("INSIGHT_BACKEND_TOKEN is not set: every request will return 503")
+
+
+# Liveness probe exempt from auth: exactly GET /health, and it exposes only two booleans (no paths, versions or scores).
+HEALTH_PATH = "/health"
+
+
+@app.middleware("http")
+async def require_backend_token(request: Request, call_next):
+    if request.method == "GET" and request.url.path == HEALTH_PATH:
+        return await call_next(request)
+    expected = os.environ.get("INSIGHT_BACKEND_TOKEN", "")
+    if not expected:
+        if os.environ.get("INSIGHT_ALLOW_UNAUTHENTICATED") == "1":
+            return await call_next(request)
+        return JSONResponse({"detail": "backend token not configured"}, status_code=503)
+    scheme, _, supplied = request.headers.get("authorization", "").partition(" ")
+    if scheme.lower() != "bearer" or not hmac.compare_digest(supplied.strip().encode(), expected.encode()):
+        return JSONResponse({"detail": "Invalid or missing bearer token"}, status_code=401,
+                            headers={"WWW-Authenticate": "Bearer"})
+    return await call_next(request)
+
+
+@app.get(HEALTH_PATH)
+def health():
+    """Never triggers HuBERT loading: model_loaded only reports whether a previous request already loaded it."""
+    try:
+        ood_threshold()
+        ood_calibrated = True
+    except (RuntimeError, ValueError, TypeError, OSError, KeyError):
+        ood_calibrated = False
+    return {"status": "ok", "model_loaded": load_model.cache_info().currsize > 0, "ood_calibrated": ood_calibrated}
 
 
 @app.post("/analyze")
@@ -52,9 +96,9 @@ async def analyze(
         audio = decode_audio(path)
         if len(audio) / 16000 > 120:
             raise HTTPException(422, "Audio exceeds the 120 second inference limit")
-        score = infer_score(audio)
-        phonation, acoustic, recording_quality = measure(audio)
-        status = interpret_status(score)
+        score, ood = infer(audio)
+        phonation, acoustic, recording_quality = measure(audio, task_code)
+        status = interpret_status(score) if ood["in_distribution"] else None
     except (RuntimeError, ImportError) as exc:
         raise HTTPException(503, str(exc)) from exc
     except ValueError as exc:
@@ -67,7 +111,9 @@ async def analyze(
         "task": {"code": task_code, "label": TASKS[task_code]},
         "model": {"name": "MLP_MAX_h07", "score": score,
                   "display_score": round(score * 100, 1), "status": status,
-                  "status_reason": None if status else "No validated three-level cutoff was supplied"},
+                  "status_reason": (OOD_REASON if not ood["in_distribution"] else
+                                    None if status else "No validated three-level cutoff was supplied"),
+                  "ood": ood},
         "phonation": phonation, "acoustic": acoustic,
         "recording_quality": recording_quality,
     }

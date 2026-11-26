@@ -1,8 +1,11 @@
 "use client";
 
 import { useEffect, useMemo, useState, type FormEvent } from "react";
-import { Activity, FileAudio } from "lucide-react";
+import Link from "next/link";
+import { Activity, CircleHelp, FileAudio, OctagonAlert, ShieldCheck, TriangleAlert } from "lucide-react";
 import { useClinicalData } from "@/components/clinical-data-provider";
+import { VhiSummary } from "@/components/questionnaire/vhi-questionnaire";
+import { ModelEvidence } from "@/components/analysis/model-evidence";
 import { VOICE_TASKS } from "@/data/tasks";
 import { convertToWav, needsConversion } from "@/lib/audio-convert";
 import { SUBJECT_ID_HINT, isValidSubjectId, normalizeSubjectId } from "@/lib/subject-id";
@@ -13,11 +16,14 @@ function metric(value: number | null, unit: string, digits = 1) {
 }
 
 function Metric({ title, subtitle, value, compact = false }: { title: string; subtitle?: string; value: string; compact?: boolean }) {
-  return <div className="result-metric rounded bg-surface-container-low p-unit-md"><dt className="text-[11px] font-semibold text-on-surface-variant">{title}</dt>{subtitle && <p className="text-[10px] text-on-surface-variant">{subtitle}</p>}<dd className={`mt-2 break-words text-primary ${compact ? "text-[15px] font-semibold" : "font-data-lg text-data-lg"}`}>{value}</dd></div>;
+  const unavailable = value === "Unavailable";
+  return <div className="result-metric rounded bg-surface-container-low p-unit-md" data-unavailable={unavailable || undefined}><dt className="text-[11px] font-semibold text-on-surface-variant">{title}</dt>{subtitle && <p className="text-[10px] text-on-surface-variant">{subtitle}</p>}<dd className={`mt-2 break-words text-primary ${compact ? "text-[15px] font-semibold" : "font-data-lg text-data-lg"}`}>{value}</dd></div>;
 }
 
 export function Result({ result, sessionId }: { result: ClinicalInference; sessionId?: string }) {
-  const { results, databaseConnected, databaseBusy, uploadToDatabase } = useClinicalData();
+  const { results, questionnaires, databaseConnected, databaseBusy, uploadToDatabase } = useClinicalData();
+  // Latest self-report for the same pseudonymous subject; shown beside, never merged into, the model score.
+  const vhi = questionnaires.find(entry => entry.subject_id === result.user_id);
   const [uploadError, setUploadError] = useState("");
   const entry = results.find(item => item.id === sessionId);
   const requiredMeasurements = [result.recording_quality.rms_dbfs, result.acoustic.mean_pitch_hz,
@@ -33,6 +39,9 @@ export function Result({ result, sessionId }: { result: ClinicalInference; sessi
   const a = result.acoustic;
   const quality = result.recording_quality;
   const statusLabel = result.model.status === "normal" ? "정상 / Normal" : result.model.status === "caution" ? "주의 / Caution" : result.model.status === "high_risk" ? "위험 / High Risk" : "미분류 / Unclassified";
+  const StatusIcon = result.model.status === "normal" ? ShieldCheck : result.model.status === "caution" ? TriangleAlert : result.model.status === "high_risk" ? OctagonAlert : CircleHelp;
+  const statusTone = result.model.status ?? "unclassified";
+  const ood = result.model.ood;
   return <div className="result-workspace flex flex-col gap-unit-md">
     <section className="patient-banner rounded bg-surface-container-lowest p-unit-lg shadow-sm">
       <div className="mb-unit-md flex flex-wrap items-center justify-between gap-2 border-b border-surface-container pb-unit-xs"><h2 className="text-headline-lg text-primary">Patient / Recording Information</h2></div>
@@ -45,14 +54,18 @@ export function Result({ result, sessionId }: { result: ClinicalInference; sessi
     <section className="rounded bg-surface-container-lowest p-unit-lg shadow-sm" aria-labelledby="analysis-result-title">
       <div className="flex items-center gap-2 border-b border-surface-container pb-unit-xs"><Activity size={20} className="text-secondary" /><h2 id="analysis-result-title" className="text-headline-lg text-primary">AI Voice Analysis Result</h2></div>
       <div className="mt-unit-md grid gap-unit-sm lg:grid-cols-12">
-        <div className="rounded bg-surface-container-low p-unit-md lg:col-span-5"><p className="text-[10px] font-semibold uppercase tracking-wide text-on-surface-variant">음성이상점수</p><h3 className="text-headline-sm text-primary">Voice Abnormality Score</h3><p className="result-score my-unit-md font-data-lg text-[48px] font-bold leading-none text-primary">{result.model.display_score.toFixed(1)}<span className="ml-2 text-headline-lg font-normal text-on-surface-variant">/ 100</span></p></div>
+        <div className="score-card rounded bg-surface-container-low p-unit-md lg:col-span-5"><p className="text-[10px] font-semibold uppercase tracking-wide text-on-surface-variant">음성이상점수</p><h3 className="text-headline-sm text-primary">Voice Abnormality Score</h3><p className="result-score my-unit-md font-data-lg text-[48px] font-bold leading-none text-primary">{result.model.display_score.toFixed(1)}<span className="ml-2 text-headline-lg font-normal text-on-surface-variant">/ 100</span></p><div className="score-track" role="meter" aria-label="Voice Abnormality Score" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.min(100, Math.max(0, result.model.display_score))}><span style={{ width: `${Math.min(100, Math.max(0, result.model.display_score))}%` }} /></div>
+          {ood && !ood.in_distribution && <div role="status" className="mt-unit-sm"><span className="status-chip" data-tone="caution"><TriangleAlert size={15} aria-hidden="true" />학습 분포 밖 입력 / Out of distribution</span><p className="mt-1 text-[11px] text-on-surface-variant">이 녹음은 학습 데이터(SAND) 특징 분포를 벗어나 점수를 해석할 수 없습니다. Score shown for transparency only (distance {ood.distance.toFixed(2)} &gt; threshold {ood.threshold.toFixed(2)}).</p></div>}
+          {ood?.in_distribution && <p className="mt-unit-sm text-[11px] text-on-surface-variant">Input distribution check passed (distance {ood.distance.toFixed(2)} ≤ {ood.threshold.toFixed(2)}); this does not validate the score.</p>}
+        </div>
         <dl className="grid gap-unit-sm sm:grid-cols-3 lg:col-span-7">
-          <Metric compact title="분석 상태 / Status" value={statusLabel} />
+          <div className="result-metric rounded bg-surface-container-low p-unit-md"><dt className="text-[11px] font-semibold text-on-surface-variant">분석 상태 / Status</dt><dd className="mt-2"><span className="status-chip" data-tone={statusTone}><StatusIcon size={15} aria-hidden="true" />{statusLabel}</span></dd></div>
           <Metric compact title="Recording Quality" subtitle={`Duration ${quality.duration_seconds.toFixed(1)} s · RMS ${metric(quality.rms_dbfs, " dBFS")}`} value={quality.assessment ?? "등급 미설정 / Unrated"} />
           <Metric compact title="Model" value={result.model.name} />
         </dl>
       </div>
       <p className="mt-unit-sm text-[11px] text-on-surface-variant">Near-full-scale samples: {quality.near_full_scale_percent.toFixed(2)}%</p>
+      <ModelEvidence />
     </section>
     {result.task.code.startsWith("vowel_") && <section className="rounded bg-surface-container-lowest p-unit-lg shadow-sm">
       <h2 className="text-headline-lg text-primary">모음 발성 분석 <span className="block text-body-sm text-on-surface-variant">Sustained Vowel Analysis</span></h2>
@@ -65,23 +78,25 @@ export function Result({ result, sessionId }: { result: ClinicalInference; sessi
     <section className="rounded bg-surface-container-lowest p-unit-lg shadow-sm">
       <h2 className="text-headline-lg text-primary">Acoustic Parameters</h2>
       <dl className="mt-unit-md grid gap-unit-sm sm:grid-cols-2 lg:grid-cols-4">
-        <Metric title="Jitter (%)" value={metric(a.jitter_percent, "%")} />
-        <Metric title="Shimmer (%)" value={metric(a.shimmer_percent, "%")} />
-        <Metric title="HNR (dB)" value={metric(a.hnr_db, " dB")} />
+        <Metric title="Jitter (%)" subtitle="Praat local · sustained vowel" value={metric(a.jitter_percent, "%", 2)} />
+        <Metric title="Shimmer (%)" subtitle="Praat local · sustained vowel" value={metric(a.shimmer_percent, "%", 2)} />
+        <Metric title="HNR (dB)" subtitle="Praat cc · 0–4 kHz band" value={metric(a.hnr_db, " dB")} />
         <Metric title="Mean F0" value={metric(a.mean_pitch_hz, " Hz")} />
         <Metric title="F0 SD" value={metric(a.pitch_sd_hz, " Hz")} />
         <Metric title="F0 CV" value={metric(a.pitch_cv === null ? null : a.pitch_cv * 100, "%", 2)} />
         <Metric title="Intensity CV" value={metric(a.intensity_cv === null ? null : a.intensity_cv * 100, "%", 2)} />
         <Metric title="Relative Acoustic Level" subtitle="dBFS · 비보정 신호" value={metric(a.mean_intensity_dbfs, " dBFS")} />
       </dl>
+      <p className="mt-unit-sm text-[11px] text-on-surface-variant">Jitter · Shimmer · HNR는 기술(descriptive) 측정값이며 진단 기준이 아닙니다. 마이크·녹음 환경·대역폭에 따라 달라지며 이 시스템에는 검증된 정상/비정상 기준값이 없습니다.{a.voice_quality_reason ? ` 미측정 사유: ${a.voice_quality_reason}.` : ""}</p>
       {sessionId && <div className="mt-unit-md flex flex-wrap items-center gap-3 border-t border-surface-container pt-unit-md"><button type="button" onClick={() => void upload()} disabled={!databaseConnected || databaseBusy || !canUpload || !!entry?.databaseAnalysisId} className="rounded bg-primary-container px-4 py-2 text-body-sm font-medium text-white disabled:opacity-50">{entry?.databaseAnalysisId ? "DB 업로드 완료" : databaseBusy ? "업로드 중…" : "DB 업로드"}</button>{uploadError && <p role="alert" className="w-full text-body-sm text-error">{uploadError}</p>}</div>}
     </section>
+    {vhi ? <VhiSummary entry={vhi} /> : <section className="rounded bg-surface-container-lowest p-unit-lg shadow-sm"><h2 className="text-headline-lg text-primary">VHI-30 자가보고 · Self-report</h2><p className="text-body-sm text-on-surface-variant">{result.user_id}의 VHI-30 문진 결과가 없습니다. <Link href="/questionnaire" className="font-medium text-secondary underline">문진 작성</Link></p></section>}
   </div>;
 }
 
 export function LiveAnalysis() {
-  const { analyze, liveResult, results } = useClinicalData();
-  const [userId, setUserId] = useState("");
+  const { analyze, liveResult, results, activeSubjectId } = useClinicalData();
+  const [userId, setUserId] = useState(activeSubjectId);
   const [taskCode, setTaskCode] = useState("vowel_a");
   const [recordingTime, setRecordingTime] = useState("");
   const [file, setFile] = useState<File | null>(null);
@@ -116,6 +131,16 @@ export function LiveAnalysis() {
       {busy && status && <p role="status" aria-live="polite" className="mt-3 rounded bg-surface-container-low p-2 text-body-sm text-primary">{status}</p>}
       {error && <p role="alert" className="mt-3 rounded bg-error-container p-2 text-body-sm text-on-error-container">{error}</p>}
     </section>
+    {!liveResult && <section className="idle-panel" aria-label="분석 진행 순서">
+      <h2 className="text-headline-sm text-primary">분석 순서 · How it works</h2>
+      <ol>
+        <li><b>1</b><span>(선택) <Link href="/questionnaire" className="font-medium text-secondary underline">VHI-30 문진</Link>을 같은 Subject ID로 작성하면 결과 화면에 자가보고 점수가 함께 표시됩니다.</span></li>
+        <li><b>2</b><span>Subject ID, Task, 녹음 시각을 입력하고 저장된 오디오 파일을 선택합니다.</span></li>
+        <li><b>3</b><span>Analyze recording을 누르면 서버에서 HuBERT 분석이 실행됩니다 (수십 초 소요).</span></li>
+        <li><b>4</b><span>음성이상점수와 음향 지표가 이 아래에 표시되고, Patient Registry와 History에 저장됩니다.</span></li>
+      </ol>
+      <p>이 화면은 기존 오디오 파일을 분석합니다. 마이크 녹음 기능은 제공하지 않으며, 결과는 선별 보조 정보입니다.</p>
+    </section>}
     {liveResult && <Result result={liveResult} sessionId={results.find(entry => entry.result === liveResult)?.id} />}
   </div>;
 }
