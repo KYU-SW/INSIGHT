@@ -1,14 +1,61 @@
 import assert from "node:assert/strict";
+import { createVerify, generateKeyPairSync } from "node:crypto";
+import { mkdtempSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { test } from "node:test";
+import { firebaseAccessToken } from "../src/lib/firebase-auth";
 import { checkDatabaseConnection, loadDatabaseQuestionnaires, loadDatabaseResults, uploadDatabaseResult, uploadQuestionnaire } from "../src/lib/firebase-database";
 import type { ClinicalInference } from "../src/types";
 
 process.env.FIREBASE_DATABASE_URL = "https://example-default-rtdb.firebaseio.com";
+const keyDir = mkdtempSync(join(tmpdir(), "insight-sa-"));
+const { privateKey, publicKey } = generateKeyPairSync("rsa", { modulusLength: 2048 });
+const keyPath = join(keyDir, "service-account.json");
+writeFileSync(keyPath, JSON.stringify({ client_email: "test@example.iam.gserviceaccount.com", private_key: privateKey.export({ type: "pkcs8", format: "pem" }) }));
+process.env.FIREBASE_SERVICE_ACCOUNT_PATH = keyPath;
+
+test("server signs an RS256 service-account assertion and caches the access token", async () => {
+  const original = globalThis.fetch;
+  const assertions: string[] = [];
+  globalThis.fetch = async (input, init) => {
+    assert.equal(String(input), "https://oauth2.googleapis.com/token");
+    assertions.push(new URLSearchParams(String(init?.body)).get("assertion")!);
+    return Response.json({ access_token: "test-token", expires_in: 3600 });
+  };
+  try {
+    assert.equal(await firebaseAccessToken(), "test-token");
+    assert.equal(await firebaseAccessToken(), "test-token");
+    assert.equal(assertions.length, 1);
+    const [header, claims, signature] = assertions[0].split(".");
+    assert.ok(createVerify("RSA-SHA256").update(`${header}.${claims}`).verify(publicKey, Buffer.from(signature, "base64url")));
+    const payload = JSON.parse(Buffer.from(claims, "base64url").toString());
+    assert.match(payload.scope, /firebase\.database/);
+    assert.equal(payload.iss, "test@example.iam.gserviceaccount.com");
+  } finally {
+    globalThis.fetch = original;
+  }
+});
+
+test("database access is refused without a service account instead of falling back to public access", async () => {
+  delete process.env.FIREBASE_SERVICE_ACCOUNT_PATH;
+  const original = globalThis.fetch;
+  let called = false;
+  globalThis.fetch = async () => { called = true; return Response.json({}); };
+  try {
+    await assert.rejects(checkDatabaseConnection(), /FIREBASE_SERVICE_ACCOUNT_PATH/);
+    assert.equal(called, false);
+  } finally {
+    globalThis.fetch = original;
+    process.env.FIREBASE_SERVICE_ACCOUNT_PATH = keyPath;
+  }
+});
+
 test("connection fails when Firebase denies collection-level reads", async () => {
   const original = globalThis.fetch;
   globalThis.fetch = async () => Response.json({ error: "Permission denied" }, { status: 401 });
   try {
-    await assert.rejects(checkDatabaseConnection(), /컬렉션의 \.read 규칙/);
+    await assert.rejects(checkDatabaseConnection(), /서비스 계정/);
   } finally {
     globalThis.fetch = original;
   }
@@ -97,6 +144,19 @@ test("stored questionnaires with malformed answers are skipped, not partially sc
     const loaded = await loadDatabaseQuestionnaires();
     assert.deepEqual(loaded.map(entry => entry.id), ["Q1"]);
     assert.equal(loaded[0].scores.total, 30);
+  } finally {
+    globalThis.fetch = original;
+  }
+});
+
+test("every Realtime Database request carries the server access token", async () => {
+  const original = globalThis.fetch;
+  const urls: URL[] = [];
+  globalThis.fetch = async input => { urls.push(new URL(String(input))); return Response.json(null); };
+  try {
+    await checkDatabaseConnection();
+    assert.equal(urls.length, 4);
+    assert.ok(urls.every(url => url.searchParams.get("access_token") === "test-token"));
   } finally {
     globalThis.fetch = original;
   }

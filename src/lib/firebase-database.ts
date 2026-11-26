@@ -6,6 +6,7 @@ import { VOICE_TASKS } from "@/data/tasks";
 import { VHI_INSTRUMENT } from "@/data/vhi";
 import { isValidSubjectId, normalizeSubjectId, requireSubjectId } from "@/lib/subject-id";
 import { scoreVhi } from "@/lib/vhi";
+import { firebaseAccessToken } from "@/lib/firebase-auth";
 
 const DEFAULT_URL = "Enter your Firebase URL";
 const COLLECTIONS = ["subjects", "recordings", "analyses", "acoustic_metrics"] as const;
@@ -19,12 +20,14 @@ function databaseUrl(path: string, shallow = false) {
 }
 
 async function request(path: string, init?: RequestInit, shallow = false): Promise<unknown> {
-  const response = await fetch(databaseUrl(path, shallow), {
+  const url = new URL(databaseUrl(path, shallow));
+  url.searchParams.set("access_token", await firebaseAccessToken());
+  const response = await fetch(url, {
     ...init, cache: "no-store", signal: AbortSignal.timeout(10000),
   });
   if (!response.ok) {
     const detail = response.status === 401 || response.status === 403
-      ? `Firebase ${path} 읽기/쓰기 권한이 없습니다 (${response.status}). 컬렉션의 .read 규칙을 확인하세요.`
+      ? `Firebase ${path} 읽기/쓰기 권한이 없습니다 (${response.status}). 서비스 계정의 Realtime Database 권한을 확인하세요.`
       : `Firebase ${path} 요청 실패 (${response.status}).`;
     throw new Error(detail);
   }
