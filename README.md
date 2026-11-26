@@ -1,22 +1,408 @@
+<div align="center">
+
 # INSIGHT
 
+**음성으로 근위축성 측삭경화증(ALS)을 조기에 선별하도록 돕는 연구 프로토타입**<br>
+Early screening support for ALS through speech analysis
+
 [![CI](https://github.com/KYU-SW/INSIGHT/actions/workflows/ci.yml/badge.svg)](https://github.com/KYU-SW/INSIGHT/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+![Next.js 16](https://img.shields.io/badge/Next.js-16-black?logo=nextdotjs)
+![Python 3.11](https://img.shields.io/badge/Python-3.11-3776AB?logo=python&logoColor=white)
+![Model](https://img.shields.io/badge/Model-HuBERT--large%20%2B%20MLP-orange)
 
-음성 기반 근위축성 측삭경화증(ALS) 조기 선별 보조 연구 프로토타입 · Early screening support for ALS through speech analysis
+[빠른 시작](#빠른-시작) · [사용 방법](#사용-방법) · [API](#api) · [문제 해결](#문제-해결) · [FAQ](#자주-묻는-질문) · [연구 근거](#1-배경-및-필요성)
 
-진료 전에 스마트폰 녹음 파일과 VHI-30 자가보고 문진을 받아, ALS 관련 음성 이상 점수·음향 지표·문진 점수를 의료진 기록으로 전달하는 시스템이다. Next.js 16 / React 19 화면, Python HuBERT 추론 서비스, Firebase Realtime Database로 구성된다. 익명·시험 데이터 전용이며, 출력은 **의뢰 우선순위 판단을 돕는 선별 보조 정보**이고 진단이 아니다.
+</div>
 
-| 핵심 결과 | 근거 |
-|---|---|
-| 시험 41명(피험자 단위) AUROC **0.898** [0.783–0.980], 민감도 92.0%, 특이도 75.0% | §3, `model_card.json` |
-| **구음장애가 없는 ALS(SAND Class 4) 10명 중 8명** 검출 | §3 |
-| 배포 가중치가 특정 학습 실행에서 나왔음을 11개 검사로 증명 | §3, [`provenance/`](provenance/) |
-| 같은 분할에서 9개 모델 구성 × 3 seed 비교: 더 복잡한 구성이 기준 모델보다 유의하게 낫지 않음 | §4 |
-| VHI-30 모바일 문진(임시 저장·이어쓰기) + 음성 분석을 같은 가명 ID로 결합해 DB에 저장 | §2, §6 |
+> [!WARNING]
+> INSIGHT는 **진단 도구가 아닙니다.** 출력은 신경과 의뢰 우선순위 판단을 돕는 **선별 보조 정보**이며, 임상 검증을 거치지 않았습니다. 익명·시험 데이터에만 사용하세요. 실제 환자 데이터에는 사용하지 않습니다.
 
-근거별 원문과 확인 방법은 [`docs/evidence-traceability.md`](docs/evidence-traceability.md)에 정리했다.
+진료 전에 환자가 스마트폰으로 **VHI-30 음성장애 문진**에 답하고 **음성 녹음 파일**을 제출하면, INSIGHT는 다음 세 가지를 같은 가명 ID로 묶어 의료진 화면에 전달합니다.
+
+1. **AI 음성 이상 점수**: HuBERT-large 음성 표현과 MLP 분류기로 계산합니다.
+2. **음향 지표**: F0, Jitter, Shimmer, HNR, 강도 변동 등이며, 모델과 독립적으로 측정합니다.
+3. **문진 점수**: VHI-30의 기능·신체·정서 영역 점수입니다.
+
+<div align="center">
+
+![분석 결과 화면](docs/ui-verification/insight-analysis-desktop.png)
+
+<sub>합성 음성(`examples/synthetic_vowel_a_unstable.wav`)을 실제로 분석한 화면이다. 합성음은 학습 분포 밖의 입력이므로, 점수는 표시하되 해석을 막는 **OOD 경고**가 함께 뜬다.</sub>
+
+</div>
 
 ---
+
+## 목차
+
+- [한눈에 보기](#한눈에-보기)
+- [어떻게 동작하나요](#어떻게-동작하나요)
+- [빠른 시작](#빠른-시작)
+- [사용 방법](#사용-방법)
+- [API](#api)
+- [프로젝트 구조](#프로젝트-구조)
+- [테스트와 재현](#테스트와-재현)
+- [문제 해결](#문제-해결)
+- [자주 묻는 질문](#자주-묻는-질문)
+- 연구·설계 문서
+  - [1. 배경 및 필요성](#1-배경-및-필요성) · [2. 시스템 구조](#2-시스템-구조) · [3. 배포 모델의 근거](#3-배포-모델의-근거) · [4. 모델 선택 근거](#4-모델-선택-근거-같은-분할에서의-비교-실험)
+  - [5. 기존 시스템과의 비교](#5-기존-사전문진음성-선별-시스템과의-비교) · [6. 화면 구성](#6-화면-구성) · [7. 기대효과](#7-기대효과) · [8. 검증과 성능](#8-검증과-성능-직접-실행-2026-11-26)
+  - [9. 한계와 남은 과제](#9-기술적-한계와-남은-과제) · [10. DB와 보안](#10-realtime-database와-보안) · [11. 구현 세부](#11-구현-세부) · [12. 개인 기여](#12-개인-기여) · [참고문헌](#참고문헌)
+
+---
+
+## 한눈에 보기
+
+| 핵심 결과 | 값 | 자세히 |
+|---|---|---|
+| 내부 시험 성능 (41명, 피험자 단위) | AUROC **0.898** [0.783–0.980] · 민감도 **92.0%** · 특이도 **75.0%** | [§3.2](#32-성능-같은-분포-내부-시험) |
+| 구음장애가 없는 초기 ALS(SAND Class 4) | 10명 중 **8명** 검출 | [§3.2](#32-성능-같은-분포-내부-시험) |
+| 배포 가중치의 출처 증명 | 특정 학습 실행에서 나왔음을 **11개 검사**로 재계산 | [§3.1](#31-배포-가중치--학습-실행-증명) |
+| 모델 선택 근거 | 같은 분할에서 9개 구성 × 3 seed 비교. 더 복잡한 구성이 유의하게 낫지 않아 가장 가벼운 구조를 택함 | [§4](#4-모델-선택-근거-같은-분할에서의-비교-실험) |
+| 실험 규모 | 층 탐색 300회, 특징 결합 60회, 비교 실험 27회 + HPO 88 trial | [§4.2](#42-설계-결정의-실험-근거) |
+| 자동 검증 | Python 테스트 29개, TypeScript 테스트 22개, Ubuntu CI 통과 | [§8](#8-검증과-성능-직접-실행-2026-11-26) |
+
+[ ]는 95% 신뢰구간입니다. 모든 수치의 원본 파일과 문헌 출처는 [`docs/evidence-traceability.md`](docs/evidence-traceability.md)에서 확인할 수 있습니다.
+
+### 주요 기능
+
+| 기능 | 설명 |
+|---|---|
+| 모바일 VHI-30 문진 | 한 화면에 한 문항씩 표시하고 진행률을 보여 줍니다. 응답할 때마다 DB에 임시 저장되므로, 같은 ID로 다시 들어오면 이어서 작성할 수 있습니다 |
+| 음성 파일 분석 | WAV·FLAC·OGG 파일을 업로드합니다. M4A·MP3는 브라우저에서 자동으로 WAV로 변환됩니다. 업로드 진행률이 표시되고, 3초 녹음은 약 1–1.4초 안에 분석됩니다(CPU) |
+| 음향 지표 | F0 평균·SD·CV, 강도 CV, dBFS를 측정합니다. 지속 모음 과제에서는 Praat 기반 Jitter·Shimmer·HNR도 측정합니다 |
+| 분포 밖 입력 경고 | 학습 데이터와 너무 다른 녹음이면 점수 해석을 막고 이유를 표시합니다 |
+| 환자 기록 조회 | Subject ID별로 녹음 결과와 최신 문진 결과를 함께 볼 수 있습니다 |
+| 추적 가능한 저장 | 저장된 모든 점수에 가중치 SHA-256이 기록되어 학습 실행까지 거슬러 올라갈 수 있습니다 |
+| 보안 기본값 | DB에는 서버만 접근할 수 있고(클라이언트 전면 차단), 추론 서버는 토큰으로 인증합니다. 원본 음성은 저장하지 않습니다 |
+
+---
+
+## 어떻게 동작하나요
+
+```mermaid
+flowchart LR
+    P["환자 (스마트폰)"] -->|1. VHI-30 문진| Q["/questionnaire"]
+    P -->|2. 녹음 파일 업로드| A["/analysis"]
+    Q --> N["Next.js 서버<br/>점수 재계산 · 검증"]
+    A --> N
+    N -->|Bearer 토큰| F["FastAPI 추론 서버<br/>HuBERT → MLP<br/>OOD 검사 · 음향 지표"]
+    F --> N
+    N -->|서버 전용 자격 증명| D[("Firebase<br/>Realtime DB")]
+    D --> R["/patients<br/>의료진 조회"]
+```
+
+1. **문진.** 환자가 가명 Subject ID(예: `SUBJ_001`)로 VHI-30 30문항에 0–4점으로 답합니다. 점수는 서버가 원본 응답으로 다시 계산합니다.
+2. **음성 분석.** 같은 ID로 녹음 파일을 올리면 추론 서버가 결과를 돌려줍니다.
+   - 처리 경로: 16 kHz 변환 → HuBERT 7번째 층 표현 → 시간축 max pooling → MLP. 이 경로로 **음성 이상 점수**(0–100)를 계산합니다.
+   - 같은 녹음에서 **음향 지표**를 따로 측정합니다.
+   - 녹음이 학습 분포 밖이면 **경고**를 함께 붙입니다.
+3. **조회.** 의료진은 `/patients`에서 문진과 음성 결과를 나란히 봅니다. 두 값은 서로 다른 것을 측정하므로 **합산하지 않습니다**([§1.4](#14-문진과-음향-분석을-함께-쓰는-이유)).
+
+---
+
+## 빠른 시작
+
+### 준비물
+
+| 항목 | 버전 · 조건 | 비고 |
+|---|---|---|
+| Node.js | 22 이상 | CI와 같은 버전 |
+| Python | 3.11 | 추론 서버. 다른 버전은 검증하지 않았습니다 |
+| 디스크 | 여유 2 GB 이상 | HuBERT 체크포인트(약 1.2 GB) + 패키지 + 빌드 |
+| 메모리 | 4 GB 이상 권장 | 추론 시 최대 약 3.1 GB RSS |
+| GPU | 필요 없음 | CPU에서 3초 녹음 약 1초 |
+| Firebase Realtime DB | 선택 | 없어도 분석은 됩니다. 저장·조회·문진 임시 저장에만 필요합니다 |
+
+### 1. 저장소 받기와 의존성 설치
+
+```sh
+git clone https://github.com/KYU-SW/INSIGHT.git
+cd INSIGHT
+
+python3.11 -m venv .venv
+.venv/bin/pip install -r requirements-inference.txt --extra-index-url https://download.pytorch.org/whl/cpu
+npm install
+```
+
+### 2. 환경 변수 설정
+
+```sh
+cp .env.example .env.local
+openssl rand -hex 32      # 출력값을 .env.local의 INSIGHT_BACKEND_TOKEN= 뒤에 붙여 넣는다
+```
+
+| 변수 | 필수 | 설명 |
+|---|---|---|
+| `INSIGHT_BACKEND_TOKEN` | **예** | Next.js 서버와 추론 서버가 공유하는 비밀값입니다. 비어 있으면 추론 서버는 모든 요청을 거부합니다. `NEXT_PUBLIC_`을 붙이지 않으므로 브라우저에 노출되지 않습니다 |
+| `INFERENCE_API_URL` | 아니요 | 추론 서버 주소. 기본값 `http://127.0.0.1:8001` |
+| `FIREBASE_DATABASE_URL` | DB 사용 시 | `https://<프로젝트>-default-rtdb.<지역>.firebasedatabase.app` |
+| `FIREBASE_DATABASE_SECRET` | DB 사용 시 (택1) | Firebase 콘솔 → 프로젝트 설정 → 서비스 계정 → 데이터베이스 비밀번호 |
+| `FIREBASE_SERVICE_ACCOUNT_PATH` | DB 사용 시 (택1) | 저장소 **밖**에 둔 서비스 계정 키 JSON의 절대 경로 |
+
+> [!IMPORTANT]
+> `.env.local`은 `.gitignore`에 포함되어 있습니다. 자격 증명을 커밋하지 마세요. DB를 쓴다면 [`firebase.database.rules.json`](firebase.database.rules.json)을 콘솔의 규칙에 적용해 클라이언트 접근을 막으세요([§10](#10-realtime-database와-보안)).
+
+### 3. 실행 (터미널 2개)
+
+```sh
+# 터미널 1: 추론 서버 (127.0.0.1:8001). 첫 실행 때 HuBERT 체크포인트를 내려받습니다
+HF_HOME=./hf-cache npm run backend
+
+# 터미널 2: 웹 앱 (127.0.0.1:3000)
+npm run dev
+```
+
+브라우저에서 <http://127.0.0.1:3000>을 엽니다. 운영 모드로 실행하려면 `npm run build && npm start`를 씁니다.
+
+### 4. 동작 확인
+
+1. **Voice Analysis** 탭에서 Subject ID에 `DEMO_001`을 입력합니다.
+2. 파일로 [`examples/synthetic_vowel_a_unstable.wav`](examples/)를 선택하고 **Analyze recording**을 누릅니다.
+3. 점수, OOD 경고, Jitter 2.21% / Shimmer 8.25% / HNR 9.7 dB가 나오면 정상입니다(위 스크린샷과 같은 화면).
+
+명령줄에서 같은 결과를 확인하려면 `.venv/bin/python scripts/reproduce_inference.py`를 실행합니다(`PASS` 출력).
+
+### 5. (선택) 휴대폰에서 접속하기
+
+휴대폰 브라우저에서 PWA로 설치하거나 파일을 고르려면 HTTPS가 필요합니다.
+
+```sh
+npm run build && npm start
+cloudflared tunnel --url http://127.0.0.1:3000   # 출력된 https://...trycloudflare.com 주소로 접속
+```
+
+> [!CAUTION]
+> 터널 주소는 인터넷에 공개됩니다. 시험 데이터만 사용하고, 끝나면 터널을 종료하세요.
+
+---
+
+## 사용 방법
+
+### 환자: VHI-30 문진 작성 (`/questionnaire`)
+
+| 문항 화면 | 결과 화면 |
+|---|---|
+| <img src="docs/ui-verification/vhi-mobile-question.png" width="300" alt="VHI-30 문항 화면"> | <img src="docs/ui-verification/vhi-mobile-result.png" width="300" alt="VHI-30 결과 화면"> |
+
+1. 실명이나 병원 등록번호 대신 **가명 Subject ID**를 입력하고 **문진 시작**을 누릅니다.
+2. 문항마다 0(전혀 없음)부터 4(항상)까지 고릅니다. PC에서는 키보드 `0`–`4`로도 답할 수 있습니다.
+3. 중간에 나가도 DB가 연동되어 있으면 응답이 자동 저장됩니다. 같은 ID로 다시 시작하면 이어서 작성하고, 처음부터 하려면 **처음부터 다시**를 누릅니다.
+4. 제출하면 총점(0–120)과 기능·신체·정서 영역 점수가 나옵니다. **DB 업로드**를 누르면 최종 결과로 저장되고 임시 저장본은 삭제됩니다.
+
+> [!NOTE]
+> 문항은 PhenX 영문판(PX201301)을 개발용으로 번역한 것이며, 공식 K-VHI 검증본이 아닙니다. 한국어판 기준값이 없어 중증도 등급은 표시하지 않습니다.
+
+### 환자 또는 의료진: 음성 분석 (`/analysis`)
+
+1. **Subject ID**는 문진과 같은 ID를 씁니다. **Task**는 녹음한 과제를 고르고, **Recording Time**은 녹음한 시각을 입력합니다.
+2. 녹음 파일을 선택하고 **Analyze recording**을 누릅니다.
+3. 결과에서 **DB 업로드**를 누르면 저장됩니다. 상단의 **DB 연동**이 먼저 연결되어 있어야 합니다.
+
+**지원 과제와 녹음 요령**
+
+| 과제 코드 | 내용 | 녹음 요령 | Jitter·Shimmer·HNR |
+|---|---|---|---|
+| `vowel_a` `vowel_e` `vowel_i` `vowel_o` `vowel_u` | 지속 모음 /a/ /e/ /i/ /o/ /u/ | 편한 높이와 크기로 한 번에 길게(3초 이상) 발성 | 측정함 |
+| `syllable_pa` `syllable_ta` `syllable_ka` | 교대운동(DDK) /pa/ /ta/ /ka/ 반복 | 같은 음절을 가능한 빠르고 규칙적으로 반복 | 측정하지 않음 (지속 발성에서만 정의됨) |
+
+- **파일 형식:** WAV·FLAC·OGG는 그대로 올라가고, M4A·MP3·AAC는 브라우저에서 16 kHz WAV로 바뀝니다.
+- **크기·길이 제한:** 파일 최대 25 MB, 녹음 최대 120초입니다.
+- **녹음 환경:** 조용한 곳에서 입과 마이크 사이를 일정하게 유지하세요. 학습 데이터는 8 kHz 스마트폰 녹음이라, 고음질 녹음도 같은 대역으로 낮춰 분석합니다.
+
+**결과 화면 읽는 법**
+
+| 항목 | 의미 | 주의 |
+|---|---|---|
+| 음성이상점수 (0–100) | 모델이 추정한 ALS 음성 패턴의 정도 | 보정된 확률이 아닙니다. 검증된 기준점이 없어 상태는 "미분류"로 표시됩니다 |
+| 학습 분포 밖 입력 경고 | 녹음 특징이 학습 데이터(SAND)와 너무 다름 | 이 경고가 뜨면 점수를 해석하지 않습니다 |
+| Jitter · Shimmer · HNR | 성대 진동의 주기·진폭 불규칙성, 조화음 대 잡음비 | 기술 지표일 뿐이며 정상/비정상 기준이 아닙니다 |
+| Recording Quality | 녹음 길이, dBFS, 클리핑 비율 | dBFS는 보정되지 않은 상대 음량입니다 |
+| 모델 근거 | 내부 시험 성능과 실행 중인 가중치의 SHA-256 일치 여부 | 일치하지 않으면 경고가 표시됩니다 |
+
+### 의료진: 기록 조회 (`/patients`, `/history`)
+
+상단의 **DB 연동**을 누르고, **DB 불러오기**로 저장된 결과를 가져옵니다. 왼쪽에서 Subject ID를 고르면 그 사람의 녹음별 결과와 최신 VHI-30 결과가 함께 표시됩니다. `/history`에서는 전체 분석 이력을 시간순으로 볼 수 있습니다.
+
+---
+
+## API
+
+추론 서버(`src/backend/app.py`)는 엔드포인트 하나만 제공합니다. 브라우저는 이 서버를 직접 호출하지 않으며, Next.js의 `/api/analyze`가 토큰을 붙여 대신 전달합니다.
+
+```sh
+curl -X POST http://127.0.0.1:8001/analyze \
+  -H "Authorization: Bearer $INSIGHT_BACKEND_TOKEN" \
+  -F "file=@examples/synthetic_vowel_a_steady.wav" \
+  -F "user_id=SUBJ_001" \
+  -F "task_code=vowel_a" \
+  -F "recording_timestamp=2026-11-26T09:00:00+09:00"
+```
+
+| 필드 | 필수 | 형식 |
+|---|---|---|
+| `file` | 예 | WAV · FLAC · OGG, 25 MB 이하, 120초 이하 |
+| `user_id` | 예 | 영문 대문자·숫자·`_`·`-` 1–80자 (소문자는 대문자로 바뀜) |
+| `task_code` | 아니요 | 위 과제 코드 중 하나. 기본값 `vowel_a` |
+| `recording_timestamp` | 아니요 | 시간대가 포함된 ISO 8601. 없으면 서버 시각 |
+
+<details>
+<summary><b>응답 예시</b> (위 명령을 실제로 실행한 결과)</summary>
+
+```json
+{
+  "user_id": "SUBJ_001",
+  "recording_timestamp": "2026-11-26T09:00:00+09:00",
+  "analyzed_at": "2026-11-26T04:03:53.960925+00:00",
+  "task": { "code": "vowel_a", "label": "Sustained /a/" },
+  "model": {
+    "name": "MLP_MAX_h07",
+    "score": 0.9999819993972778,
+    "display_score": 100.0,
+    "status": null,
+    "status_reason": "Input is outside the model's training feature distribution (OOD gate); the score is shown but is not interpretable for this recording",
+    "ood": { "distance": 2.6282, "threshold": 1.7181, "in_distribution": false }
+  },
+  "phonation": { "stability": null, "pitch_stability": 7.1e-06, "intensity_stability": 0.0740 },
+  "acoustic": {
+    "jitter_percent": 0.0015, "shimmer_percent": 1.036, "hnr_db": 43.90, "voice_quality_reason": null,
+    "mean_pitch_hz": 120.00, "pitch_sd_hz": 0.00085, "pitch_cv": 7.1e-06,
+    "intensity_cv": 0.0740, "mean_intensity_dbfs": -12.57
+  },
+  "recording_quality": { "assessment": null, "duration_seconds": 3.0, "rms_dbfs": -12.57, "near_full_scale_percent": 0.0 }
+}
+```
+
+`null`은 "측정하지 않음" 또는 "검증된 기준이 없음"을 뜻하며, 0으로 대체하지 않습니다. 소수점 자릿수는 읽기 쉽게 줄였습니다.
+
+</details>
+
+| 상태 코드 | 의미 |
+|---|---|
+| 200 | 분석 성공 |
+| 401 | `Authorization` 헤더가 없거나 토큰이 틀림 |
+| 413 | 파일이 25 MB를 넘음 |
+| 415 | WAV·FLAC·OGG가 아님 |
+| 422 | Subject ID·과제 코드·시각 형식 오류, 120초 초과, 너무 짧거나 손상된 녹음 |
+| 503 | 서버에 토큰이 설정되지 않음, 또는 모델 로딩 실패 |
+
+Next.js 서버의 다른 API(`/api/database/*`, `/api/model-card`)와 DB 레코드 구조는 [`docs/database-schema.md`](docs/database-schema.md)에 정리되어 있습니다.
+
+---
+
+## 프로젝트 구조
+
+```text
+INSIGHT/
+├── src/
+│   ├── app/                    # Next.js 페이지와 API 라우트
+│   │   ├── questionnaire/      #   VHI-30 문진
+│   │   ├── analysis/           #   음성 분석
+│   │   ├── patients/ history/  #   의료진 조회
+│   │   └── api/                #   analyze(추론 프록시) · database/* · model-card
+│   ├── backend/                # Python 추론 서버 (FastAPI)
+│   │   ├── app.py              #   /analyze, 토큰 인증, 입력 검증
+│   │   ├── model.py            #   HuBERT 로딩, 전처리, 점수, OOD 검사
+│   │   ├── acoustics.py        #   F0·강도·Jitter·Shimmer·HNR
+│   │   └── interpretation.py   #   상태 분류 (검증된 기준이 없어 null)
+│   ├── components/             # 화면 컴포넌트
+│   ├── lib/                    # Firebase 접근, VHI 채점, 오디오 변환, Subject ID 규칙
+│   └── data/                   # VHI-30 문항, 음성 과제 목록
+├── head.pt · scaler.npz        # 배포 분류기 가중치와 표준화 통계
+├── model_card.json             # 학습 실행·분할·성능·출처 검사 결과
+├── ood_calibration.json        # OOD 임계값과 산출 근거
+├── provenance/                 # 학습·비교 실험 원본 결과 사본 (Drive ID·SHA-256 포함)
+├── scripts/                    # 모델 카드 생성·검증, OOD 보정, 재현, 서버 실행
+├── experiments/                # 부정 결과 실험 (대역폭 가설)
+├── examples/                   # 합성 음성과 기대 출력
+├── tests/                      # TypeScript 테스트 · tests/python 백엔드 테스트
+└── docs/                       # DB 스키마, 근거 추적표, 실험 목록, 화면 검증 이미지
+```
+
+---
+
+## 테스트와 재현
+
+```sh
+npm run lint && npm run typecheck && npm test            # 웹: 정적 검사 + TypeScript 테스트 22개
+.venv/bin/python -m unittest discover -s tests/python -v  # 백엔드 테스트 29개
+.venv/bin/python scripts/build_model_card.py --check      # 배포 가중치 ↔ 학습 실행 11개 검사
+.venv/bin/python scripts/calibrate_ood.py --check         # OOD 임계값 재계산 일치 확인
+.venv/bin/python scripts/reproduce_inference.py           # 합성 음성으로 추론 결과 재현
+```
+
+GitHub Actions([`ci.yml`](.github/workflows/ci.yml))가 push마다 Ubuntu에서 위 검사를 모두 실행합니다.
+
+---
+
+## 문제 해결
+
+| 증상 | 원인 | 해결 |
+|---|---|---|
+| `npm run backend`가 "INSIGHT_BACKEND_TOKEN is empty"를 출력하고 종료 | `.env.local`에 토큰이 없음 | [2단계](#2-환경-변수-설정)대로 토큰을 넣습니다. 로컬 실험에서만 `INSIGHT_ALLOW_UNAUTHENTICATED=1 npm run backend`로 인증을 끌 수 있습니다 |
+| 화면에 "Inference server rejected this app's credentials" (502) | 두 서버의 토큰이 다름 | `.env.local`을 고친 뒤 **두 서버를 모두 재시작**합니다 |
+| 화면에 "Inference server is unavailable" (503) | 추론 서버가 꺼져 있거나 주소가 다름 | 터미널 1이 실행 중인지, `INFERENCE_API_URL`이 맞는지 확인합니다 |
+| `uvicorn`으로 직접 띄웠더니 모든 요청이 503 | 토큰 환경 변수가 전달되지 않음 | `npm run backend`(`scripts/run_backend.sh`)로 실행합니다 |
+| 첫 분석만 오래 걸림 (약 9초) | 모델을 메모리에 올리는 중 | 정상입니다. 이후 요청은 1–1.4초입니다. 첫 실행 때는 HuBERT 다운로드(약 1.2 GB) 시간이 더 듭니다 |
+| 점수가 100 근처이고 "학습 분포 밖 입력" 경고 | 합성음·음악·잡음, 또는 학습 데이터와 조건이 매우 다른 녹음 | 의도된 동작입니다. 이 경우 점수를 해석하지 않습니다 ([FAQ](#자주-묻는-질문)) |
+| Jitter·Shimmer·HNR이 비어 있음 | DDK 과제(/pa/ /ta/ /ka/)이거나 유성 구간이 0.5초 미만 | 지속 모음 과제로 3초 이상 녹음합니다. 결과에 이유가 함께 표시됩니다 |
+| "이 오디오 형식을 읽을 수 없습니다" | 브라우저가 해당 코덱을 지원하지 않음 | WAV·FLAC·OGG로 변환해 올립니다 |
+| "Firebase … 권한이 없습니다 (401/403)" | DB 자격 증명이 없거나 틀림 | `FIREBASE_DATABASE_SECRET` 또는 서비스 계정 경로를 확인합니다 |
+| "FIREBASE_DATABASE_URL is not set" | DB 주소 미설정 | `.env.local`에 주소를 넣거나, DB 없이 분석만 사용합니다 |
+| 휴대폰에서 파일 선택·설치가 안 됨 | HTTP 접속 | [5단계](#5-선택-휴대폰에서-접속하기)의 HTTPS 터널을 사용합니다 |
+
+---
+
+## 자주 묻는 질문
+
+<details>
+<summary><b>이 점수로 ALS를 진단할 수 있나요?</b></summary>
+
+아니요. 내부 시험(이탈리아어 화자 41명)의 성능일 뿐이고 임상 검증을 하지 않았습니다. 일반 인구에 적용하면 ALS가 매우 드물어서 양성 판정의 대부분이 위양성이 됩니다(양성예측도 약 0.013%). 그래서 INSIGHT는 음성·연수 증상으로 내원한 환자 중 **신경과 의뢰 우선순위를 정하는 보조 용도**로 설계했습니다([§1.5](#15-insight가-다루는-문제와-위치)).
+
+</details>
+
+<details>
+<summary><b>왜 제 녹음은 점수가 거의 100이고 경고가 뜨나요?</b></summary>
+
+모델은 SAND 데이터(이탈리아어, 8 kHz 스마트폰 앱 녹음)로만 학습했습니다. 이와 크게 다른 입력이 들어오면 점수가 0이나 1 근처로 쏠리는 **포화** 현상이 있습니다. 대표적인 예는 합성음, 잡음, 다른 언어, 다른 녹음 장비입니다. 이런 입력을 걸러내려고 특징 공간 거리 기반 **OOD 검사**를 넣었고, 검사에 걸리면 점수를 해석하지 않도록 상태를 비워 둡니다. 임계값의 한계는 [§9](#9-기술적-한계와-남은-과제)에 적었습니다.
+
+</details>
+
+<details>
+<summary><b>왜 HuBERT를 썼나요? 더 단순한 모델은 안 되나요?</b></summary>
+
+구음장애 검출에서 HuBERT 표현이 eGeMAPS 같은 수기 음향 특징보다 정확하다는 보고가 있습니다[R13]. 자체 실험에서도 수기 특징 88개를 HuBERT에 더해 얻은 이득은 작았습니다. 반대로 attentive pooling, LoRA 미세조정처럼 더 복잡한 구성도 이득이 없었기 때문에, HuBERT 위에 가장 가벼운 MLP를 얹은 구조를 택했습니다([§4](#4-모델-선택-근거-같은-분할에서의-비교-실험)).
+
+</details>
+
+<details>
+<summary><b>GPU가 필요한가요?</b></summary>
+
+필요 없습니다. Intel CPU 노트북에서 3초 녹음 기준 약 1초가 걸립니다. 녹음이 길수록 시간이 빠르게 늘어나므로(60초 → 약 41초), 과제당 수 초 길이의 녹음을 권장합니다.
+
+</details>
+
+<details>
+<summary><b>DB 없이도 쓸 수 있나요?</b></summary>
+
+네. 분석과 문진은 DB 없이 동작하고, 결과는 현재 브라우저 세션에만 남습니다. 저장, 다른 기기에서 조회, 문진 이어쓰기를 하려면 Firebase 연동이 필요합니다.
+
+</details>
+
+<details>
+<summary><b>원본 음성은 어디에 저장되나요?</b></summary>
+
+저장되지 않습니다. 업로드된 파일은 추론 서버의 임시 파일로만 쓰이고 분석이 끝나면 바로 삭제됩니다. DB에는 점수, 음향 지표, 녹음 메타데이터만 저장됩니다.
+
+</details>
+
+---
+
+# 연구·설계 문서
+
+아래는 이 시스템을 왜 이렇게 설계했는지, 그 근거는 무엇인지, 무엇이 아직 검증되지 않았는지를 정리한 문서입니다.
 
 ## 1. 배경 및 필요성
 
@@ -246,7 +632,9 @@ INSIGHT가 기존 시스템보다 우수하다는 주장이 아니다. 운영 �
 
 ---
 
-## 6. 사용 화면과 실행
+## 6. 화면 구성
+
+설치와 실행 방법은 [빠른 시작](#빠른-시작), 화면별 사용법은 [사용 방법](#사용-방법)에 있다.
 
 | 경로 | 내용 |
 |---|---|
@@ -254,23 +642,6 @@ INSIGHT가 기존 시스템보다 우수하다는 주장이 아니다. 운영 �
 | `/analysis` (`/`) | Subject ID·과제·녹음 시각 입력 후 **기존 오디오 파일 업로드**(앱 내 녹음 없음) |
 | `/patients` | Subject ID별 녹음 결과와 최신 VHI-30 결과. DB 불러오기 |
 | `/history` | 전체 분석 이력 |
-
-| 문항 화면 | 결과 화면 |
-|---|---|
-| ![VHI-30 mobile question](docs/ui-verification/vhi-mobile-question.png) | ![VHI-30 mobile result](docs/ui-verification/vhi-mobile-result.png) |
-
-```sh
-python3.11 -m pip install -r requirements-inference.txt
-npm install
-cp .env.example .env.local     # INSIGHT_BACKEND_TOKEN(필수, 예: openssl rand -hex 32)과 DB 자격 증명 입력
-
-HF_HOME=./hf-cache npm run backend   # 터미널 1: scripts/run_backend.sh, .env.local의 토큰으로 FastAPI 기동
-npm run dev                          # 터미널 2
-```
-
-추론 서버는 `Authorization: Bearer <INSIGHT_BACKEND_TOKEN>`이 없는 요청을 401로 거부한다. 토큰이 설정되지 않으면 모든 요청에 503을 반환한다(fail-closed). 로컬 개발에서만 `INSIGHT_ALLOW_UNAUTHENTICATED=1`로 해제할 수 있다. 토큰은 Next.js 서버에서만 사용하며 브라우저에 노출되지 않는다.
-
-HuBERT 체크포인트·패키지·빌드 파일에 2 GB 이상이 필요하다. 모바일은 PWA로 홈 화면 설치가 가능하며, 기기에는 아무것도 저장하지 않는다. 휴대폰 접속에는 HTTPS가 필요하다(`npm run build && npm start` 후 `cloudflared tunnel --url http://127.0.0.1:3000`). 터널 URL은 공개되므로 시험 데이터만 사용한다.
 
 ---
 
@@ -414,3 +785,9 @@ HuBERT 체크포인트·패키지·빌드 파일에 2 GB 이상이 필요하다.
 - [R13] Javanmardi F, Kadiri SR, Alku P. Pre-trained models for detection and severity level classification of dysarthria from speech. *Speech Commun*. 2024;158:103047. doi:10.1016/j.specom.2024.103047
 - [R14] Dubbioso R, Spisto M, Verde L, et al. Voice signals database of ALS patients with different dysarthria severity and healthy controls. *Sci Data*. 2024;11:800. doi:10.1038/s41597-024-03597-2
 - [S1] Epic MyChart Help · [S2] Phreesia Platform · [S3] Phreesia Intake Forms · [S4] CHAI Registry: Canary Speech · [S5] App Store: Speech Vitals — URL은 추적표 참조
+
+---
+
+## 라이선스
+
+코드는 [MIT 라이선스](LICENSE)를 따릅니다. HuBERT 체크포인트(`facebook/hubert-large-ls960-ft`)와 SAND 데이터셋은 각각의 라이선스와 이용 조건을 따르며, 이 저장소에는 SAND 원본 음성이 포함되어 있지 않습니다.
