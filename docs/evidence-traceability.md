@@ -29,6 +29,10 @@ README의 주요 주장을 원 근거와 연결한다. 문헌은 PubMed 초록(E
 | E4 | 같은 분할에서 9개 구성 × 3 seed 비교, 기준 모델 대비 유의한 개선 없음 | `provenance/run_20261114T140021_240247Z_LOW_COST/*.csv` | 원본 표 (Drive 사본, SHA-256 기록) |
 | E5 | 두 실행의 피험자 분할이 동일 | `model_card.json` 검사 7 | 피험자→분할 매핑 비교 |
 | E6 | E2E 추론 1.0–1.4 s(3 s 녹음, CPU) | README §8 측정 | 로컬 실행 측정 |
+| E9 | Jitter·Shimmer·HNR은 Praat(parselmouth 0.4.7)로 지속 모음 과제에서만 산출하고, 그 외에는 사유와 함께 `null`. 합성 150 Hz 모음에서 jitter 2.05–2.21%(기대값 2.26%), HNR은 주입 SNR과 ±0.3 dB 이내 | `src/backend/acoustics.py`, `tests/python/test_backend.py`, README §8, [R15] | 단위 테스트는 주입 jitter 회복·HNR 단조 감소를 검사, 수치는 README §8 로컬 측정 |
+| E10 | 특징 공간 OOD 게이트: 임계값 1.718, 합성 비음성 입력 9개 모두 차단. 임계값은 SAND 시험 특징 4개로만 정함(한계) | `ood_calibration.json`, `scripts/calibrate_ood.py`, `src/backend/model.py` | `python scripts/calibrate_ood.py --check` |
+| E11 | 추론 서버는 `GET /health`를 제외한 모든 요청에 Bearer 토큰을 요구하고, 토큰 미설정 시 503(fail-closed) | `src/backend/app.py`, `tests/python/test_api_auth.py`, `tests/analyze-route.test.ts` | 단위 테스트 |
+| E12 | CI(GitHub Actions, Ubuntu)에서 web·model job 통과 | `.github/workflows/ci.yml`, README §8 | Actions 실행 기록 |
 | S1 | Epic MyChart: eCheck-In으로 진료 전 문진 응답, MyChart 정보는 의료기록에서 직접 표시 | [S1] mychart.org/help | 공식 페이지 원문 |
 | S2 | Phreesia: 진료 전 등록·선별검사, PRO 자동 채점, HL7·FHIR·CCD 양방향 EHR 연동, 결과를 EHR로 전송 | [S2] phreesia.com/platform, [S3] /electronic-intake-forms | 공식 페이지 원문 |
 | S3 | Canary Speech: 40초 이상 음성을 AI로 분석하는 인지건강 음성 바이오마커, 호환 EHR로 Epic·Oracle Health·Meditech 표기 | [S4] CHAI Registry | 등록 페이지 원문 |
@@ -52,6 +56,7 @@ README의 주요 주장을 원 근거와 연결한다. 문헌은 PubMed 초록(E
 | R12 | Jacobson BH, Johnson A, Grywalski C, et al. The Voice Handicap Index (VHI): development and validation. *Am J Speech Lang Pathol*. 1997;6(3):66-70. PhenX Toolkit PX201301 | https://www.phenxtoolkit.org/protocols/view/201301 | VHI-30 문항·점수 |
 | R13 | Javanmardi F, Kadiri SR, Alku P. Pre-trained models for detection and severity level classification of dysarthria from speech. *Speech Commun*. 2024;158:103047 | 10.1016/j.specom.2024.103047 | HuBERT 선택 근거 |
 | R14 | Dubbioso R, Spisto M, Verde L, et al. Voice signals database of ALS patients with different dysarthria severity and healthy controls. *Sci Data*. 2024;11:800 | 10.1038/s41597-024-03597-2 | F0 변동성 근거 |
+| R15 | Boersma P, Weenink D. Praat: doing phonetics by computer (https://www.praat.org); Jadoul Y, Thompson B, de Boer B. Introducing Parselmouth: A Python interface to Praat. *J Phon*. 2018;71:1-15 | 10.1016/j.wocn.2018.07.001 | Jitter·Shimmer·HNR 산출 방법. 서지는 이번 개정에서 원문 대조하지 않음 |
 | S1 | Epic. Help — MyChart | https://www.mychart.org/help | 진료 전 문진(eCheck-In) |
 | S2 | Phreesia. Our Patient Intake Platform | https://www.phreesia.com/platform/ | 문진·채점·EHR 연동 |
 | S3 | Phreesia. Patient Check-In Software | https://www.phreesia.com/electronic-intake-forms/ | 문진 결과의 EHR 전송 |

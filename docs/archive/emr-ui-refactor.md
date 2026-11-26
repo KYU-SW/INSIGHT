@@ -1,5 +1,7 @@
 # EMR UI refactor
 
+> **Historical planning note (archived).** 초기 UI 개편 시점(커밋 ce9d62b·2f9292d)의 계획·변경 기록이며 현재 코드·테스트 수와 일치하지 않을 수 있다. 현재 상태는 루트 `README.md`와 `AGENTS.md`를 기준으로 한다.
+
 This revision changes the existing three-screen voice research interface, not its clinical or persistence behavior. The current app has analysis, patient registry and history routes; dashboard and patient-detail routes redirect. It has no separate patient registration, prescription or clinical-note editor. Original Stitch HTML, images and design documents remain unchanged. The new user instruction supersedes their visual layout for this revision.
 
 ## Layout
