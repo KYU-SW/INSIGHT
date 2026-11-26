@@ -781,6 +781,10 @@ INSIGHT가 기존 시스템보다 우수하다는 주장이 아니다. 운영 �
 | 피험자 AUROC·중증도별 민감도, 같은 분할 비교 실험(9구성 × 3 seed) 근거 연결 | [`2b82825`](https://github.com/KYU-SW/INSIGHT/commit/2b82825) |
 | Jitter·Shimmer·HNR(Praat), 추론 서버 Bearer 인증, 특징 공간 OOD 게이트, 테스트 29+21개(당시) | [`8aec6e4`](https://github.com/KYU-SW/INSIGHT/commit/8aec6e4) |
 | Drive 전체 실험 조사(층 재실행, eGeMAPS 결합 5 seed, 수기 특징·WavLM 기준 모델, 실패 실험)와 근거 사본 | [`afed8da`](https://github.com/KYU-SW/INSIGHT/commit/afed8da) |
+| DB 업로드 실패 시 되돌리기 테스트, 구현 안전장치 문서화 | [`fca5b57`](https://github.com/KYU-SW/INSIGHT/commit/fca5b57) |
+| OOD 판정의 DB 저장·복원, `/health`, CI 추론 서버 E2E, Registry·History 화면 결함 수정 | [`ff9219b`](https://github.com/KYU-SW/INSIGHT/commit/ff9219b) |
+| 저장소 정리(시안·노트북 위치), 문서–코드 일치화 | [`366cc76`](https://github.com/KYU-SW/INSIGHT/commit/366cc76) |
+| 평가 기준별 근거 위치표, h7 다중 seed·검증 분할 OOD 보정 스크립트 | [`4a9b85e`](https://github.com/KYU-SW/INSIGHT/commit/4a9b85e) |
 
 ---
 
