@@ -1,0 +1,30 @@
+{
+  "seed": 42,
+  "n_splits": 4,
+  "n_repeats": 5,
+  "n_bootstrap": 2000,
+  "minimum_specificity": 0.9,
+  "top_k_task_features": 60,
+  "tasks": [
+    "phonationA",
+    "phonationE",
+    "phonationI",
+    "phonationO",
+    "phonationU",
+    "rhythmKA",
+    "rhythmPA",
+    "rhythmTA"
+  ],
+  "models": [
+    "M1_ElasticNet",
+    "M3_TaskConcatXGB",
+    "M4_TaskStackXGB",
+    "M5_M1_M4_Fusion"
+  ],
+  "n_patients": 272,
+  "n_train": 219,
+  "n_validation": 53,
+  "n_features": 65,
+  "final_fusion_m1_weight": 0.0,
+  "final_fusion_m4_weight": 1.0
+}

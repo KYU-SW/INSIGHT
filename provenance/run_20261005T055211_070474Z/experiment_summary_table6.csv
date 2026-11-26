@@ -1,0 +1,7 @@
+dataset,task,model,pooling,paper_layer,test_n,test_subjects,ACC [%],protocol,backbone
+ALS_HC,detection,HuBERT+MLP,mean,1,328,41,66.15853658536585,subject-stratified 70/15/15; validation-selected layer,frozen facebook/hubert-large-ls960-ft
+ALS_HC,detection,HuBERT+CNN,mean,4,328,41,69.51219512195121,subject-stratified 70/15/15; validation-selected layer,frozen facebook/hubert-large-ls960-ft
+ALS_HC,detection,HuBERT+CNN,max,6,328,41,78.35365853658537,subject-stratified 70/15/15; validation-selected layer,frozen facebook/hubert-large-ls960-ft
+ALS_HC,detection,HuBERT+MLP,max,8,328,41,75.3048780487805,subject-stratified 70/15/15; validation-selected layer,frozen facebook/hubert-large-ls960-ft
+ALS_HC,detection,HuBERT+MLP,mean_std,1,328,41,70.42682926829268,subject-stratified 70/15/15; validation-selected layer,frozen facebook/hubert-large-ls960-ft
+ALS_HC,detection,HuBERT+CNN,mean_std,8,328,41,73.78048780487805,subject-stratified 70/15/15; validation-selected layer,frozen facebook/hubert-large-ls960-ft

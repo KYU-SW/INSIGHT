@@ -1,0 +1,63 @@
+{
+  "run_id": "run_20261005T080540_357849Z",
+  "retrieved": "2026-11-26",
+  "note": "sha256 = SHA-256 of the bytes downloaded from Google Drive (unmodified copies)",
+  "sources": [
+    {
+      "file": "COMPLETED.json",
+      "drive_file_id": "1BBLb7eUDTZIo86Ph5nzceDjR5nNZIoTZ",
+      "drive_path": "MyDrive/2026_2_INSIGHT/ALS_RESULTS/ALS_voice_analysis_20260921_075155/HUBERT_PAPER_REPRODUCTION/20261005T080540_357849Z/COMPLETED.json",
+      "sha256": "9cf37cfe9d3b0aba793a6f7d6b30b6dcd13b6b6e8afb05d181e84a05430e7700",
+      "bytes": 148
+    },
+    {
+      "file": "run_config.json",
+      "drive_file_id": "1SEW3p6w7BgqnQNzyVD8UrlFP5Qo43Vez",
+      "drive_path": "MyDrive/2026_2_INSIGHT/ALS_RESULTS/ALS_voice_analysis_20260921_075155/HUBERT_PAPER_REPRODUCTION/20261005T080540_357849Z/run_config.json",
+      "sha256": "ba5f0472d75d8febb85babb0abdfe3054faabe5c6c62634691cc46e1e87b4405",
+      "bytes": 1349
+    },
+    {
+      "file": "experiment_summary_table6.csv",
+      "drive_file_id": "1CFytBWx04dmjEJbgS6b9bXp6tPlmzOoy",
+      "drive_path": "MyDrive/2026_2_INSIGHT/ALS_RESULTS/ALS_voice_analysis_20260921_075155/HUBERT_PAPER_REPRODUCTION/20261005T080540_357849Z/experiment_summary_table6.csv",
+      "sha256": "787cc2e401fa17a03dc0dfd193aea44c811d5b0231375b4b7cdeadbcc7fc5003",
+      "bytes": 1010
+    },
+    {
+      "file": "selected_layers_validation_only.csv",
+      "drive_file_id": "1-6aYn3xXeNuXDceLU1DN86U7-5og-X82",
+      "drive_path": "MyDrive/2026_2_INSIGHT/ALS_RESULTS/ALS_voice_analysis_20260921_075155/HUBERT_PAPER_REPRODUCTION/20261005T080540_357849Z/selected_layers_validation_only.csv",
+      "sha256": "6ca6627c32a0014318cb014270506a9717c4a97934c21750fccbffbccd41e28c",
+      "bytes": 569
+    },
+    {
+      "file": "test_selected_layers.csv",
+      "drive_file_id": "110lD7Ochgjb4QZTvmut6qlU7FlkxFNni",
+      "drive_path": "MyDrive/2026_2_INSIGHT/ALS_RESULTS/ALS_voice_analysis_20260921_075155/HUBERT_PAPER_REPRODUCTION/20261005T080540_357849Z/test_selected_layers.csv",
+      "sha256": "34244352877d386b93d45dd354f1f4de6edc5284e4e8eb6871286aace94e6b5e",
+      "bytes": 1357
+    },
+    {
+      "file": "27074b1545_detection_paper_table.csv",
+      "drive_file_id": "1mqS7Tu5ewjtAJVUm-DqB1eykgO64uW2d",
+      "drive_path": "MyDrive/2026_2_INSIGHT/ALS_RESULTS/ALS_voice_analysis_20260921_075155/HUBERT_PAPER_REPRODUCTION/20261005T080540_357849Z/27074b1545_detection_paper_table.csv",
+      "sha256": "6ca7ba1c38ac6652bc4ee977060e5632828d89d82910d5069f3cfe340d1b46a8",
+      "bytes": 572
+    },
+    {
+      "file": "test_all_layers.csv",
+      "drive_file_id": "15Re5LMDtFYkPPWDURIBsZnEjC0Q7AO5J",
+      "drive_path": "MyDrive/2026_2_INSIGHT/ALS_RESULTS/ALS_voice_analysis_20260921_075155/HUBERT_PAPER_REPRODUCTION/20261005T080540_357849Z/test_all_layers.csv",
+      "sha256": "b0df8337320e1b837729936ba39acd6fbe971bb735adde1404803354fb35de3e",
+      "bytes": 30343
+    },
+    {
+      "file": "validation_all_layers.csv",
+      "drive_file_id": "13DCGhNtK8LGqyURl8qZIEQvGJPJLrS7C",
+      "drive_path": "MyDrive/2026_2_INSIGHT/ALS_RESULTS/ALS_voice_analysis_20260921_075155/HUBERT_PAPER_REPRODUCTION/20261005T080540_357849Z/validation_all_layers.csv",
+      "sha256": "3448597c09babeffd8e9175cbea3cbfca221c25dc4f8a84a06e573e43d0c9f7a",
+      "bytes": 12411
+    }
+  ]
+}

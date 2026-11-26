@@ -1,0 +1,10 @@
+exp_id,name,enabled,check_shape_forward_backward,hpo_status,final_status,final_seeds_ok,final_seeds_planned,test_evaluations_logged,error,note
+BASE00,Baseline (원 설정 재현),True,PASS,NOT_APPLICABLE,COMPLETED,3,3,3,,
+BASE01,Baseline (동일 HPO 예산),True,PASS,COMPLETED,COMPLETED,3,3,3,,
+EXP01,Learnable layer-weighted aggregation,True,PASS,COMPLETED,COMPLETED,3,3,3,,
+EXP02,Multi-head attentive statistics pooling,True,PASS,COMPLETED,COMPLETED,3,3,3,,
+EXP03,Gated multimodal fusion (HuBERT + eGeMAPS),True,PASS,COMPLETED,COMPLETED,3,3,3,,
+EXP04,Class-prior focal loss,True,PASS,COMPLETED,COMPLETED,3,3,3,,
+EXP05,Subject-level gated-attention MIL,True,PASS,COMPLETED,COMPLETED,3,3,3,,
+EXP06,Latent SpecAugment on frozen HuBERT frames,True,PASS,COMPLETED,COMPLETED,3,3,3,,
+EXP07,LoRA adaptation of HuBERT layers 1–4,True,PASS,COMPLETED,COMPLETED,3,3,3,,

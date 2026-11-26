@@ -1,0 +1,49 @@
+{
+  "run_id": "HUBERT_EGEMAPS_FUSION_20261112T011348_511305Z",
+  "retrieved": "2026-11-26",
+  "note": "sha256 = SHA-256 of the bytes downloaded from Google Drive (unmodified copies)",
+  "sources": [
+    {
+      "file": "COMPLETED.json",
+      "drive_file_id": "1Za5A-wNfnVQVUjeBtPnm7SC85O4ew-uf",
+      "drive_path": "MyDrive/2026_2_INSIGHT/ALS_RESULTS/ALS_voice_analysis_20260921_075155/HUBERT_EGEMAPS_FUSION/20261112T011348_511305Z/COMPLETED.json",
+      "sha256": "66b9fde06688a685bd25cb69bc8b891e3fbc9b18d3c65eb8226ae9042df17c1c",
+      "bytes": 260
+    },
+    {
+      "file": "run_config.json",
+      "drive_file_id": "1MWrESjrWlRU7SG0_aPMCOKKZddZ9tlRJ",
+      "drive_path": "MyDrive/2026_2_INSIGHT/ALS_RESULTS/ALS_voice_analysis_20260921_075155/HUBERT_EGEMAPS_FUSION/20261112T011348_511305Z/run_config.json",
+      "sha256": "1d36f745827ab7d62e93e6f8ac8ee67f911c286ad6e98b2705e126ef7229afab",
+      "bytes": 1224
+    },
+    {
+      "file": "summary_mean_std.csv",
+      "drive_file_id": "1_JA73nr3-L9X2nRR6e802is8hAjPyLw6",
+      "drive_path": "MyDrive/2026_2_INSIGHT/ALS_RESULTS/ALS_voice_analysis_20260921_075155/HUBERT_EGEMAPS_FUSION/20261112T011348_511305Z/summary_mean_std.csv",
+      "sha256": "1192e8ea684d771b864cf82cf667706258d9a3a6158e841038201790e060ec93",
+      "bytes": 990
+    },
+    {
+      "file": "delta_vs_baseline.csv",
+      "drive_file_id": "1qpoH0w4taXKBD9sXZWxAxoVCT1rMBbv7",
+      "drive_path": "MyDrive/2026_2_INSIGHT/ALS_RESULTS/ALS_voice_analysis_20260921_075155/HUBERT_EGEMAPS_FUSION/20261112T011348_511305Z/delta_vs_baseline.csv",
+      "sha256": "fdc755481bd37c39a7a5927e65cfe21040fa7ee7582aca0b8b993fbd5337bca7",
+      "bytes": 534
+    },
+    {
+      "file": "test_results_per_seed.csv",
+      "drive_file_id": "1E_Ce39wYe8-JTei5bqlvcLvrC3CAE9Zm",
+      "drive_path": "MyDrive/2026_2_INSIGHT/ALS_RESULTS/ALS_voice_analysis_20260921_075155/HUBERT_EGEMAPS_FUSION/20261112T011348_511305Z/test_results_per_seed.csv",
+      "sha256": "a6ff96ac6e3a23de9803218a55aa8c057a6b2f32e4e5e8ac6f1b937005182605",
+      "bytes": 6783
+    },
+    {
+      "file": "selected3_pairwise.csv",
+      "drive_file_id": "1Sf4ZU31arW-4Oa-558dkXb7cOlW68AAD",
+      "drive_path": "MyDrive/2026_2_INSIGHT/ALS_RESULTS/ALS_voice_analysis_20260921_075155/HUBERT_EGEMAPS_FUSION/20261112T011348_511305Z/selected3_pairwise.csv",
+      "sha256": "d4f8a95042234b6b520122e5a0cb15374b5101802b1903092b503fe032d6e81b",
+      "bytes": 626
+    }
+  ]
+}

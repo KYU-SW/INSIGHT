@@ -1,0 +1,28 @@
+{
+  "run_id": "ML_EXPERIMENT_01",
+  "retrieved": "2026-11-26",
+  "note": "sha256 = SHA-256 of the bytes downloaded from Google Drive (unmodified copies)",
+  "sources": [
+    {
+      "file": "01_model_metrics.csv",
+      "drive_file_id": "1J7UyLf2gDoBWeU5mW56pmQcjjfw8STQ4",
+      "drive_path": "MyDrive/2026_2_INSIGHT/ALS_RESULTS/ALS_voice_analysis_20260921_075155/ML_EXPERIMENT_01/01_model_metrics.csv",
+      "sha256": "875ab1b3ab78a18bed2eff3b74cfce374bb68057163e6933f861a9a2497ad092",
+      "bytes": 1807
+    },
+    {
+      "file": "05_confusion_matrices.csv",
+      "drive_file_id": "1Ppy6hNlds81ktJvJ0yH8hafU0Ppxv8LL",
+      "drive_path": "MyDrive/2026_2_INSIGHT/ALS_RESULTS/ALS_voice_analysis_20260921_075155/ML_EXPERIMENT_01/05_confusion_matrices.csv",
+      "sha256": "f24899b6bd3f2f2c41d372dd66db10c5d7670566d82c4fd57ef4402d7b89e9b4",
+      "bytes": 1433
+    },
+    {
+      "file": "experiment_config.json",
+      "drive_file_id": "1-ZpApv2wSg5Puhln_HkA8Tm2bDNIPl_2",
+      "drive_path": "MyDrive/2026_2_INSIGHT/ALS_RESULTS/ALS_voice_analysis_20260921_075155/ML_EXPERIMENT_01/experiment_config.json",
+      "sha256": "7194e69e244b382551ef4f30189fe56011554bb48e4419480eef4dbfa428856a",
+      "bytes": 454
+    }
+  ]
+}

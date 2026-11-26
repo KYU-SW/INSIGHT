@@ -1,0 +1,59 @@
+{
+  "model_id": "facebook/hubert-large-ls960-ft",
+  "hidden_index": 4,
+  "paper_layer": 5,
+  "pooling": "max",
+  "head": "MLP",
+  "split_seed": 42,
+  "train_seeds": [
+    42,
+    43,
+    44,
+    45,
+    46
+  ],
+  "split_hash": "9bb28df8f907a9b7683970f10169bc4d678de3ca5c6cf46c659531cbc8286c83",
+  "batch_size": 64,
+  "coatt_batch_size": 64,
+  "max_epochs": 20,
+  "patience": 3,
+  "lr": 0.0005,
+  "weight_decay": 0.001,
+  "head_dropout": 0.1,
+  "coattention": {
+    "dim": 128,
+    "heads": 4,
+    "dropout": 0.1,
+    "lld_pool": 2,
+    "keep_hubert_max": true
+  },
+  "selected_egemaps": {
+    "late_functionals": [
+      "F0semitoneFrom27.5Hz_sma3nz_pctlrange0-2",
+      "F3amplitudeLogRelF0_sma3nz_amean",
+      "loudnessPeaksPerSec"
+    ],
+    "early_lld": [
+      "F0semitoneFrom27.5Hz_sma3nz",
+      "F3amplitudeLogRelF0_sma3nz",
+      "Loudness_sma3",
+      "voiced_ratio"
+    ],
+    "early_dim": 256
+  },
+  "models": [
+    "Baseline",
+    "Concat",
+    "CoAttention",
+    "Late3",
+    "Early3",
+    "EarlyHuBERTonly"
+  ],
+  "egemaps": "eGeMAPSv02 functionals(88) / LLD(25), openSMILE 2.6.0",
+  "software": {
+    "torch": "2.14.1+cu130",
+    "opensmile": "2.6.0",
+    "numpy": "2.4.6",
+    "scikit-learn": "1.6.1"
+  }
+}

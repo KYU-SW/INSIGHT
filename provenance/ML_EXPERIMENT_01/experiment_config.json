@@ -1,0 +1,27 @@
+{
+  "seed": 42,
+  "n_splits": 4,
+  "prediction_threshold": 0.5,
+  "top_k_task_features": 60,
+  "tasks": [
+    "phonationA",
+    "phonationE",
+    "phonationI",
+    "phonationO",
+    "phonationU",
+    "rhythmKA",
+    "rhythmPA",
+    "rhythmTA"
+  ],
+  "models": [
+    "M0_Majority",
+    "M1_ElasticNet",
+    "M2_GlobalXGB",
+    "M3_TaskConcatXGB",
+    "M4_TaskStackXGB"
+  ],
+  "n_patients": 272,
+  "n_train": 219,
+  "n_validation": 53,
+  "n_features": 65
+}

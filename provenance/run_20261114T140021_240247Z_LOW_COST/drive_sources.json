@@ -51,6 +51,41 @@
       "drive_file_id": "1v2cFCJZE56a43tQKTpIB5ICr8PFKw3gE",
       "drive_path": "MyDrive/2026_2_INSIGHT/ALS_RESULTS/ALS_voice_analysis_20260921_075155/HUBERT_ALS_7EXP_HPO/20261114T140021_240247Z_LOW_COST/split_manifest.csv",
       "sha256": "e612cd54848aec40dd8b85ce200396696c24e69b8bd047c49df2e6b0961e2138"
+    },
+    {
+      "file": "validation_results_subject_ensemble.csv",
+      "drive_file_id": "1pfQFzogfZ9mnlR0gI_9FggZwx1J1_6o5",
+      "drive_path": "MyDrive/2026_2_INSIGHT/ALS_RESULTS/ALS_voice_analysis_20260921_075155/HUBERT_ALS_7EXP_HPO/20261114T140021_240247Z_LOW_COST/tables/validation_results_subject_ensemble.csv",
+      "sha256": "96d60a33a3cfd1803a25c7282a20d12a5f93d645a2b8d15a07bc3eb3b10ba69b",
+      "bytes": 2550
+    },
+    {
+      "file": "experiment_status.csv",
+      "drive_file_id": "1YVgt1cZKRzFC1M7RoxF5983w9zC6_nUl",
+      "drive_path": "MyDrive/2026_2_INSIGHT/ALS_RESULTS/ALS_voice_analysis_20260921_075155/HUBERT_ALS_7EXP_HPO/20261114T140021_240247Z_LOW_COST/tables/experiment_status.csv",
+      "sha256": "55b88f8083490eab1fdcbd21b4a862428e78556147ae5ed36a8c55360c8a8931",
+      "bytes": 863
+    },
+    {
+      "file": "run_config.json",
+      "drive_file_id": "1pMkfUFmgTmGRp4JfNuZJw6I4FsOkIpDk",
+      "drive_path": "MyDrive/2026_2_INSIGHT/ALS_RESULTS/ALS_voice_analysis_20260921_075155/HUBERT_ALS_7EXP_HPO/20261114T140021_240247Z_LOW_COST/run_config.json",
+      "sha256": "824c84119291ff09020a8ba0307b122ffbe4db37d67e009fe14242c2b742bb0e",
+      "bytes": 834
+    },
+    {
+      "file": "hpo_configuration.csv",
+      "drive_file_id": "1yce_1dO8H6PLpOybEM21EfbGG3IQM_gN",
+      "drive_path": "MyDrive/2026_2_INSIGHT/ALS_RESULTS/ALS_voice_analysis_20260921_075155/HUBERT_ALS_7EXP_HPO/20261114T140021_240247Z_LOW_COST/tables/hpo_configuration.csv",
+      "sha256": "b5618bd5748f51914cd36a7fb9182406f3d2671562a97b191f8f1584709293e1",
+      "bytes": 5255
+    },
+    {
+      "file": "research_report.md",
+      "drive_file_id": "1BEosEqWvc1ywqbGIVi1jOSY9azBZM0o7",
+      "drive_path": "MyDrive/2026_2_INSIGHT/ALS_RESULTS/ALS_voice_analysis_20260921_075155/HUBERT_ALS_7EXP_HPO/20261114T140021_240247Z_LOW_COST/research_report.md",
+      "sha256": "72b19e09c400f88ff82ff28b1be8315244f3a973c5e62c0ac6b41ce45299b5f8",
+      "bytes": 24944
     }
   ]
 }

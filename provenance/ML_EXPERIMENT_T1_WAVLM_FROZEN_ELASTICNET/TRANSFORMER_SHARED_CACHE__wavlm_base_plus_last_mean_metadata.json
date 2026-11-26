@@ -1,0 +1,13 @@
+{
+  "model_id": "microsoft/wavlm-base-plus",
+  "model_commit": "4c66d4806a428f2e922ccfa1a962776e232d487b",
+  "transformers_version": "5.16.1",
+  "torch_version": "2.11.0+cu128",
+  "target_sample_rate": 16000,
+  "max_chunk_seconds": 15.0,
+  "chunk_overlap_seconds": 1.0,
+  "pooling": "last_hidden_state_valid_frame_mean_then_recording_chunk_mean",
+  "hidden_size": 768,
+  "n_recordings": 2176,
+  "feature_extractor_do_normalize": false
+}

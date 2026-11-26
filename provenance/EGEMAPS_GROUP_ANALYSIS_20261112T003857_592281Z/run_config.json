@@ -1,0 +1,39 @@
+{
+  "analysis_splits": null,
+  "split_seed": 42,
+  "fdr_alpha": 0.05,
+  "top_k": 20,
+  "covariates": [
+    "sex",
+    "age"
+  ],
+  "scopes": [
+    "ALL",
+    "Phonation (all)",
+    "Rhythm (all)",
+    "phonationA",
+    "phonationE",
+    "phonationI",
+    "phonationO",
+    "phonationU",
+    "rhythmKA",
+    "rhythmPA",
+    "rhythmTA"
+  ],
+  "n_recordings": 2164,
+  "figures": [
+    "01_volcano_ALL",
+    "02_top_effect_sizes_ALL",
+    "03_single_feature_AUC",
+    "04_effect_heatmap_by_task",
+    "05_significant_count_by_task",
+    "06_boxplots_top_features",
+    "07_top_features_by_task",
+    "08_severity_trend",
+    "09_top_feature_correlation",
+    "10_pca",
+    "11_demographics",
+    "12_sex_stratified",
+    "13_adjusted_vs_unadjusted"
+  ]
+}

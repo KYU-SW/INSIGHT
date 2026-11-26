@@ -1,0 +1,14 @@
+{
+  "run_id": "run_20261005T215051_337316Z",
+  "retrieved": "2026-11-26",
+  "note": "sha256 = SHA-256 of the bytes downloaded from Google Drive (unmodified copies)",
+  "sources": [
+    {
+      "file": "run_config.json",
+      "drive_file_id": "1p5aBEgrJMltMgHHdEH6ZnLJAfqyTw5bw",
+      "drive_path": "MyDrive/2026_2_INSIGHT/ALS_RESULTS/ALS_voice_analysis_20260921_075155/HUBERT_PAPER_REPRODUCTION/20261005T215051_337316Z/run_config.json",
+      "sha256": "3e865b5c88e9a41a43bfa44dd0ac28d3157f8da31da0c2181cd0566eaa0d20d5",
+      "bytes": 1600
+    }
+  ]
+}

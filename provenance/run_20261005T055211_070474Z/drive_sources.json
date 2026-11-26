@@ -117,6 +117,34 @@
       "sha256": "28cecf736a7cacf56fce0ec17f80d461059ba592cfc0dd671d383096de481a7f",
       "bytes": 372661,
       "derived_file": "test_features_h07_max.npz['abb904405acf4277773c48dec76bb45381601f87d6ea7113525a0d4c86129f88'] = max[7]"
+    },
+    {
+      "file": "experiment_summary_table6.csv",
+      "drive_file_id": "11OjUX1Lso5KlVnWNpmOv9UJ4qkQwg3RC",
+      "drive_path": "MyDrive/2026_2_INSIGHT/ALS_RESULTS/ALS_voice_analysis_20260921_075155/HUBERT_PAPER_REPRODUCTION/20261005T055211_070474Z/experiment_summary_table6.csv",
+      "sha256": "ac2e7202fed633ae7da2c9a4be964759b71c729e1b8bb6432acdbd70b3e1a53a",
+      "bytes": 1009
+    },
+    {
+      "file": "selected_layers_validation_only.csv",
+      "drive_file_id": "1FV5nhgWINlDZbzytBULFTd72IC_lwFeB",
+      "drive_path": "MyDrive/2026_2_INSIGHT/ALS_RESULTS/ALS_voice_analysis_20260921_075155/HUBERT_PAPER_REPRODUCTION/20261005T055211_070474Z/selected_layers_validation_only.csv",
+      "sha256": "e50d9d1f629493c264cd7c8c166f3b5abe14f2a974a60b1e6a4ce77856e1e9f6",
+      "bytes": 570
+    },
+    {
+      "file": "test_selected_layers.csv",
+      "drive_file_id": "12ZhTKJkytqFrii1owDBEnwpsgKrzbcEa",
+      "drive_path": "MyDrive/2026_2_INSIGHT/ALS_RESULTS/ALS_voice_analysis_20260921_075155/HUBERT_PAPER_REPRODUCTION/20261005T055211_070474Z/test_selected_layers.csv",
+      "sha256": "c200af1ec483a35bdb5185f67ba8c705906d2678f2283b514726fd652b580322",
+      "bytes": 1370
+    },
+    {
+      "file": "27074b1545_detection_paper_table.csv",
+      "drive_file_id": "1W213jcudG_PHjce5dUEh1bSEA9hIxWXF",
+      "drive_path": "MyDrive/2026_2_INSIGHT/ALS_RESULTS/ALS_voice_analysis_20260921_075155/HUBERT_PAPER_REPRODUCTION/20261005T055211_070474Z/27074b1545_detection_paper_table.csv",
+      "sha256": "63ae1afb1e51c48a95e3b7dd36d65453d864bccb7d2f7de66a4177a8672f1d65",
+      "bytes": 586
     }
   ]
 }

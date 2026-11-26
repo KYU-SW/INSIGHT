@@ -1,0 +1,35 @@
+{
+  "run_id": "drive_notes",
+  "retrieved": "2026-11-26",
+  "note": "sha256 = SHA-256 of the bytes downloaded from Google Drive (unmodified copies)",
+  "sources": [
+    {
+      "file": "ALS_voice_analysis_20260921_075155__run_summary.json",
+      "drive_file_id": "1OyeP06wkZhdMPHdNoOwiiM3KvGq2rSOB",
+      "drive_path": "MyDrive/2026_2_INSIGHT/ALS_RESULTS/ALS_voice_analysis_20260921_075155/run_summary.json",
+      "sha256": "ce9f3fb6fc24c9f2c235bc60de6fb73e40e5aecb7a262e001b5a03dc05abcda0",
+      "bytes": 1629
+    },
+    {
+      "file": "정리본_안내와_검증범위.md",
+      "drive_file_id": "1MtT31Z2bn3uTZgSDXSxARdqGsHeQReK1",
+      "drive_path": "MyDrive/2026_2_INSIGHT_실험정리_20261115/정리본_안내와_검증범위.md",
+      "sha256": "e5553e328b4ceca123c0fd41aa5a7999859d325d28bc37ca6a8b6bff50794c26",
+      "bytes": 6414
+    },
+    {
+      "file": "ALS_Transformer_Model_Bundle__README.md",
+      "drive_file_id": "1Q30F553w25xiS8ivlNNvjOEbz29rgiTB",
+      "drive_path": "MyDrive/2026_2_INSIGHT/ALS_Transformer_Model_Bundle/README.md",
+      "sha256": "eb915074021a5e2cb5bf864d80e31adcd7fcf70b9d685db5b03efba8a719649c",
+      "bytes": 2565
+    },
+    {
+      "file": "ALS_Transformer_Model_Bundle__bundle_manifest.json",
+      "drive_file_id": "1BchzC6KDijFlvCGSjWS8nucz8bhqvI6z",
+      "drive_path": "MyDrive/2026_2_INSIGHT/ALS_Transformer_Model_Bundle/bundle_manifest.json",
+      "sha256": "93596edd3d0d055bbb39b50879426adeea94b011bb7f7af85193a2bd0f3c8bf8",
+      "bytes": 897
+    }
+  ]
+}
