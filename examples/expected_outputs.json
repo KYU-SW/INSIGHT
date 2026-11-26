@@ -1,0 +1,31 @@
+{
+  "model_card_head_sha256": "f46ad9e6130f4538dab2427b78b17d501f6358d5f7c88f400fe820a656da58c6",
+  "score_atol": 0.0001,
+  "metric_rtol": 0.0001,
+  "outputs": {
+    "synthetic_vowel_a_steady.wav": {
+      "wav_sha256": "638602154aabad765ae2e759ed221d2cccb1b7a8bfe55b9098259a9482e19221",
+      "score": 0.999982,
+      "acoustic": {
+        "mean_pitch_hz": 120.00401589618626,
+        "pitch_sd_hz": 0.0008524329357869775,
+        "pitch_cv": 7.103370078251422e-06,
+        "intensity_cv": 0.0740145817399025,
+        "mean_intensity_dbfs": -12.57348895072937
+      },
+      "duration_seconds": 3.0
+    },
+    "synthetic_vowel_a_unstable.wav": {
+      "wav_sha256": "e5b88a3d9aa463bbeac6f99b8f9638be77a8b7e785e208d8c847ad748e51907a",
+      "score": 0.999988,
+      "acoustic": {
+        "mean_pitch_hz": 119.87650162078913,
+        "pitch_sd_hz": 1.3741920342652614,
+        "pitch_cv": 0.01146339787769505,
+        "intensity_cv": 0.10528691112995148,
+        "mean_intensity_dbfs": -17.071192264556885
+      },
+      "duration_seconds": 3.0
+    }
+  }
+}
