@@ -202,7 +202,7 @@
     "5_confusion_matrix_reproduces_run_test_accuracy": true,
     "6_deployed_weights_reproduce_stored_test_probabilities": true,
     "7_comparison_run_uses_identical_subject_split": true,
-    "6_max_abs_probability_difference": 5.960464477539063e-08,
+    "6_probability_tolerance": 1e-06,
     "6_samples_checked": 4
   },
   "notes": [

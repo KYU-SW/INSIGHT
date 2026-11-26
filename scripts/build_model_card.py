@@ -35,6 +35,7 @@ RUN = ROOT / "provenance" / f"run_{RUN_ID}"
 DEPLOYED = ["head.pt", "scaler.npz", "history.csv", "validation.json", "test_confusion_counts.npy"]
 HIDDEN_INDEX = 7
 PROB_ATOL = 1e-6  # float32, GPU (training) vs CPU (here)
+_LAST_MAX_DIFF = [float("nan")]
 
 
 def sha256(path: Path) -> str:
@@ -177,6 +178,7 @@ def build() -> dict:
         features = {sid: cached[sid] for sid in cached.files}
     recomputed_prob = recompute_probabilities(features)
     max_prob_diff = max(abs(recomputed_prob[sid] - stored_prob[sid]) for sid in features)
+    _LAST_MAX_DIFF[0] = max_prob_diff
     best = min(history, key=lambda row: float(row["val_loss"]))
     (tn, fp), (fn, tp) = cm.tolist()
     sensitivity, specificity, precision = tp / (tp + fn), tn / (tn + fp), tp / (tp + fp)
@@ -233,7 +235,9 @@ def build() -> dict:
             "eer": round(float(test_row["EER"]), 4),
         },
         "test_uncertainty": uncertainty(predictions),
-        "provenance_checks": checks | {"6_max_abs_probability_difference": float(max_prob_diff), "6_samples_checked": len(features)},
+        # The raw max difference (~1 float32 ULP) depends on the CPU's SIMD summation order, so writing it into the card
+        # made --check flaky across CI runners. The card records the tolerance it passed; the value is printed instead.
+        "provenance_checks": checks | {"6_probability_tolerance": PROB_ATOL, "6_samples_checked": len(features)},
         "notes": [
             "The repository notebook (MAX_EPOCHS 20, PATIENCE 3, LR 5e-4) is a later edit whose saved output is run "
             "20261005T080540_357849Z. The deployed weights come from the earlier run 20261005T055211_070474Z "
@@ -259,6 +263,7 @@ def build() -> dict:
 if __name__ == "__main__":
     card = json.dumps(build(), indent=2, ensure_ascii=False) + "\n"
     target = ROOT / "model_card.json"
+    print(f"check 6: max |recomputed - stored| probability = {_LAST_MAX_DIFF[0]:.3g} (tolerance {PROB_ATOL})", file=sys.stderr)
     if "--check" in sys.argv:
         if not target.exists() or target.read_text(encoding="utf-8") != card:
             sys.exit("model_card.json is stale: run scripts/build_model_card.py")
