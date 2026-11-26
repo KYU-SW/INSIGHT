@@ -1,5 +1,7 @@
 # INSIGHT
 
+[![CI](https://github.com/KYU-SW/INSIGHT/actions/workflows/ci.yml/badge.svg)](https://github.com/KYU-SW/INSIGHT/actions/workflows/ci.yml)
+
 음성 기반 근위축성 측삭경화증(ALS) 조기 선별 보조 연구 프로토타입 · Early screening support for ALS through speech analysis
 
 Next.js 16 / React 19 화면과 Python HuBERT 추론 서비스로 구성됩니다. 익명·시험 데이터 전용입니다. 출력은 **선별 보조 정보**이며 진단이 아닙니다.
@@ -58,7 +60,7 @@ INSIGHT: 녹음 파일 → AI 음성이상점수 + 음향 지표,  VHI-30 → �
    │ 응답마다 임시 저장 (DB 연동 시)          │ XMLHttpRequest 업로드 진행률
    ▼                                          ▼
 [Next.js 서버]                              /api/analyze ──► [FastAPI :8001] src/backend/app.py
-  /api/database/questionnaire-drafts          decode → mono → 16 kHz → HuBERT-large(frozen) hidden_states[7]
+  /api/database/questionnaire-drafts          decode → mono → (>8 kHz면 8 kHz로) → 16 kHz → HuBERT-large(frozen) hidden_states[7]
   /api/database/questionnaires (점수 재계산)  → 시간축 max pooling(1024) → StandardScaler → MLP → sigmoid
   /api/model-card (가중치 SHA-256 대조)      + F0(YIN)·강도 CV·dBFS (모델과 독립)
    │ FIREBASE_DATABASE_SECRET (서버 전용, .env.local)
@@ -95,9 +97,14 @@ INSIGHT: 녹음 파일 → AI 음성이상점수 + 음향 지표,  VHI-30 → �
 | 특징 | frozen `facebook/hubert-large-ls960-ft` @ `ece5fabb`, hidden_states[7], 시간축 max pooling |
 | 학습 | Adam, lr 1e-3, batch 64, BCE, max 100 epoch, patience 20, 최소 val loss epoch 선택. Head: Linear(1024,128)–ReLU–Linear(128,1) |
 | 검증 (선택용) | **73.31%** (239/326), best epoch 2 |
-| 시험 (녹음 단위) | ACC **75.3%**, 민감도 **86.0%**, 특이도 **58.6%**, 균형정확도 72.3%, EER 0.234 |
+| 시험 · 녹음 단위 (328개) | ACC **75.3%** [68.3–81.4], 민감도 **86.0%** [77.5–93.0], 특이도 **58.6%** [46.9–69.5], EER 0.234 |
+| 시험 · 피험자 단위 (41명: HC 16, ALS 25) | ACC **85.4%** [73.2–95.1], 민감도 **92.0%** [80.0–100], 특이도 **75.0%** [50.0–93.8] |
 
-**해석 범위.** 시험 수치는 선택에 쓰지 않은 41명에서 나왔지만 같은 SAND 분포·녹음 프로토콜 내부의 결과이며, 스마트폰 녹음 등 배포 앱 입력에서의 성능이 아닙니다. 피험자당 평균 약 8개 녹음이므로 녹음 단위 지표는 유효 표본 수를 과대평가합니다. 특이도가 낮아 0.5 기준에서 위양성이 많습니다. 저장소의 노트북(MAX_EPOCHS 20, PATIENCE 3, LR 5e-4)은 이후 설정을 바꾼 버전으로, 저장된 출력은 다른 실행(`20261005T080540_357849Z`)의 것입니다. 특징 추출·분할 코드는 같습니다.
+[ ]는 95% 신뢰구간입니다. 같은 사람의 녹음은 서로 독립이 아니므로 녹음이 아니라 **피험자를 재표본**했습니다(클래스 층화 cluster bootstrap 10,000회, seed 42). 피험자 단위 판정은 평가 전에 고정한 규칙(피험자별 P(ALS) 평균 ≥ 0.5)을 따릅니다. HC가 16명뿐이라 특이도 신뢰구간이 50–94%로 넓습니다. 정밀한 특이도 추정에는 대조군이 더 필요합니다.
+
+**해석 범위.** 시험 수치는 선택에 쓰지 않은 41명에서 나왔지만 같은 SAND 분포·녹음 프로토콜 내부의 결과이며, 스마트폰 녹음 등 배포 앱 입력에서의 성능이 아닙니다.
+
+**학습–배포 전처리 일치.** 학습 녹음 2,164개는 **모두 8 kHz**입니다(`split_manifest.csv`의 `source_sr`). 학습 특징에는 4 kHz 이상 성분이 없었으므로, `decode_audio`는 8 kHz를 넘는 입력을 먼저 8 kHz로 낮춘 뒤 16 kHz로 올립니다. 8 kHz 입력은 학습 경로와 비트 단위로 동일하고, 48 kHz 입력의 4 kHz 이상 에너지는 약 10⁻¹²로 제거됨을 확인했습니다. 실제 스마트폰 녹음에서 성능이 얼마나 달라지는지는 측정하지 못했습니다. 저장소의 노트북(MAX_EPOCHS 20, PATIENCE 3, LR 5e-4)은 이후 설정을 바꾼 버전으로, 저장된 출력은 다른 실행(`20261005T080540_357849Z`)의 것입니다. 특징 추출·분할 코드는 같습니다.
 
 ---
 
@@ -136,6 +143,7 @@ INSIGHT: 녹음 파일 → AI 음성이상점수 + 음향 지표,  VHI-30 → �
 | 항목 | 결과 |
 |---|---|
 | `npm run lint` / `typecheck` | 통과 |
+| CI (GitHub Actions) | `web`: lint·typecheck·test·build / `model`: 가중치 증명 10개 검사 + 합성 음성 재현 |
 | `npm test` | **18/18 통과** (VHI 점수·문항 매핑, 임시 저장 검증, Firebase 인증·권한 거부, 모델 카드 증명 검사 등) |
 | `npm run build` | 성공, **24.9 s** |
 | HuBERT + head 로드 | 4.2–8.5 s (캐시 상태에 따라) |
@@ -163,7 +171,18 @@ INSIGHT: 녹음 파일 → AI 음성이상점수 + 음향 지표,  VHI-30 → �
 | `synthetic_vowel_a_steady.wav` | F0 120 Hz 고정, 진폭 일정 | 0.999982 | 0.00 Hz | 0.074 |
 | `synthetic_vowel_a_unstable.wav` | 주기별 F0 섭동 3%, 5 Hz 진폭 떨림, 잡음 | 0.999988 | 1.37 Hz | 0.105 |
 
-음향 지표는 설계대로 두 신호를 구분합니다. 이 예시는 파이프라인의 **결정성·재현성** 검증용입니다. 합성 신호는 학습 분포 밖이라 모델 점수는 둘 다 약 1.0으로 포화되며, 분포 밖 입력 처리는 향후 과제입니다.
+음향 지표는 설계대로 두 신호를 구분합니다. 이 예시는 파이프라인의 **결정성·재현성** 검증용입니다. 모델 점수는 두 합성 신호 모두 약 1.0으로 포화됩니다.
+
+**실험: 포화 원인이 대역폭인가?** ([`experiments/bandwidth_8k.py`](experiments/bandwidth_8k.py), 결과 [`bandwidth_8k_results.json`](experiments/bandwidth_8k_results.json))
+
+| 항목 | 내용 |
+|---|---|
+| 가설 | 학습에 없던 4–8 kHz 성분 때문에 합성 입력이 분포 밖이 되어 점수가 포화된다 |
+| 설계 | 전처리 하나만 변경(현재 vs 8 kHz 대역 일치), 합성 /a/ F0 4종 × 안정/불안정 = 8개 |
+| 관찰 | 안정 합성음은 원래 4 kHz 이상 에너지가 0인데도 0.99994–0.99999. 대역 일치 후에도 8개 모두 0.99994–0.99999 |
+| 해석 | **가설 기각.** 포화는 대역폭이 아니라 합성 신호 자체의 분포 이탈로 보이며, 구체적 원인은 미측정 |
+
+분포 밖 입력 탐지(OOD)는 향후 과제입니다.
 
 ---
 
@@ -223,6 +242,9 @@ VHI-30 문항은 PhenX 영문판(PX201301; Jacobson et al., 1997) 기반 **개�
 | 합성 음성 재현 예시와 기대 출력 비교 | [`f71d9ac`](https://github.com/KYU-SW/INSIGHT/commit/f71d9ac) |
 | 배포 가중치 ↔ 학습 실행 `20261005T055211_070474Z` 증명 (10개 검사) | [`35b7c72`](https://github.com/KYU-SW/INSIGHT/commit/35b7c72) |
 | 실제 Firebase DB 연결·규칙 적용, VHI-30 임시 저장·이어쓰기, 모바일 검증 | [`0684d26`](https://github.com/KYU-SW/INSIGHT/commit/0684d26) |
+| 학습–추론 대역폭(8 kHz) 일치와 포화 원인 실험(부정 결과) | [`68b5878`](https://github.com/KYU-SW/INSIGHT/commit/68b5878) |
+| 피험자 단위 지표와 cluster bootstrap 95% 신뢰구간 | [`a2b0f1c`](https://github.com/KYU-SW/INSIGHT/commit/a2b0f1c) |
+| CI: 웹 검사 + 모델 증명·재현 자동화 | [`f3d4037`](https://github.com/KYU-SW/INSIGHT/commit/f3d4037) |
 
 ---
 
