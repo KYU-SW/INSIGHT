@@ -35,3 +35,21 @@ export async function saveQuestionnaire(questionnaire: VhiResult): Promise<{ que
     method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ questionnaire: { subject_id, completed_at, answers } }),
   }));
 }
+
+export type QuestionnaireDraft = { subject_id: string; answers: (number | null)[]; current_index: number; updated_at: string };
+const draftUrl = (subjectId: string) => `/api/database/questionnaire-drafts?subject_id=${encodeURIComponent(subjectId)}`;
+
+export async function loadQuestionnaireDraft(subjectId: string): Promise<QuestionnaireDraft | null> {
+  return (await readResponse<{ draft: QuestionnaireDraft | null }>(await fetch(draftUrl(subjectId), { cache: "no-store" }))).draft;
+}
+
+export async function saveQuestionnaireDraft(subjectId: string, answers: (number | null)[], currentIndex: number): Promise<{ updated_at: string }> {
+  return readResponse(await fetch("/api/database/questionnaire-drafts", {
+    method: "PUT", headers: { "content-type": "application/json" }, body: JSON.stringify({ subject_id: subjectId, answers, current_index: currentIndex }),
+  }));
+}
+
+export async function deleteQuestionnaireDraft(subjectId: string): Promise<void> {
+  const response = await fetch(draftUrl(subjectId), { method: "DELETE" });
+  if (!response.ok) await readResponse(response);
+}

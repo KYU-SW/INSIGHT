@@ -5,7 +5,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { test } from "node:test";
 import { firebaseAccessToken } from "../src/lib/firebase-auth";
-import { checkDatabaseConnection, loadDatabaseQuestionnaires, loadDatabaseResults, uploadDatabaseResult, uploadQuestionnaire } from "../src/lib/firebase-database";
+import { checkDatabaseConnection, loadDatabaseQuestionnaires, loadQuestionnaireDraft, saveQuestionnaireDraft, loadDatabaseResults, uploadDatabaseResult, uploadQuestionnaire } from "../src/lib/firebase-database";
 import type { ClinicalInference } from "../src/types";
 
 process.env.FIREBASE_DATABASE_URL = "https://example-default-rtdb.firebaseio.com";
@@ -43,7 +43,7 @@ test("database access is refused without a service account instead of falling ba
   let called = false;
   globalThis.fetch = async () => { called = true; return Response.json({}); };
   try {
-    await assert.rejects(checkDatabaseConnection(), /FIREBASE_SERVICE_ACCOUNT_PATH/);
+    await assert.rejects(checkDatabaseConnection(), /credentials are not set/);
     assert.equal(called, false);
   } finally {
     globalThis.fetch = original;
@@ -158,6 +158,45 @@ test("every Realtime Database request carries the server access token", async ()
     await checkDatabaseConnection();
     assert.equal(urls.length, 4);
     assert.ok(urls.every(url => url.searchParams.get("access_token") === "test-token"));
+  } finally {
+    globalThis.fetch = original;
+  }
+});
+
+test("a configured Database Secret is sent as the auth parameter instead of an OAuth token", async () => {
+  process.env.FIREBASE_DATABASE_SECRET = "test-secret";
+  const original = globalThis.fetch;
+  const urls: URL[] = [];
+  globalThis.fetch = async input => { urls.push(new URL(String(input))); return Response.json(null); };
+  try {
+    await checkDatabaseConnection();
+    assert.ok(urls.every(url => url.searchParams.get("auth") === "test-secret" && !url.searchParams.has("access_token")));
+  } finally {
+    globalThis.fetch = original;
+    delete process.env.FIREBASE_DATABASE_SECRET;
+  }
+});
+
+test("VHI drafts store only answered items, validate values, and restore in item order", async () => {
+  const writes: { path: string; body: Record<string, unknown> }[] = [];
+  const original = globalThis.fetch;
+  globalThis.fetch = async (input, init) => {
+    const path = new URL(String(input)).pathname;
+    if (init?.method === "PUT") { writes.push({ path, body: JSON.parse(String(init.body)) }); return Response.json({}); }
+    return Response.json(writes.at(-1)?.body ?? null);
+  };
+  try {
+    const answers = Array(30).fill(null); answers[0] = 3; answers[29] = 0;
+    await saveQuestionnaireDraft({ subject_id: "subj_1", answers, current_index: 29 });
+    assert.equal(writes[0].path, "/questionnaire_drafts/SUBJ_1.json");
+    assert.deepEqual(writes[0].body.answers, { 1: 3, 30: 0 });
+    const draft = await loadQuestionnaireDraft("SUBJ_1");
+    assert.equal(draft?.answers[0], 3);
+    assert.equal(draft?.answers[29], 0);
+    assert.equal(draft?.answers.filter(value => value !== null).length, 2);
+    assert.equal(draft?.current_index, 29);
+    await assert.rejects(saveQuestionnaireDraft({ subject_id: "S1", answers: [...answers.slice(0, 29), 7], current_index: 0 }), /문항 30/);
+    await assert.rejects(saveQuestionnaireDraft({ subject_id: "S1", answers, current_index: 30 }), /문항 위치/);
   } finally {
     globalThis.fetch = original;
   }

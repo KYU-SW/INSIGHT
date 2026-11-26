@@ -1,15 +1,27 @@
 "use client";
 
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import Link from "next/link";
 import { ClipboardList } from "lucide-react";
 import { useClinicalData } from "@/components/clinical-data-provider";
 import { VHI_DOMAIN_LABELS, VHI_INSTRUMENT, VHI_ITEMS, VHI_SCALE } from "@/data/vhi";
 import { SUBJECT_ID_HINT, isValidSubjectId, normalizeSubjectId } from "@/lib/subject-id";
 import { isCompleteVhi } from "@/lib/vhi";
+import { deleteQuestionnaireDraft, loadQuestionnaireDraft, saveQuestionnaireDraft } from "@/services/databaseService";
 import type { VhiResult } from "@/types";
 
 const TOTAL = VHI_ITEMS.length;
+const clock = (iso?: string) => (iso ? new Date(iso).toLocaleTimeString("ko-KR") : "");
+
+function draftLabel(state: { kind: string; at?: string; count?: number }) {
+  switch (state.kind) {
+    case "saving": return "임시 저장 중…";
+    case "saved": return state.at ? `임시 저장됨 ${clock(state.at)}` : "임시 저장 켜짐";
+    case "restored": return `임시 저장된 응답 ${state.count}개를 불러왔습니다 (${clock(state.at)})`;
+    case "failed": return "임시 저장 실패: 응답은 이 화면에 남아 있습니다. 연결 상태를 확인하세요.";
+    default: return "임시 저장 꺼짐 (DB 미연동)";
+  }
+}
 
 /** Domain + total scores only. VHI.md: no severity grade without a validated Korean cutoff. */
 export function VhiSummary({ entry, heading = "VHI-30 자가보고 · Self-report" }: { entry: VhiResult; heading?: string }) {
@@ -36,23 +48,63 @@ export function VhiQuestionnaire() {
   const [notice, setNotice] = useState("");
   const [completedId, setCompletedId] = useState<string | null>(null);
   const [uploadError, setUploadError] = useState("");
+  // Draft autosave to questionnaire_drafts/{subjectId}; only while the DB is connected.
+  const [draftState, setDraftState] = useState<{ kind: "off" | "saving" | "saved" | "failed" | "restored"; at?: string; count?: number }>({ kind: "off" });
+  const [starting, setStarting] = useState(false);
+  const saveQueue = useRef<Promise<void>>(Promise.resolve());
   const completed = questionnaires.find(entry => entry.id === completedId);
   const answered = answers.filter(value => value !== undefined).length;
   const item = VHI_ITEMS[index];
 
-  function start(event: FormEvent<HTMLFormElement>) {
+  async function start(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const normalized = normalizeSubjectId(subjectInput);
     if (!isValidSubjectId(normalized)) { setNotice(SUBJECT_ID_HINT); return; }
-    setNotice(""); setSubjectId(normalized); setActiveSubjectId(normalized);
+    setNotice(""); setActiveSubjectId(normalized);
+    let restored: (number | undefined)[] = Array(TOTAL).fill(undefined), restoredIndex = 0;
+    if (databaseConnected) {
+      setStarting(true);
+      try {
+        const draft = await loadQuestionnaireDraft(normalized);
+        const count = draft?.answers.filter(value => value !== null).length ?? 0;
+        if (draft && count > 0) {
+          restored = draft.answers.map(value => value ?? undefined);
+          restoredIndex = draft.current_index;
+          setDraftState({ kind: "restored", at: draft.updated_at, count });
+        } else setDraftState({ kind: "saved" });
+      } catch { setDraftState({ kind: "failed" }); }
+      finally { setStarting(false); }
+    } else setDraftState({ kind: "off" });
+    setAnswers(restored); setIndex(restoredIndex); setSubjectId(normalized);
+  }
+  function persist(nextAnswers: (number | undefined)[], nextIndex: number) {
+    if (!subjectId || !databaseConnected) return;
+    setDraftState(current => ({ ...current, kind: "saving" }));
+    // Serialize writes so an older draft never overwrites a newer one.
+    saveQueue.current = saveQueue.current.then(async () => {
+      const saved = await saveQuestionnaireDraft(subjectId, nextAnswers.map(value => value ?? null), nextIndex);
+      setDraftState({ kind: "saved", at: saved.updated_at });
+    }).catch(() => setDraftState({ kind: "failed" }));
   }
   function select(value: number) {
-    setAnswers(current => current.map((answer, i) => (i === index ? value : answer)));
+    const nextAnswers = answers.map((answer, i) => (i === index ? value : answer));
+    setAnswers(nextAnswers);
     setNotice("");
+    persist(nextAnswers, index);
+  }
+  function move(nextIndex: number) {
+    setIndex(nextIndex);
+    persist(answers, nextIndex);
   }
   function next() {
     if (answers[index] === undefined) { setNotice("이 문항에 먼저 응답해 주세요."); return; }
-    setNotice(""); setIndex(current => Math.min(current + 1, TOTAL - 1));
+    setNotice(""); move(Math.min(index + 1, TOTAL - 1));
+  }
+  async function discardDraft() {
+    if (!subjectId) return;
+    await saveQueue.current;
+    try { await deleteQuestionnaireDraft(subjectId); setDraftState({ kind: "saved" }); } catch { setDraftState({ kind: "failed" }); }
+    setAnswers(Array(TOTAL).fill(undefined)); setIndex(0);
   }
   function submit() {
     if (!subjectId || !isCompleteVhi(answers)) {
@@ -61,15 +113,17 @@ export function VhiQuestionnaire() {
       if (missing >= 0) setIndex(missing);
       return;
     }
+    persist(answers, index);
     setCompletedId(completeQuestionnaire(subjectId, [...answers]).id);
   }
   function restart() {
-    setAnswers(Array(TOTAL).fill(undefined)); setIndex(0); setCompletedId(null); setSubjectId(null); setNotice(""); setUploadError("");
+    setAnswers(Array(TOTAL).fill(undefined)); setIndex(0); setCompletedId(null); setSubjectId(null); setNotice(""); setUploadError(""); setDraftState({ kind: "off" });
   }
   async function upload() {
     if (!completed) return;
     setUploadError("");
-    try { await uploadQuestionnaire(completed.id); }
+    await saveQueue.current; // the server deletes the draft after storing; let pending draft writes land first
+    try { await uploadQuestionnaire(completed.id); setDraftState({ kind: "off" }); }
     catch (error) { setUploadError(error instanceof Error ? error.message : "DB upload failed."); }
   }
 
@@ -98,6 +152,7 @@ export function VhiQuestionnaire() {
         <button type="button" onClick={restart} className="vhi-secondary">새 문진</button>
       </div>
       {!databaseConnected && <p className="mt-2 text-body-sm text-on-surface-variant">DB 업로드는 상단 DB 연동 후 사용할 수 있습니다. 결과는 현재 브라우저 세션에 유지됩니다.</p>}
+      {databaseConnected && !completed.databaseId && <p className="mt-2 text-body-sm text-on-surface-variant">응답은 임시 저장되어 있습니다. DB 업로드 시 최종 결과로 저장되고 임시 저장본은 삭제됩니다.</p>}
       {uploadError && <p role="alert" className="mt-2 text-body-sm text-error">{uploadError}</p>}
     </section>
   </div>;
@@ -106,9 +161,9 @@ export function VhiQuestionnaire() {
     <section className="rounded bg-surface-container-lowest p-unit-lg shadow-sm">
       <form onSubmit={start} className="vhi-start">
         <label className="text-body-sm font-medium">Subject ID (가명)<input required maxLength={80} value={subjectInput} onChange={event => setSubjectInput(event.target.value.toUpperCase())} placeholder="SUBJ_001" autoCapitalize="characters" spellCheck={false} title={SUBJECT_ID_HINT} /></label>
-        <button type="submit" className="vhi-primary">문진 시작</button>
+        <button type="submit" disabled={starting} className="vhi-primary">{starting ? "임시 저장 확인 중…" : "문진 시작"}</button>
       </form>
-      <p className="mt-2 text-body-sm text-on-surface-variant">실명이나 병원 등록번호 대신 가명 ID를 입력하세요. 같은 Subject ID의 음성 분석 결과와 함께 조회됩니다.</p>
+      <p className="mt-2 text-body-sm text-on-surface-variant">실명이나 병원 등록번호 대신 가명 ID를 입력하세요. 같은 Subject ID의 음성 분석 결과와 함께 조회됩니다. {databaseConnected ? "DB 연동 중: 응답이 자동 임시 저장되고, 같은 ID로 다시 시작하면 이어서 작성합니다." : "상단 DB 연동 후 시작하면 응답이 자동 임시 저장됩니다."}</p>
       {notice && <p role="alert" className="mt-2 text-body-sm text-error">{notice}</p>}
     </section>
   </div>;
@@ -116,6 +171,7 @@ export function VhiQuestionnaire() {
   return <div className="vhi-workspace flex flex-col gap-unit-md">{header}
     <section className="vhi-card rounded bg-surface-container-lowest shadow-sm" aria-label={`문항 ${item.number}`}>
       <div className="vhi-progress-head"><span>문진 진행률 · {subjectId}</span><span>{answered} / {TOTAL} 응답</span></div>
+      <p className="vhi-draft" role="status" aria-live="polite" data-kind={draftState.kind}>{draftLabel(draftState)}{draftState.kind === "restored" && <button type="button" onClick={() => void discardDraft()}>처음부터 다시</button>}</p>
       <div role="progressbar" aria-label="문진 진행률" aria-valuemin={0} aria-valuemax={TOTAL} aria-valuenow={answered} className="score-track"><span style={{ width: `${(answered / TOTAL) * 100}%` }} /></div>
       <div className="vhi-question">
         <div className="vhi-meta"><span className="vhi-domain" data-domain={item.domain}>{VHI_DOMAIN_LABELS[item.domain].ko}</span><span>문항 {index + 1} / {TOTAL}</span></div>
@@ -130,7 +186,7 @@ export function VhiQuestionnaire() {
         {notice && <p role="alert" className="mt-2 text-body-sm text-error">{notice}</p>}
       </div>
       <div className="vhi-nav">
-        <button type="button" onClick={() => { setNotice(""); setIndex(current => Math.max(0, current - 1)); }} disabled={index === 0} className="vhi-secondary">이전 문항</button>
+        <button type="button" onClick={() => { setNotice(""); move(Math.max(0, index - 1)); }} disabled={index === 0} className="vhi-secondary">이전 문항</button>
         {index === TOTAL - 1
           ? <button type="button" onClick={submit} className="vhi-primary">문진 제출</button>
           : <button type="button" onClick={next} className="vhi-primary">다음 문항 →</button>}

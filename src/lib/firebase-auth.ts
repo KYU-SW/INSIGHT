@@ -2,8 +2,8 @@ import { createSign } from "node:crypto";
 import { readFile } from "node:fs/promises";
 
 // Server-only Firebase access. The Realtime Database rules deny all client access, so the Next.js server
-// authenticates as a service account (OAuth2 JWT bearer grant) and sends access_token on each REST call.
-// The service account key never reaches the browser and must not be committed.
+// authenticates with either a Database Secret (FIREBASE_DATABASE_SECRET) or a service account
+// (OAuth2 JWT bearer grant). Credentials live only in .env.local on the server and never reach the browser.
 
 const TOKEN_URL = "https://oauth2.googleapis.com/token";
 const SCOPES = "https://www.googleapis.com/auth/firebase.database https://www.googleapis.com/auth/userinfo.email";
@@ -11,9 +11,16 @@ let cached: { token: string; expiresAt: number; keyPath: string } | null = null;
 
 const base64url = (value: string | Buffer) => Buffer.from(value).toString("base64url");
 
+/** Query parameter that authenticates one REST call: a legacy Database Secret, or a service-account OAuth2 token. */
+export async function firebaseAuthParam(): Promise<[name: "auth" | "access_token", value: string]> {
+  const secret = process.env.FIREBASE_DATABASE_SECRET;
+  if (secret) return ["auth", secret];
+  return ["access_token", await firebaseAccessToken()];
+}
+
 export async function firebaseAccessToken(): Promise<string> {
   const keyPath = process.env.FIREBASE_SERVICE_ACCOUNT_PATH;
-  if (!keyPath) throw new Error("FIREBASE_SERVICE_ACCOUNT_PATH is not set. Firebase rules deny unauthenticated access; set a service account key path in .env.local.");
+  if (!keyPath) throw new Error("Firebase server credentials are not set. Firebase rules deny unauthenticated access; set FIREBASE_DATABASE_SECRET or FIREBASE_SERVICE_ACCOUNT_PATH in .env.local.");
   if (cached && cached.keyPath === keyPath && cached.expiresAt - 60_000 > Date.now()) return cached.token;
   let account: { client_email?: unknown; private_key?: unknown };
   try { account = JSON.parse(await readFile(keyPath, "utf8")); }

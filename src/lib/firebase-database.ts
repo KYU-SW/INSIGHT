@@ -3,10 +3,10 @@ import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import type { ClinicalInference, SessionResult, VhiResult } from "@/types";
 import { VOICE_TASKS } from "@/data/tasks";
-import { VHI_INSTRUMENT } from "@/data/vhi";
+import { VHI_INSTRUMENT, VHI_ITEMS } from "@/data/vhi";
 import { isValidSubjectId, normalizeSubjectId, requireSubjectId } from "@/lib/subject-id";
 import { scoreVhi } from "@/lib/vhi";
-import { firebaseAccessToken } from "@/lib/firebase-auth";
+import { firebaseAuthParam } from "@/lib/firebase-auth";
 
 const DEFAULT_URL = "Enter your Firebase URL";
 const COLLECTIONS = ["subjects", "recordings", "analyses", "acoustic_metrics"] as const;
@@ -21,7 +21,7 @@ function databaseUrl(path: string, shallow = false) {
 
 async function request(path: string, init?: RequestInit, shallow = false): Promise<unknown> {
   const url = new URL(databaseUrl(path, shallow));
-  url.searchParams.set("access_token", await firebaseAccessToken());
+  url.searchParams.set(...await firebaseAuthParam());
   const response = await fetch(url, {
     ...init, cache: "no-store", signal: AbortSignal.timeout(10000),
   });
@@ -177,6 +177,7 @@ export async function uploadQuestionnaire(input: Pick<VhiResult, "subject_id" | 
     answers: [...input.answers], functional_score: scores.functional, physical_score: scores.physical,
     emotional_score: scores.emotional, total_score: scores.total,
   });
+  await deleteQuestionnaireDraft(subjectId); // the stored questionnaire supersedes the draft
   return { questionnaire_id: questionnaireId };
 }
 
@@ -194,4 +195,41 @@ export async function loadDatabaseQuestionnaires(): Promise<VhiResult[]> {
       instrument_version: text(row.instrument_version) ?? "unknown", answers: answers as number[], scores });
   }
   return loaded.sort((left, right) => right.completed_at.localeCompare(left.completed_at));
+}
+
+// --- VHI-30 drafts: one in-progress response per subject, removed when the questionnaire is stored. ---
+export type QuestionnaireDraft = { subject_id: string; answers: (number | null)[]; current_index: number; updated_at: string };
+const draftPath = (subjectId: string) => `questionnaire_drafts/${encodeURIComponent(requireSubjectId(subjectId))}`;
+
+export async function loadQuestionnaireDraft(subjectId: string): Promise<QuestionnaireDraft | null> {
+  const row = await request(draftPath(subjectId)) as Record<string, unknown> | null;
+  if (!row || typeof row !== "object") return null;
+  const stored = row.answers && typeof row.answers === "object" ? row.answers as Record<string, unknown> : {};
+  const answers = VHI_ITEMS.map(item => {
+    const value = stored[String(item.number)];
+    return typeof value === "number" && Number.isInteger(value) && value >= 0 && value <= 4 ? value : null;
+  });
+  const index = number(row.current_index);
+  return { subject_id: requireSubjectId(subjectId), answers, updated_at: text(row.updated_at) ?? "",
+    current_index: index !== null && Number.isInteger(index) && index >= 0 && index < VHI_ITEMS.length ? index : 0 };
+}
+
+export async function saveQuestionnaireDraft(input: { subject_id: string; answers: unknown; current_index: unknown }): Promise<{ updated_at: string }> {
+  const subjectId = requireSubjectId(input?.subject_id ?? "");
+  if (!Array.isArray(input.answers) || input.answers.length !== VHI_ITEMS.length) throw new Error("임시 저장 응답 형식이 올바르지 않습니다.");
+  const answers: Record<string, number> = {};
+  input.answers.forEach((value, i) => {
+    if (value === null) return;
+    if (typeof value !== "number" || !Number.isInteger(value) || value < 0 || value > 4) throw new Error(`VHI 문항 ${i + 1}의 응답은 0~4 정수여야 합니다.`);
+    answers[String(i + 1)] = value;
+  });
+  const index = Number(input.current_index);
+  if (!Number.isInteger(index) || index < 0 || index >= VHI_ITEMS.length) throw new Error("문항 위치가 올바르지 않습니다.");
+  const updatedAt = new Date().toISOString();
+  await put(draftPath(subjectId), { subject_id: subjectId, instrument_version: VHI_INSTRUMENT.version, answers, current_index: index, updated_at: updatedAt });
+  return { updated_at: updatedAt };
+}
+
+export async function deleteQuestionnaireDraft(subjectId: string) {
+  await request(draftPath(subjectId), { method: "DELETE" });
 }

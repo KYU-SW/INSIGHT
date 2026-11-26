@@ -196,3 +196,7 @@
 .model-evidence dt { font-size: 12px; font-weight: 600; color: var(--muted); }
 .model-evidence dd { margin: 1px 0 0; font-variant-numeric: tabular-nums; }
 .model-evidence ul { padding-left: 18px; color: var(--muted); font-size: 12px; line-height: 17px; }
+.vhi-draft { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 6px 14px 0; font-size: 12px; color: var(--muted); }
+.vhi-draft[data-kind="failed"] { color: var(--tone-high); }
+.vhi-draft[data-kind="saved"], .vhi-draft[data-kind="restored"] { color: var(--tone-normal); }
+.vhi-draft button { min-height: 28px !important; padding: 0 8px; border: 1px solid #a8b6c2; background: #fff; color: var(--ink); font-size: 12px; }
