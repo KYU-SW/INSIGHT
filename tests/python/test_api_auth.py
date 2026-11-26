@@ -118,5 +118,37 @@ class OodGateTest(unittest.TestCase):
             model.ood_distance(np.zeros(512))
 
 
+class HealthTest(unittest.TestCase):
+    def setUp(self):
+        self.client = TestClient(app_module.app)
+        self.env = mock.patch.dict(os.environ, {"INSIGHT_BACKEND_TOKEN": TOKEN}, clear=False)
+        self.env.start()
+        os.environ.pop("INSIGHT_ALLOW_UNAUTHENTICATED", None)
+        self.addCleanup(self.env.stop)
+
+    def test_health_is_unauthenticated_and_does_not_load_hubert(self):
+        before = model.load_model.cache_info()
+        response = self.client.get("/health")
+        self.assertEqual(model.load_model.cache_info(), before)  # no call, no load
+        self.assertEqual(response.status_code, 200)
+        body = response.json()
+        self.assertEqual(set(body), {"status", "model_loaded", "ood_calibrated"})
+        self.assertEqual(body["status"], "ok")
+        self.assertIsInstance(body["model_loaded"], bool)
+        self.assertTrue(body["ood_calibrated"])
+
+    def test_health_works_even_when_token_is_unset(self):
+        os.environ.pop("INSIGHT_BACKEND_TOKEN")
+        self.assertEqual(self.client.get("/health").status_code, 200)
+
+    def test_exemption_is_exactly_get_health(self):
+        self.assertEqual(self.client.post("/health").status_code, 401)
+        self.assertEqual(self.client.get("/health/").status_code, 401)
+        self.assertEqual(self.client.get("/docs").status_code, 401)
+
+    def test_missing_calibration_reports_uncalibrated(self):
+        with mock.patch.object(app_module, "ood_threshold", side_effect=RuntimeError("missing")):
+            self.assertFalse(self.client.get("/health").json()["ood_calibrated"])
+
 if __name__ == "__main__":
     unittest.main()

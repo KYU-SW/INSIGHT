@@ -47,3 +47,7 @@ jobs:
         run: python scripts/calibrate_ood.py --check
       - name: Reproduce inference on synthetic examples
         run: python scripts/reproduce_inference.py
+      - name: End-to-end API smoke test (uvicorn + bearer auth + /health + /analyze)
+        run: sh scripts/smoke_backend.sh
+        env:
+          PYTHON: python

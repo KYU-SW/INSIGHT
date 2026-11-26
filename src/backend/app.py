@@ -13,7 +13,7 @@ from fastapi.responses import JSONResponse
 
 from .acoustics import measure
 from .interpretation import interpret_status
-from .model import decode_audio, infer
+from .model import decode_audio, infer, load_model, ood_threshold
 
 app = FastAPI(title="INSIGHT voice screening inference")
 TASKS = {
@@ -35,8 +35,14 @@ if not os.environ.get("INSIGHT_BACKEND_TOKEN") and os.environ.get("INSIGHT_ALLOW
     logging.getLogger("uvicorn.error").warning("INSIGHT_BACKEND_TOKEN is not set: every request will return 503")
 
 
+# Liveness probe exempt from auth: exactly GET /health, and it exposes only two booleans (no paths, versions or scores).
+HEALTH_PATH = "/health"
+
+
 @app.middleware("http")
 async def require_backend_token(request: Request, call_next):
+    if request.method == "GET" and request.url.path == HEALTH_PATH:
+        return await call_next(request)
     expected = os.environ.get("INSIGHT_BACKEND_TOKEN", "")
     if not expected:
         if os.environ.get("INSIGHT_ALLOW_UNAUTHENTICATED") == "1":
@@ -47,6 +53,17 @@ async def require_backend_token(request: Request, call_next):
         return JSONResponse({"detail": "Invalid or missing bearer token"}, status_code=401,
                             headers={"WWW-Authenticate": "Bearer"})
     return await call_next(request)
+
+
+@app.get(HEALTH_PATH)
+def health():
+    """Never triggers HuBERT loading: model_loaded only reports whether a previous request already loaded it."""
+    try:
+        ood_threshold()
+        ood_calibrated = True
+    except (RuntimeError, ValueError, TypeError, OSError, KeyError):
+        ood_calibrated = False
+    return {"status": "ok", "model_loaded": load_model.cache_info().currsize > 0, "ood_calibrated": ood_calibrated}
 
 
 @app.post("/analyze")

@@ -211,7 +211,9 @@
   "limitations": [
     "Test metrics are internal (same SAND distribution and recording protocol). They are not the performance of the deployed app on phone recordings, other microphones, or other populations.",
     "About 8 recordings per subject: recording-level metrics overstate the effective sample size; see test_uncertainty for subject-level metrics and subject-cluster bootstrap CIs (41 test subjects).",
-    "Specificity (58.6%) is low relative to sensitivity at the 0.5 threshold; no clinical operating point was validated.",
+    "Recording-level specificity (58.6%) is low relative to sensitivity at the 0.5 threshold (subject-level 75.0%, 16 HC subjects); no clinical operating point was validated.",
+    "Only one training seed (42) exists for this h07 configuration; a same-design rerun selected h04 instead, and the CIs reflect subject resampling only, not training-seed variance.",
+    "The OOD gate threshold (ood_calibration.json) was set from 4 cached test features, not a validation split; its false-rejection rate on real SAND audio is unmeasured.",
     "Check 6 recomputes 4 of 328 test samples (2 HC, 2 ALS, one misclassified each) from cached features; the remaining samples are covered by checks 1 and 5."
   ]
 }

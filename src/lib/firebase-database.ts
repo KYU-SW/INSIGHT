@@ -67,19 +67,28 @@ export async function loadDatabaseResults(): Promise<SessionResult[]> {
     if (!analysisId || !recording || !acoustic || !subjectId || !isValidSubjectId(subjectId) || !subjects.has(subjectId) || !task ||
         !recordedAt || !Number.isFinite(Date.parse(recordedAt)) || score === null || score < 0 || score > 1 ||
         analysis.model_name !== "MLP_MAX_h07") continue;
+    const oodDistance = number(analysis.ood_distance);
+    const oodThreshold = number(analysis.ood_threshold);
+    const oodFlag = analysis.ood_in_distribution;
+    // Older records predate the OOD gate: leave ood undefined rather than inventing an in-distribution verdict.
+    const ood = oodDistance !== null && oodThreshold !== null && typeof oodFlag === "boolean"
+      ? { distance: oodDistance, threshold: oodThreshold, in_distribution: oodFlag } : undefined;
     const result: ClinicalInference = {
       user_id: subjectId, recording_timestamp: recordedAt,
       analyzed_at: text(analysis.analyzed_at) ?? recordedAt,
       task: { code: task.code, label: task.label },
       model: { name: "MLP_MAX_h07", score, display_score: Math.round(score * 1000) / 10,
-        status: null, status_reason: "No validated three-level cutoff was supplied" },
+        status: null, status_reason: text(analysis.status_reason) ?? "No validated three-level cutoff was supplied",
+        ...(ood ? { ood } : {}) },
       recording_quality: { assessment: null,
         duration_seconds: number(recording.duration_seconds) ?? 0,
         rms_dbfs: number(recording.rms_dbfs),
         near_full_scale_percent: number(recording.near_full_scale_percent) ?? 0 },
       phonation: { stability: null, pitch_stability: number(acoustic.pitch_cv), intensity_stability: number(acoustic.intensity_cv) },
       acoustic: { jitter_percent: number(acoustic.jitter_percent), shimmer_percent: number(acoustic.shimmer_percent),
-        hnr_db: number(acoustic.hnr_db), mean_pitch_hz: number(acoustic.mean_pitch_hz),
+        hnr_db: number(acoustic.hnr_db),
+        ...(text(acoustic.voice_quality_reason) !== null ? { voice_quality_reason: text(acoustic.voice_quality_reason) } : {}),
+        mean_pitch_hz: number(acoustic.mean_pitch_hz),
         pitch_sd_hz: number(acoustic.pitch_sd_hz), pitch_cv: number(acoustic.pitch_cv),
         intensity_cv: number(acoustic.intensity_cv), mean_intensity_dbfs: number(acoustic.mean_intensity_dbfs) },
     };
@@ -127,6 +136,15 @@ export async function uploadDatabaseResult(result: ClinicalInference): Promise<{
     // Links this stored score to the training config, split and validation/test evidence for these weights.
     model_card_sha256: createHash("sha256").update(card).digest("hex"),
   };
+  // Persist the OOD verdict so a reloaded out-of-distribution recording keeps its warning.
+  const ood = result.model.ood;
+  if (ood && number(ood.distance) !== null && number(ood.threshold) !== null && typeof ood.in_distribution === "boolean") {
+    analysis.ood_distance = ood.distance;
+    analysis.ood_threshold = ood.threshold;
+    analysis.ood_in_distribution = ood.in_distribution;
+  }
+  const statusReason = text(result.model.status_reason);
+  if (statusReason !== null) analysis.status_reason = statusReason;
   const acoustic: JsonRecord = {
     analysis_id: analysisId,
     mean_pitch_hz: requiredNumber(result.acoustic.mean_pitch_hz, "mean_pitch_hz"),
@@ -139,6 +157,8 @@ export async function uploadDatabaseResult(result: ClinicalInference): Promise<{
     const value = number(result.acoustic[key]);
     if (value !== null) acoustic[key] = value;
   }
+  const voiceQualityReason = text(result.acoustic.voice_quality_reason);
+  if (voiceQualityReason !== null) acoustic.voice_quality_reason = voiceQualityReason;
   await ensureSubject(subjectId, now);
   const written: string[] = [];
   try {

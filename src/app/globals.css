@@ -89,10 +89,11 @@
 .chart-container { min-width: 0; width: 100%; }
 .clinical-input { height: 30px; border: 1px solid #a8b6c2; padding: 4px 8px; }
 @media (min-width: 1100px) {
-  .registry-patients { display: grid; grid-template-columns: 250px minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr); height: 100%; align-items: start; }
-  .registry-patients .patient-list { grid-column: 1; grid-row: 2 / 4; max-height: 100%; overflow: auto; height: 100%; }
-  .registry-patients .recording-list { grid-column: 2; }
-  .registry-patients:has(.result-workspace) { grid-template-rows: auto auto minmax(0, 1fr); }
+  /* Rows: heading, summary strip, recordings, result. Only the result row stretches, so the summary strip
+     never absorbs the free height and push the recordings table to the bottom. */
+  .registry-patients { display: grid; grid-template-columns: 250px minmax(0, 1fr); grid-template-rows: auto auto auto minmax(0, 1fr); height: 100%; align-items: start; }
+  .registry-patients .patient-list { grid-column: 1; grid-row: 2 / -1; max-height: 100%; overflow: auto; height: 100%; }
+  .registry-patients .summary-strip, .registry-patients .recording-list, .registry-patients .vhi-summary { grid-column: 2; }
   .registry-patients .result-workspace { grid-column: 2; max-height: 100%; overflow: auto; }
   .registry-patients .patient-banner { top: 0; }
 }
@@ -115,7 +116,7 @@
   .patient-banner dl { grid-template-columns: 1fr; }
   .recording-list > div { max-height: 300px; }
 }
-/* === Evaluation-driven additions (tokens first; see docs/design-evaluation-plan.md) === */
+/* === Evaluation-driven additions (tokens first; see docs/archive/design-evaluation-plan.md) === */
 :root { --ink: #173b59; --accent: #28618d; --line: #d8dfe5; --muted: #566573; --tone-normal: #1f6b3a; --tone-caution: #8a5a00; --tone-high: #9b1c1c; }
 .status-chip { display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px; border: 1px solid currentColor; font-size: 14px; font-weight: 600; color: var(--muted); background: #fff; }
 .status-chip[data-tone="normal"] { color: var(--tone-normal); background: #eef7f1; }

@@ -1,6 +1,6 @@
 """Reproduce inference on the synthetic examples and compare with examples/expected_outputs.json.
 
-Runs the same functions as the FastAPI service (decode_audio -> infer_score -> measure), checks
+Runs the same functions as the FastAPI service (decode_audio -> infer -> measure), checks
 the deployed weights against model_card.json, and reports model-load and per-file inference time.
 
     HF_HOME=./hf-cache .venv/bin/python scripts/reproduce_inference.py            # verify
@@ -19,12 +19,15 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
 from src.backend.acoustics import measure  # noqa: E402
-from src.backend.model import decode_audio, infer_score, load_model  # noqa: E402
+from src.backend.model import decode_audio, infer, load_model, ood_threshold  # noqa: E402
 
 EXAMPLES = ROOT / "examples"
 EXPECTED = EXAMPLES / "expected_outputs.json"
 SCORE_ATOL = 1e-4   # CPU float32 HuBERT: allow BLAS/thread-order differences across machines
 METRIC_RTOL = 1e-4
+# OOD distance is model-determined (rounded to 4 dp by ood_check). The threshold lives in ood_calibration.json and may be
+# recalibrated independently, so it is NOT compared; in_distribution is re-derived from the current threshold at runtime.
+OOD_ATOL = 1e-3
 
 
 def sha256(path: Path) -> str:
@@ -51,23 +54,29 @@ def main() -> int:
     for wav in sorted(EXAMPLES.glob("*.wav")):
         audio = decode_audio(wav)
         started = time.perf_counter()
-        score = infer_score(audio)
+        score, ood = infer(audio)
         infer_seconds = time.perf_counter() - started
         phonation, acoustic, quality = measure(audio)
         outputs[wav.name] = {"wav_sha256": sha256(wav), "score": round(score, 6),
-                             "acoustic": {k: v for k, v in acoustic.items() if v is not None},
+                             "acoustic": {k: v for k, v in acoustic.items() if v is not None and k != "voice_quality_reason"},
+                             "ood": {"distance": ood["distance"], "in_distribution": ood["in_distribution"]},
                              "duration_seconds": quality["duration_seconds"], "_infer_seconds": round(infer_seconds, 3)}
 
     print(f"model load: {load_seconds:.1f} s ({platform.machine()}, {platform.system()}, CPU)")
     for name, out in outputs.items():
         print(f"{name}: score={out['score']:.6f} inference={out['_infer_seconds']:.2f} s "
               f"F0={out['acoustic'].get('mean_pitch_hz', float('nan')):.1f} Hz F0 SD={out['acoustic'].get('pitch_sd_hz', float('nan')):.2f} Hz "
-              f"intensity CV={out['acoustic'].get('intensity_cv', float('nan')):.4f}")
+              f"intensity CV={out['acoustic'].get('intensity_cv', float('nan')):.4f} "
+              f"jitter={out['acoustic'].get('jitter_percent', float('nan')):.3f}% "
+              f"shimmer={out['acoustic'].get('shimmer_percent', float('nan')):.3f}% "
+              f"HNR={out['acoustic'].get('hnr_db', float('nan')):.2f} dB "
+              f"OOD distance={out['ood']['distance']:.4f} in_distribution={out['ood']['in_distribution']}")
 
     stable = {name: {k: v for k, v in out.items() if not k.startswith("_")} for name, out in outputs.items()}
     if "--update" in sys.argv:
         EXPECTED.write_text(json.dumps({"model_card_head_sha256": card["artifacts_sha256"]["head.pt"],
-                                        "score_atol": SCORE_ATOL, "metric_rtol": METRIC_RTOL, "outputs": stable}, indent=2) + "\n")
+                                        "score_atol": SCORE_ATOL, "metric_rtol": METRIC_RTOL, "ood_atol": OOD_ATOL,
+                                        "ood_threshold_at_generation": ood_threshold(), "outputs": stable}, indent=2) + "\n")
         print(f"wrote {EXPECTED.relative_to(ROOT)}")
         return 0
 
@@ -80,9 +89,20 @@ def main() -> int:
             continue
         if abs(got["score"] - want["score"]) > SCORE_ATOL:
             failures.append(f"{name}: score {got['score']} != expected {want['score']}")
-        for key, value in want["acoustic"].items():
+        # Union of keys: a metric that newly appears or disappears (e.g. jitter becoming null) is a mismatch too.
+        for key in sorted(set(want["acoustic"]) | set(got["acoustic"])):
+            value = want["acoustic"].get(key)
             if not close(got["acoustic"].get(key), value, METRIC_RTOL):
                 failures.append(f"{name}: {key} {got['acoustic'].get(key)} != expected {value}")
+        want_ood = want.get("ood")
+        if want_ood is None:
+            failures.append(f"{name}: expected outputs have no ood entry (regenerate with --update)")
+        else:
+            if abs(got["ood"]["distance"] - want_ood["distance"]) > OOD_ATOL:
+                failures.append(f"{name}: ood distance {got['ood']['distance']} != expected {want_ood['distance']}")
+            if got["ood"]["in_distribution"] != (want_ood["distance"] <= ood_threshold()):
+                failures.append(f"{name}: ood in_distribution {got['ood']['in_distribution']} disagrees with expected "
+                                f"distance {want_ood['distance']} vs current threshold {ood_threshold()}")
     for failure in failures:
         print("FAIL", failure)
     print("PASS: outputs match examples/expected_outputs.json" if not failures else f"{len(failures)} mismatch(es)")
