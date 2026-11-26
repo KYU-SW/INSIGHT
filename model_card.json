@@ -158,6 +158,35 @@
           0.71,
           0.94
         ]
+      },
+      "auroc": {
+        "value": 0.8975,
+        "ci95": [
+          0.7825,
+          0.98
+        ]
+      }
+    },
+    "subject_sensitivity_by_sand_class": {
+      "class_1": {
+        "n_ALS": 1,
+        "detected": 1,
+        "sensitivity": 1.0
+      },
+      "class_2": {
+        "n_ALS": 5,
+        "detected": 5,
+        "sensitivity": 1.0
+      },
+      "class_3": {
+        "n_ALS": 9,
+        "detected": 9,
+        "sensitivity": 1.0
+      },
+      "class_4": {
+        "n_ALS": 10,
+        "detected": 8,
+        "sensitivity": 0.8
       }
     }
   },
@@ -172,6 +201,7 @@
     "5_predictions_reproduce_confusion_matrix": true,
     "5_confusion_matrix_reproduces_run_test_accuracy": true,
     "6_deployed_weights_reproduce_stored_test_probabilities": true,
+    "7_comparison_run_uses_identical_subject_split": true,
     "6_max_abs_probability_difference": 5.960464477539063e-08,
     "6_samples_checked": 4
   },

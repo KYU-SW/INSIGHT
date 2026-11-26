@@ -77,6 +77,15 @@ def recompute_probabilities(features: dict) -> dict:
 BOOTSTRAP_ROUNDS, BOOTSTRAP_SEED = 10_000, 42
 
 
+COMPARISON_RUN = ROOT / "provenance" / "run_20261114T140021_240247Z_LOW_COST"
+
+
+def auroc(y: np.ndarray, p: np.ndarray) -> float:
+    """Mann-Whitney AUROC with ties counted as 1/2."""
+    pos, neg = p[y == 1], p[y == 0]
+    return float(((pos[:, None] > neg[None, :]).sum() + 0.5 * (pos[:, None] == neg[None, :]).sum()) / (len(pos) * len(neg)))
+
+
 def binary_metrics(y: np.ndarray, p: np.ndarray) -> dict:
     pred = p >= 0.5
     se = float(np.mean(pred[y == 1])) if np.any(y == 1) else np.nan
@@ -104,9 +113,15 @@ def uncertainty(predictions: list[dict]) -> dict:
                 "subject": binary_metrics(label[index], subj_p[index])}
 
     point = both(np.arange(len(ids)))
+    point["subject"]["auroc"] = auroc(label, subj_p)
     rng = np.random.default_rng(BOOTSTRAP_SEED)
     groups = [np.flatnonzero(label == c) for c in (0, 1)]
-    samples = [both(np.concatenate([rng.choice(g, size=len(g), replace=True) for g in groups])) for _ in range(BOOTSTRAP_ROUNDS)]
+    samples = []
+    for _ in range(BOOTSTRAP_ROUNDS):
+        index = np.concatenate([rng.choice(g, size=len(g), replace=True) for g in groups])
+        sample = both(index)
+        sample["subject"]["auroc"] = auroc(label[index], subj_p[index])
+        samples.append(sample)
     result = {"subject_aggregation": "mean P(ALS) over recordings, threshold 0.5 (fixed before evaluation)",
               "bootstrap": f"{BOOTSTRAP_ROUNDS} subject-cluster resamples stratified by class, seed {BOOTSTRAP_SEED}, percentile 95% CI",
               "subjects": {"HC": int((label == 0).sum()), "ALS": int((label == 1).sum())}}
@@ -114,7 +129,22 @@ def uncertainty(predictions: list[dict]) -> dict:
         result[level] = {metric: {"value": round(value, 4),
                                   "ci95": [round(float(np.percentile([s[level][metric] for s in samples], q)), 4) for q in (2.5, 97.5)]}
                          for metric, value in point[level].items()}
+    # Sensitivity by SAND severity class (Class 4 = "ALS with no dysarthria"; class labels from the 7EXP run manifest).
+    with (COMPARISON_RUN / "subject_severity.csv").open(newline="") as handle:
+        severity = {r["speaker_id"]: r["severity_class"] for r in csv.DictReader(handle)}
+    detected = defaultdict(list)
+    for i, sid in enumerate(ids):
+        if label[i] == 1:
+            detected[severity[sid]].append(bool(subj_p[i] >= 0.5))
+    result["subject_sensitivity_by_sand_class"] = {f"class_{k}": {"n_ALS": len(v), "detected": int(sum(v)), "sensitivity": round(sum(v) / len(v), 4)}
+                                                    for k, v in sorted(detected.items())}
     return result
+
+
+def same_split_as_comparison_run(manifest: list[dict]) -> bool:
+    with (COMPARISON_RUN / "subject_severity.csv").open(newline="") as handle:
+        other = {(r["speaker_id"], r["split"]) for r in csv.DictReader(handle) if r["split"]}
+    return {(r["speaker_id"], r["split"]) for r in manifest} == other
 
 
 def build() -> dict:
@@ -163,6 +193,7 @@ def build() -> dict:
         "5_predictions_reproduce_confusion_matrix": recomputed_cm == cm.tolist(),
         "5_confusion_matrix_reproduces_run_test_accuracy": abs((tn + tp) / cm.sum() * 100 - float(test_row["ACC [%]"])) < 1e-9,
         "6_deployed_weights_reproduce_stored_test_probabilities": max_prob_diff <= PROB_ATOL,
+        "7_comparison_run_uses_identical_subject_split": same_split_as_comparison_run(manifest),
     }
     checks = {key: bool(value) for key, value in checks.items()}
     if not all(checks.values()):

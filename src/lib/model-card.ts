@@ -9,7 +9,8 @@ export type ModelCard = {
   validation: { val_ACC: number; best_epoch: number; correct_over_n: string; epochs_logged: number };
   test: { level: string; confusion_matrix_rows_true_HC_ALS: number[][]; accuracy: number; sensitivity_ALS: number; specificity_HC: number; balanced_accuracy: number };
   training_run: { run_id: string; evidence_dir: string };
-  test_uncertainty: { subjects: { HC: number; ALS: number } } & Record<"recording" | "subject", Record<"accuracy" | "sensitivity_ALS" | "specificity_HC" | "balanced_accuracy", { value: number; ci95: [number, number] }>>;
+  test_uncertainty: { subjects: { HC: number; ALS: number }; subject_sensitivity_by_sand_class: Record<string, { n_ALS: number; detected: number; sensitivity: number }> }
+    & Record<"recording" | "subject", Record<string, { value: number; ci95: [number, number] }>>;
   training_config: Record<string, unknown>;
   provenance_checks: Record<string, boolean | number>;
   limitations: string[];
