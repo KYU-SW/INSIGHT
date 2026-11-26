@@ -39,7 +39,9 @@ jobs:
         with:
           path: hf-cache
           key: hubert-large-ls960-ft-ece5fabb
-      - name: Prove deployed weights come from the recorded training run (10 checks)
+      - name: Backend unit tests
+        run: python -m unittest discover -s tests/python -v
+      - name: Prove deployed weights come from the recorded training run (11 checks)
         run: python scripts/build_model_card.py --check
       - name: Reproduce inference on synthetic examples
         run: python scripts/reproduce_inference.py
