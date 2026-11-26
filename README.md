@@ -76,8 +76,9 @@
 [Next.js 서버]                              /api/analyze ──► [FastAPI :8001] src/backend/app.py
   /api/database/questionnaire-drafts          decode → mono → (>8 kHz면 8 kHz로) → 16 kHz → HuBERT-large(frozen) hidden_states[7]
   /api/database/questionnaires (점수 재계산)  → 시간축 max pooling(1024) → StandardScaler → MLP → sigmoid
-  /api/model-card (가중치 SHA-256 대조)      + F0(YIN)·강도 CV·dBFS (모델과 독립)
-   │ 서버 전용 자격 증명 (.env.local)
+  /api/model-card (가중치 SHA-256 대조)      → 특징 공간 OOD 거리 검사 (분포 밖이면 상태 해석 차단)
+   │ 서버 전용 자격 증명 (.env.local)        + F0(YIN)·강도 CV·dBFS, 지속 모음은 Jitter·Shimmer·HNR(Praat) (모델과 독립)
+   │ Next.js → FastAPI: Authorization: Bearer (서버 전용 토큰, 미설정 시 503)
    ▼
 [Firebase Realtime DB]  subjects / recordings / analyses / acoustic_metrics / questionnaires / questionnaire_drafts
   클라이언트 읽기·쓰기 전면 거부 (401). 원본 음성은 저장하지 않음.
@@ -151,6 +152,21 @@
 
 **해석.** 학습형 attentive pooling, 수기 음향 특징(eGeMAPS) 결합, 인코더 미세조정 등 더 복잡한 대안이 이 데이터에서는 단순한 max pooling + MLP보다 낫지 않았다. 배포 모델의 AUROC도 비교 기준 모델 범위 안에 있다. 그래서 추론 비용이 가장 낮은 단순 구조(녹음당 0.03 ms, 인코더 제외)를 배포 대상으로 택했다. "max pooling이 일반적으로 우수하다"는 결론은 아니다. 41명 시험에서 차이를 검출할 검정력이 부족하다. 배포 모델은 0.5 기준을, 비교 실험은 검증 Youden 기준을 써서 민감도·특이도는 직접 비교하지 않고 임계값과 무관한 AUROC만 비교했다.
 
+### 4.1 Drive 전체 실험 조사 결과
+
+연구 Drive의 ALS 실험 결과를 모두 조사해 [`docs/experiment-inventory.md`](docs/experiment-inventory.md)에 정리했다. 원본 지표 파일은 `provenance/` 아래에 SHA-256과 함께 복사되어 있다. 배포 판단에 영향을 주는 결과는 다음과 같다.
+
+| 실험 | 분할 | 결과 | 의미 |
+|---|---|---|---|
+| 층 탐색 재실행 `20261005T080540` (특징 캐시 v2) | 9bb28df8, seed 42 | 검증으로 선택된 층이 **h4**(시험 녹음 ACC 78.35%). 같은 실행의 h7은 78.05% | 층 선택(h7)은 실행 간에 안정적이지 않다. h4와 h7의 차이는 작다 |
+| HuBERT h4 + eGeMAPS 결합 (5 seed) | 9bb28df8 | 기준 피험자 AUC 0.890 ± 0.003, Early3 결합 0.901 ± 0.004 | 수기 특징을 결합한 이득은 작다 (§4 EXP03과 일치) |
+| 수기 특징 65개 + ElasticNet (`ML_EXPERIMENT_01/02`) | **SAND 공식 분할** | 검증 AUROC 0.838 [0.707–0.939] | 독립 기준 모델. 다만 공식 검증 53명 중 35명이 배포 모델의 학습 집합에 있어 **직접 비교할 수 없다** |
+| frozen WavLM + ElasticNet | SAND 공식 분할 | 검증 AUROC 0.832, 수기 특징 대비 ΔAUROC −0.009 [−0.161, 0.134] | 인코더를 바꿔도 차이가 없다 |
+| Data2Vec 미세조정 | 별도 VOC-ALS 분할 | AUROC 0.589, 특이도 0 (전원을 ALS로 예측) | 실패한 실험이며 배포 판단에 사용하지 않았다 |
+| eGeMAPS 88개 군 비교 | 분할 없음 | FDR 유의 특징 27/88, 최대 단일 특징 AUC 0.72 (F0 범위) | 음향 차이는 존재하지만 단일 특징으로는 분리력이 낮다 |
+
+**결론.** 배포 구성(h7 + max + MLP)의 다중 seed 결과는 없다. 다중 seed 결과는 모두 h4 구성이다. 따라서 §3.2의 신뢰구간은 피험자 재표본 불확실성만 반영하며, 학습 seed 변동은 반영하지 않는다. 같은 9bb28df8 분할에서 학습한 수기 특징 단독 모델도 없다.
+
 ---
 
 ## 5. 기존 사전문진·음성 선별 시스템과의 비교
@@ -195,11 +211,13 @@ INSIGHT가 기존 시스템보다 우수하다는 주장이 아니다. 운영 �
 ```sh
 python3.11 -m pip install -r requirements-inference.txt
 npm install
-cp .env.example .env.local     # FIREBASE_DATABASE_URL과 서버 자격 증명 입력 (DB 기능 사용 시)
+cp .env.example .env.local     # INSIGHT_BACKEND_TOKEN(필수, 예: openssl rand -hex 32)과 DB 자격 증명 입력
 
-HF_HOME=./hf-cache python3.11 -m uvicorn src.backend.app:app --host 127.0.0.1 --port 8001   # 터미널 1
-npm run dev                                                                                  # 터미널 2
+HF_HOME=./hf-cache npm run backend   # 터미널 1: scripts/run_backend.sh, .env.local의 토큰으로 FastAPI 기동
+npm run dev                          # 터미널 2
 ```
+
+추론 서버는 `Authorization: Bearer <INSIGHT_BACKEND_TOKEN>`이 없는 요청을 401로 거부한다. 토큰이 설정되지 않으면 모든 요청에 503을 반환한다(fail-closed). 로컬 개발에서만 `INSIGHT_ALLOW_UNAUTHENTICATED=1`로 해제할 수 있다. 토큰은 Next.js 서버에서만 사용하며 브라우저에 노출되지 않는다.
 
 HuBERT 체크포인트·패키지·빌드 파일에 2 GB 이상이 필요하다. 모바일은 PWA로 홈 화면 설치가 가능하며, 기기에는 아무것도 저장하지 않는다. 휴대폰 접속에는 HTTPS가 필요하다(`npm run build && npm start` 후 `cloudflared tunnel --url http://127.0.0.1:3000`). 터널 URL은 공개되므로 시험 데이터만 사용한다.
 
@@ -211,7 +229,7 @@ HuBERT 체크포인트·패키지·빌드 파일에 2 GB 이상이 필요하다.
 |---|---|---|
 | **실험으로 입증** | 내부 시험 41명에서 피험자 단위 AUROC 0.898 [0.783–0.980], 민감도 92.0%, 특이도 75.0% | §3.2, 같은 SAND 분포 |
 | | 구음장애가 평정되지 않은 ALS(Class 4) 10명 중 8명 검출 | §3.2, n = 10 |
-| | 더 복잡한 8개 대안 대비 성능 저하 없이 추론 비용이 가장 낮은 구조 선택 (seed 간 AUROC SD 0.003) | §4 |
+| | 더 복잡한 8개 대안 대비 성능 저하 없이 추론 비용이 가장 낮은 구조 선택 (h4 기준 모델의 seed 간 AUROC SD 0.003; 배포 h7 구성의 seed 변동은 미측정) | §4, §4.1 |
 | | 3초 녹음 기준 서버 응답 1.0–1.4 s(CPU), 문진·음성 결과의 DB 저장·재조회 E2E 통과 | §8 |
 | **근거 기반 추정** | 사전확률 5–20%의 증상 내원 집단에서 PPV 16–48% — 일반 인구(0.013%)가 아닌 의뢰 집단에서만 유용 | §1.5 계산; 시험 성능이 외부 집단에 그대로 적용된다는 가정 |
 | | 음성 변화가 있는 환자를 진료 전에 표시해 신경과 의뢰를 앞당길 수 있음 | 진단 지연 중앙값 11–11.5개월 [R1, R3], 말 증상과 빠른 진단의 연관 [R1]; 지연 단축 폭은 추정하지 않음 |
@@ -225,12 +243,14 @@ HuBERT 체크포인트·패키지·빌드 파일에 2 GB 이상이 필요하다.
 
 | 항목 | 결과 |
 |---|---|
-| `npm run lint` / `typecheck` / `npm test` | 통과, TypeScript 테스트 **18/18** |
-| Python 백엔드 테스트 (`python -m unittest discover -s tests/python`) | **12/12** (8 kHz 경로 동일성, 대역 제한, F0·dBFS, 미측정 지표 `null`, 상태 기준값 검증, API 계약) |
+| `npm run lint` / `typecheck` / `npm test` | 통과, TypeScript 테스트 **21/21** (추론 API 경로의 토큰 전달·인증 오류 은닉 포함) |
+| Python 백엔드 테스트 (`python -m unittest discover -s tests/python`) | **29/29** (8 kHz 경로 동일성, 대역 제한, F0·dBFS, Jitter·Shimmer·HNR 합성 신호 검증, API 인증, OOD 게이트, API 계약) |
+| Jitter·Shimmer·HNR 정확도 (합성 150 Hz 모음) | 주기 변동 SD 2% 주입 → jitter 2.05–2.21% (해석적 기대값 2.26%). SNR 40/30/20/10 dB → HNR 40.1/30.1/20.1/10.3 dB |
+| OOD 게이트 (`scripts/calibrate_ood.py --check`) | SAND 시험 특징 4개의 거리 0.87–1.15, 임계값 1.718. 합성 비음성 입력 9개(무음·잡음·순음·음악·합성 모음)는 1.74–3.00으로 모두 차단 |
 | 가중치 증명 (`scripts/build_model_card.py --check`) | 11개 검사 통과 |
 | 합성 음성 재현 (`scripts/reproduce_inference.py`) | PASS |
 | `npm run build` | 성공, 24.9 s |
-| CI (GitHub Actions `ci.yml`) | `web`: lint·typecheck·test·build / `model`: Python 테스트·가중치 증명·합성 음성 재현 |
+| CI (GitHub Actions `ci.yml`) | `web`: lint·typecheck·test·build / `model`: Python 테스트·가중치 증명·OOD 보정 검사·합성 음성 재현. Linux 실행 결과는 push 후 Actions에서 확인 필요(로컬 Docker 검증은 디스크 부족으로 중단) |
 | E2E `/api/analyze` (3 s 녹음) | 첫 요청 8.8 s(모델 로드 포함), 이후 **1.0–1.4 s** |
 | 추론 시간 vs 녹음 길이 | 3 s → 0.97 s · 10 s → 3.1 s · 30 s → 13.3 s · 60 s → 41.3 s (초선형, self-attention) |
 | 최대 메모리 | 약 3.1 GB RSS |
@@ -245,16 +265,17 @@ HuBERT 체크포인트·패키지·빌드 파일에 2 GB 이상이 필요하다.
 
 | 항목 | 현재 상태 | 근거 · 다음 단계 |
 |---|---|---|
-| 분포 밖 입력 | 미해결 — 합성음에서 점수 포화, 입력 품질 게이트 없음 | 학습 특징 분포 기반 OOD 점수(예: Mahalanobis) 도입 실험 필요 |
-| Jitter·Shimmer·HNR | 미구현(`null`) | Praat 기반 측정은 지속 모음 프로토콜·Parselmouth 의존성 추가가 필요 |
-| 외부 기준 모델 | 부분 — eGeMAPS는 HuBERT와의 결합(EXP03)으로만 비교 | eGeMAPS 단독 + SVM 같은 수기 특징 단독 기준은 SAND 원본 음성으로 재학습 필요 |
+| 분포 밖 입력 | **부분 해결.** 특징 공간 OOD 게이트를 구현했다: 표준화 특징의 RMS 거리를 쓰고, 분포 밖이면 상태 해석을 차단하고 사유를 표시한다. 합성 비음성 입력 9개는 모두 차단했다 | 임계값은 시험 특징 4개로만 정했다(최댓값 × 1.5, 시험 분할 사용). 실제 비SAND 음성(다른 언어·마이크)에서 분리되는지와 SAND 음성의 오거부율은 측정하지 않았다. 음악 입력은 임계값을 1%만 넘어 여유가 작다. 검증 분할 특징으로 다시 보정해야 한다. 점수 포화 자체(OOD 입력 0.9996 이상)는 모델 특성으로 남아 있다 |
+| Jitter·Shimmer·HNR | **해결.** Praat(parselmouth 0.4.7) local jitter·shimmer, cc HNR을 지속 모음 과제에서만 산출한다. /pa/ /ta/ /ka/ 과제와 0.5 s 미만 유성 구간에서는 사유와 함께 `null`을 반환한다 | 8 kHz 녹음은 대역 상한이 4 kHz라 HNR을 광대역 규준치와 직접 비교할 수 없다. 임상 기준값은 적용하지 않았다(기술 지표로만 표시) |
+| 외부 기준 모델 | 부분 — 수기 특징 + ElasticNet 기준 모델이 있으나 SAND 공식 분할 결과라 배포 모델과 직접 비교할 수 없다(§4.1) | 9bb28df8 분할에서 수기 특징 단독 모델을 학습해야 한다. Drive의 `EGEMAPS_V02_CACHE`로 가능하며 원본 음성은 필요 없다 |
+| 배포 구성의 seed 변동 | 미해결 — h7 구성은 seed 42 단일 학습뿐이며, 같은 설계를 재실행했을 때 선택된 층이 h4로 바뀌었다(§4.1) | Drive 특징 캐시 v1(약 0.8 GB 추정)으로 h7을 다중 seed로 학습해야 한다. 로컬 디스크가 부족해 Colab에서 수행해야 한다 |
 | 검정력 | 시험 41명(HC 16) | 외부 코호트·더 많은 대조군 필요; 교차검증은 미수행 |
 | 언어·녹음 조건 | 이탈리아어, 8 kHz 스마트폰 앱 | 한국어 화자·고음질 녹음 검증 필요 |
 | 점수 해석 | 상태 미분류, 보정 없음 | 의뢰 집단에서 운영 기준점·보정 검증 필요 |
 | EMR 연동 | 자체 DB만 | FHIR 변환·병원 연동 미구현 |
-| API 인증 | 미구현 — Next.js API에 사용자 인증 없음, DB 규칙은 전면 차단 | 인증 체계 선택은 아키텍처 결정이 필요 |
+| API 인증 | **부분 해결.** 추론 서버(FastAPI)는 Bearer 토큰 미들웨어로 보호한다. 토큰 비교는 상수 시간이고, 본문을 읽기 전에 거부하며, 토큰이 없으면 fail-closed로 동작한다 | Next.js API의 사용자(의료진·환자) 로그인은 아직 없다. 인증 체계 선택은 아키텍처 결정이 필요하다. 요청 빈도 제한도 없다 |
 | DB 자격 증명 | 레거시 Database Secret 사용(서비스 계정도 지원) | 운영 전 서비스 계정으로 전환 권장 |
-| LICENSE | 없음 | 라이선스 선택은 저장소 소유자 결정 사항 |
+| LICENSE | **해결.** MIT 라이선스([`LICENSE`](LICENSE)) | 코드에만 적용된다. HuBERT 가중치와 SAND 데이터는 각자의 라이선스를 따른다 |
 
 ---
 
@@ -301,6 +322,8 @@ HuBERT 체크포인트·패키지·빌드 파일에 2 GB 이상이 필요하다.
 | CI: 웹 검사 + 모델 증명·재현 자동화 | [`f3d4037`](https://github.com/KYU-SW/INSIGHT/commit/f3d4037) |
 | Python 백엔드 자동 테스트 12개, CI 포함 | [`2c92ea8`](https://github.com/KYU-SW/INSIGHT/commit/2c92ea8) |
 | 피험자 AUROC·중증도별 민감도, 같은 분할 비교 실험(9구성 × 3 seed) 근거 연결 | [`2b82825`](https://github.com/KYU-SW/INSIGHT/commit/2b82825) |
+| Jitter·Shimmer·HNR(Praat), 추론 서버 Bearer 인증, 특징 공간 OOD 게이트, 테스트 29+21개 | [`8aec6e4`](https://github.com/KYU-SW/INSIGHT/commit/8aec6e4) |
+| Drive 전체 실험 조사(층 재실행, eGeMAPS 결합 5 seed, 수기 특징·WavLM 기준 모델, 실패 실험)와 근거 사본 | [`afed8da`](https://github.com/KYU-SW/INSIGHT/commit/afed8da) |
 
 ---
 
