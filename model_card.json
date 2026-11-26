@@ -1,6 +1,12 @@
 {
   "model_name": "MLP_MAX_h07",
   "intended_use": "Research screening support on anonymized/test data. Not a diagnosis; not validated for clinical use.",
+  "training_run": {
+    "run_id": "20261005T055211_070474Z",
+    "evidence_dir": "provenance/run_20261005T055211_070474Z",
+    "model_folder": "models/27074b1545/detection/MLP_max_h07",
+    "feature_cache": "HUBERT_PAPER_FEATURE_CACHE_V1/00fcfa559a73d004ab9d"
+  },
   "artifacts_sha256": {
     "head.pt": "f46ad9e6130f4538dab2427b78b17d501f6358d5f7c88f400fe820a656da58c6",
     "scaler.npz": "47e5e89c27eb51948bf692b225aa1cba2b72b8aab5877a3cf505ebdde0fe30e4",
@@ -13,32 +19,41 @@
     "backbone_revision": "ece5fabbf034c1073acae96d5401b25be96709d8",
     "backbone_frozen": true,
     "hidden_state_index": 7,
-    "notebook_paper_layer": 8,
+    "paper_layer": 8,
     "sample_rate_hz": 16000,
-    "pooling": "max over all time frames (no chunking)",
+    "pooling": "max over all time frames (chunk_seconds = null)",
     "standardization": "StandardScaler fit on the training split only (scaler.npz)",
-    "head": "Linear(1024,128) - ReLU - Dropout(0.3, train only) - Linear(128,1); sigmoid = P(ALS)",
-    "decision_rule": "argmax over [1-p, p] (equivalent to p >= 0.5) for the reported test counts"
+    "head": "Linear(1024,128) - ReLU - Linear(128,1); sigmoid = P(ALS). No dropout layer in this run's weights.",
+    "decision_rule": "p >= 0.5 for the reported test counts"
   },
-  "training_config_from_notebook": {
+  "training_config": {
     "seed": 42,
     "batch_size": 64,
-    "max_epochs": 20,
-    "early_stopping_patience": 3,
+    "max_epochs": 100,
+    "patience": 20,
+    "lr": 0.001,
+    "selection": "minimum val loss epoch; maximum val ACC layer",
+    "software": {
+      "torch": "2.11.0+cu130",
+      "transformers": "4.57.1",
+      "numpy": "2.1.3",
+      "pandas": "2.2.3",
+      "scikit-learn": "1.6.1",
+      "librosa": "0.11.0"
+    },
     "optimizer": "Adam",
-    "learning_rate": 0.0005,
-    "weight_decay": 0.001,
     "loss": "BCEWithLogits",
-    "checkpoint_selection": "minimum validation loss epoch"
+    "not_recorded": "weight decay is not in run_config.json"
   },
   "data_split": {
     "dataset": "SAND Challenge Task 1 training sheet; Class 5 = HC (0), Class 1-4 = ALS (1)",
-    "unit": "subject (speaker) - no speaker appears in two splits",
+    "unit": "subject (speaker)",
     "stratified_ratios": [
       0.7,
       0.15,
       0.15
     ],
+    "split_hash": "9bb28df8f907a9b7683970f10169bc4d678de3ca5c6cf46c659531cbc8286c83",
     "subjects": {
       "train": 189,
       "val": 41,
@@ -55,7 +70,8 @@
     "val_loss": 0.5241309565726233,
     "best_epoch": 2,
     "correct_over_n": "239/326",
-    "epochs_logged": 22
+    "epochs_logged": 22,
+    "selected_among_layers": 25
   },
   "test": {
     "level": "recording (328 recordings from 41 held-out subjects); not subject-level aggregation",
@@ -74,21 +90,30 @@
     "specificity_HC": 0.5859,
     "balanced_accuracy": 0.723,
     "precision_ALS": 0.7644,
-    "f1_ALS": 0.8094
+    "f1_ALS": 0.8094,
+    "eer": 0.2344
   },
-  "consistency_checks": {
-    "validation_json_matches_history_best_epoch": true,
-    "validation_accuracy_is_integer_count_of_notebook_val_split": true,
-    "test_confusion_total_equals_notebook_test_split": true,
-    "history_epochs_within_notebook_max_epochs": false,
-    "history_stops_within_patience_after_best_epoch": false,
-    "validation_json_equals_notebook_printed_value_for_this_layer": false
+  "provenance_checks": {
+    "1_deployed_files_byte_identical_to_run": true,
+    "2_split_hash_reproduced": true,
+    "2_no_subject_in_two_splits": true,
+    "3_history_explained_by_run_config": true,
+    "4_validation_json_equals_run_layer_row": true,
+    "4_h07_is_validation_selected_layer": true,
+    "5_predictions_cover_exactly_test_split": true,
+    "5_predictions_reproduce_confusion_matrix": true,
+    "5_confusion_matrix_reproduces_run_test_accuracy": true,
+    "6_deployed_weights_reproduce_stored_test_probabilities": true,
+    "6_max_abs_probability_difference": 5.960464477539063e-08,
+    "6_samples_checked": 4
   },
+  "notes": [
+    "The repository notebook (MAX_EPOCHS 20, PATIENCE 3, LR 5e-4) is a later edit whose saved output is run 20261005T080540_357849Z. The deployed weights come from the earlier run 20261005T055211_070474Z (max_epochs 100, patience 20, lr 1e-3) with the same split_hash and feature pipeline."
+  ],
   "limitations": [
-    "history.csv has more epochs than the notebook's MAX_EPOCHS/PATIENCE allow, and validation.json differs from the notebook's printed value for this layer (72.09%). This indicates the supplied artifacts were not produced by the run whose output is saved in the notebook. The validation count (239/326) and test total (328) match the notebook's subject split, but no training run ID was saved, so the weights-to-run link is consistent, not proven.",
-    "test_confusion_counts.npy is taken to belong to head.pt because they were supplied together; re-running inference on the SAND test split is the only way to verify it.",
-    "Test metrics are internal (same SAND distribution, same recording protocol). They are not the performance of the deployed app on phone recordings, other microphones, or other populations.",
-    "Recordings are not independent: 8 recordings per subject on average, so recording-level metrics overstate the effective sample size.",
-    "Specificity is low relative to sensitivity at the 0.5 threshold; no clinical operating point was validated."
+    "Test metrics are internal (same SAND distribution and recording protocol). They are not the performance of the deployed app on phone recordings, other microphones, or other populations.",
+    "About 8 recordings per subject: recording-level metrics overstate the effective sample size.",
+    "Specificity (58.6%) is low relative to sensitivity at the 0.5 threshold; no clinical operating point was validated.",
+    "Check 6 recomputes 4 of 328 test samples (2 HC, 2 ALS, one misclassified each) from cached features; the remaining samples are covered by checks 1 and 5."
   ]
 }

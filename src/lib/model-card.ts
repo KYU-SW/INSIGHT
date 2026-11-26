@@ -8,8 +8,9 @@ export type ModelCard = {
   data_split: { subjects: Record<"train" | "val" | "test", number>; recordings: Record<"train" | "val" | "test", number> };
   validation: { val_ACC: number; best_epoch: number; correct_over_n: string; epochs_logged: number };
   test: { level: string; confusion_matrix_rows_true_HC_ALS: number[][]; accuracy: number; sensitivity_ALS: number; specificity_HC: number; balanced_accuracy: number };
-  training_config_from_notebook: Record<string, string | number>;
-  consistency_checks: Record<string, boolean>;
+  training_run: { run_id: string; evidence_dir: string };
+  training_config: Record<string, unknown>;
+  provenance_checks: Record<string, boolean | number>;
   limitations: string[];
 };
 

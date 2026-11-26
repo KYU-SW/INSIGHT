@@ -14,7 +14,9 @@ test("model card test counts are internally consistent with the subject split", 
   const [[tn, fp], [fn, tp]] = card.test.confusion_matrix_rows_true_HC_ALS;
   assert.equal(tn + fp + fn + tp, card.data_split.recordings.test);
   assert.equal(Math.round(((tn + tp) / (tn + fp + fn + tp)) * 1e4) / 1e4, card.test.accuracy);
-  // Known provenance gaps must stay visible rather than silently pass.
-  assert.equal(card.consistency_checks.history_epochs_within_notebook_max_epochs, false);
-  assert.ok(card.limitations.length >= 4);
+  // Every provenance proof step (scripts/build_model_card.py) must have passed when the card was written.
+  const proofs = Object.entries(card.provenance_checks).filter(([, value]) => typeof value === "boolean");
+  assert.ok(proofs.length >= 10);
+  assert.deepEqual(proofs.filter(([, ok]) => !ok), []);
+  assert.equal(card.training_run.run_id, "20261005T055211_070474Z");
 });
