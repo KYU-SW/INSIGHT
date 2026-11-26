@@ -36,7 +36,7 @@ Early screening support for ALS through speech analysis
 
 ## 목차
 
-- [한눈에 보기](#한눈에-보기)
+- [한눈에 보기](#한눈에-보기) · [평가 기준별 근거 위치](#평가-기준별-근거-위치)
 - [어떻게 동작하나요](#어떻게-동작하나요)
 - [빠른 시작](#빠른-시작)
 - [사용 방법](#사용-방법)
@@ -61,7 +61,7 @@ Early screening support for ALS through speech analysis
 | 배포 가중치의 출처 증명 | 특정 학습 실행에서 나왔음을 **11개 검사**로 재계산 | [§3.1](#31-배포-가중치--학습-실행-증명) |
 | 모델 선택 근거 | 같은 분할에서 9개 구성 × 3 seed 비교. 더 복잡한 구성이 유의하게 낫지 않아 가장 가벼운 구조를 택함 | [§4](#4-모델-선택-근거-같은-분할에서의-비교-실험) |
 | 실험 규모 | 층 탐색 300회, 특징 결합 60회, 비교 실험 27회 + HPO 88 trial | [§4.2](#42-설계-결정의-실험-근거) |
-| 자동 검증 | Python 테스트 29개, TypeScript 테스트 22개, Ubuntu CI 통과 | [§8](#8-검증과-성능-직접-실행-2026-11-26) |
+| 자동 검증 | Python 테스트 33개, TypeScript 테스트 24개, 추론 서버 E2E 스모크 테스트, Ubuntu CI 통과 | [§8](#8-검증과-성능-직접-실행-2026-11-26) |
 
 [ ]는 95% 신뢰구간입니다. 모든 수치의 원본 파일과 문헌 출처는 [`docs/evidence-traceability.md`](docs/evidence-traceability.md)에서 확인할 수 있습니다.
 
@@ -76,6 +76,18 @@ Early screening support for ALS through speech analysis
 | 환자 기록 조회 | Subject ID별로 녹음 결과와 최신 문진 결과를 함께 볼 수 있습니다 |
 | 추적 가능한 저장 | 저장된 모든 점수에 가중치 SHA-256이 기록되어 학습 실행까지 거슬러 올라갈 수 있습니다 |
 | 보안 기본값 | DB에는 서버만 접근할 수 있고(클라이언트 전면 차단), 추론 서버는 토큰으로 인증합니다. 원본 음성은 저장하지 않습니다 |
+
+### 평가 기준별 근거 위치
+
+설계 교과목의 5개 평가 기준에 대응하는 근거를 한곳에 모았다. 각 링크는 수치·코드·테스트로 직접 확인할 수 있는 위치를 가리킨다.
+
+| 평가 기준 (배점) | 확인할 수 있는 근거 | 위치 |
+|---|---|---|
+| **배경·필요성** (10) | ALS 진단 지연 11–11.5개월 등 정량 근거와 출처, 기존 연수 기능 평가·사전문진의 한계, 대상 집단과 용도 정의(PPV 계산) | [§1](#1-배경-및-필요성), [참고문헌](#참고문헌) |
+| **기술 구체성·이해도** (20) | 시스템·데이터 흐름, 모델 사양(층·pooling·학습 설정), 학습–추론 전처리 일치, API 명세, 인증·OOD·음향 지표 구현, 구현 안전장치 12종 | [동작 원리](#어떻게-동작하나요), [§2](#2-시스템-구조), [§3](#3-배포-모델의-근거), [API](#api), [§11](#11-구현-세부) |
+| **근거·논리성** (10) | 피험자 단위 지표와 cluster bootstrap CI, 같은 분할 9구성 × 3 seed 비교(Holm·Bonferroni 보정), 누수 방지 절차, 부정 결과·실패 실험 공개, 주장별 출처 추적표 | [§3.2](#32-성능-같은-분포-내부-시험), [§4](#4-모델-선택-근거-같은-분할에서의-비교-실험), [추적표](docs/evidence-traceability.md), [실험 목록](docs/experiment-inventory.md) |
+| **차별성·기대효과·기여** (20) | 실제 시스템 4개와 3축 비교, 기대효과를 입증/추정/미검증으로 구분, 작업별 커밋 해시가 붙은 개인 기여 표 | [§5](#5-기존-사전문진음성-선별-시스템과의-비교), [§7](#7-기대효과), [§12](#12-개인-기여) |
+| **산출물 정확도** (40) | 따라 하는 설치·실행 절차, 자동 테스트(Python 33·TS 24)·E2E 스모크·CI 통과, 배포 가중치 출처 11개 검사, 실제 화면, 문제 해결 표, 한계 명시 | [빠른 시작](#빠른-시작), [테스트와 재현](#테스트와-재현), [§8](#8-검증과-성능-직접-실행-2026-11-26), [§9](#9-기술적-한계와-남은-과제), [CI](https://github.com/KYU-SW/INSIGHT/actions/workflows/ci.yml) |
 
 ---
 
@@ -223,13 +235,15 @@ cloudflared tunnel --url http://127.0.0.1:3000   # 출력된 https://...trycloud
 
 ### 의료진: 기록 조회 (`/patients`, `/history`)
 
-상단의 **DB 연동**을 누르고, **DB 불러오기**로 저장된 결과를 가져옵니다. 왼쪽에서 Subject ID를 고르면 그 사람의 녹음별 결과와 최신 VHI-30 결과가 함께 표시됩니다. `/history`에서는 전체 분석 이력을 시간순으로 볼 수 있습니다.
+상단의 **DB 연동**을 누르고, **DB 불러오기**로 저장된 결과를 가져옵니다. 왼쪽에서 Subject ID를 고르면 그 사람의 녹음별 결과와 최신 VHI-30 결과가 함께 표시됩니다. `/history`에서도 같은 **DB 불러오기** 버튼으로 전체 분석 이력을 시간순으로 볼 수 있습니다. 학습 분포 밖으로 판정된 기록은 점수 옆에 `OOD`가 표시되고, DB에서 다시 불러와도 경고가 유지됩니다.
+
+![Registry: DB에서 다시 불러온 기록의 상세 화면](docs/ui-verification/insight-registry-desktop.png)
 
 ---
 
 ## API
 
-추론 서버(`src/backend/app.py`)는 엔드포인트 하나만 제공합니다. 브라우저는 이 서버를 직접 호출하지 않으며, Next.js의 `/api/analyze`가 토큰을 붙여 대신 전달합니다.
+추론 서버(`src/backend/app.py`)는 분석용 `POST /analyze`와 상태 확인용 `GET /health`(인증 불필요, 모델을 로드하지 않음)를 제공합니다. 브라우저는 이 서버를 직접 호출하지 않으며, Next.js의 `/api/analyze`가 토큰을 붙여 대신 전달합니다.
 
 ```sh
 curl -X POST http://127.0.0.1:8001/analyze \
@@ -314,10 +328,12 @@ INSIGHT/
 ├── ood_calibration.json        # OOD 임계값과 산출 근거
 ├── provenance/                 # 학습·비교 실험 원본 결과 사본 (Drive ID·SHA-256 포함)
 ├── scripts/                    # 모델 카드 생성·검증, OOD 보정, 재현, 서버 실행
-├── experiments/                # 부정 결과 실험 (대역폭 가설)
+├── experiments/                # 대역폭 가설(부정 결과), h7 다중 seed·OOD 재보정 스크립트
 ├── examples/                   # 합성 음성과 기대 출력
+├── notebooks/                  # 배포 가중치를 만든 학습 노트북 (Colab)
 ├── tests/                      # TypeScript 테스트 · tests/python 백엔드 테스트
-└── docs/                       # DB 스키마, 근거 추적표, 실험 목록, 화면 검증 이미지
+├── design/stitch-mockups/      # 초기 Google Stitch 화면 시안 (실행에 사용하지 않음)
+└── docs/                       # DB 스키마, 근거 추적표, 실험 목록, 화면 검증 이미지 (archive/: 지난 계획 문서)
 ```
 
 ---
@@ -325,8 +341,9 @@ INSIGHT/
 ## 테스트와 재현
 
 ```sh
-npm run lint && npm run typecheck && npm test            # 웹: 정적 검사 + TypeScript 테스트 22개
-.venv/bin/python -m unittest discover -s tests/python -v  # 백엔드 테스트 29개
+npm run lint && npm run typecheck && npm test            # 웹: 정적 검사 + TypeScript 테스트 24개
+.venv/bin/python -m unittest discover -s tests/python -v  # 백엔드 테스트 33개
+sh scripts/smoke_backend.sh                               # 추론 서버를 실제로 띄워 인증·분석·OOD 응답 확인 (E2E)
 .venv/bin/python scripts/build_model_card.py --check      # 배포 가중치 ↔ 학습 실행 11개 검사
 .venv/bin/python scripts/calibrate_ood.py --check         # OOD 임계값 재계산 일치 확인
 .venv/bin/python scripts/reproduce_inference.py           # 합성 음성으로 추론 결과 재현
@@ -665,8 +682,9 @@ INSIGHT가 기존 시스템보다 우수하다는 주장이 아니다. 운영 �
 
 | 항목 | 결과 |
 |---|---|
-| `npm run lint` / `typecheck` / `npm test` | 통과, TypeScript 테스트 **22/22** (추론 API 경로의 토큰 전달·인증 오류 은닉, DB 업로드 실패 시 되돌리기 포함) |
-| Python 백엔드 테스트 (`python -m unittest discover -s tests/python`) | **29/29** (8 kHz 경로 동일성, 대역 제한, F0·dBFS, Jitter·Shimmer·HNR 합성 신호 검증, API 인증, OOD 게이트, API 계약) |
+| `npm run lint` / `typecheck` / `npm test` | 통과, TypeScript 테스트 **24/24** (추론 API 경로의 토큰 전달·인증 오류 은닉, DB 업로드 실패 시 되돌리기, OOD 판정의 DB 저장·복원 포함) |
+| Python 백엔드 테스트 (`python -m unittest discover -s tests/python`) | **33/33** (8 kHz 경로 동일성, 대역 제한, F0·dBFS, Jitter·Shimmer·HNR 합성 신호 검증, API 인증, `/health`, OOD 게이트, API 계약) |
+| 추론 서버 E2E (`scripts/smoke_backend.sh`) | uvicorn을 실제로 띄워 `/health` → 토큰 없음·틀린 토큰 401 → 올바른 토큰 200(점수·Jitter·OOD 일관성) 확인. CI에서도 매 push 실행 |
 | Jitter·Shimmer·HNR 정확도 (합성 150 Hz 모음) | 주기 변동 SD 2% 주입 → jitter 2.05–2.21% (해석적 기대값 2.26%). SNR 40/30/20/10 dB → HNR 40.1/30.1/20.1/10.3 dB |
 | OOD 게이트 (`scripts/calibrate_ood.py --check`) | SAND 시험 특징 4개의 거리 0.87–1.15, 임계값 1.718. 합성 비음성 입력 9개(무음·잡음·순음·음악·합성 모음)는 1.74–3.00으로 모두 차단 |
 | 가중치 증명 (`scripts/build_model_card.py --check`) | 11개 검사 통과 |
@@ -687,10 +705,10 @@ INSIGHT가 기존 시스템보다 우수하다는 주장이 아니다. 운영 �
 
 | 항목 | 현재 상태 | 근거 · 다음 단계 |
 |---|---|---|
-| 분포 밖 입력 | **부분 해결.** 특징 공간 OOD 게이트를 구현했다: 표준화 특징의 RMS 거리를 쓰고, 분포 밖이면 상태 해석을 차단하고 사유를 표시한다. 합성 비음성 입력 9개는 모두 차단했다 | 임계값은 시험 특징 4개로만 정했다(최댓값 × 1.5, 시험 분할 사용). 실제 비SAND 음성(다른 언어·마이크)에서 분리되는지와 SAND 음성의 오거부율은 측정하지 않았다. 음악 입력은 임계값을 1%만 넘어 여유가 작다. 검증 분할 특징으로 다시 보정해야 한다. 점수 포화 자체(OOD 입력 0.9996 이상)는 모델 특성으로 남아 있다 |
+| 분포 밖 입력 | **부분 해결.** 특징 공간 OOD 게이트를 구현했다: 표준화 특징의 RMS 거리를 쓰고, 분포 밖이면 상태 해석을 차단하고 사유를 표시한다. 합성 비음성 입력 9개는 모두 차단했다. OOD 판정은 DB에 함께 저장되어, 다시 불러온 기록에도 경고가 유지된다 | 임계값은 시험 특징 4개로만 정했다(최댓값 × 1.5, 시험 분할 사용). 실제 비SAND 음성(다른 언어·마이크)에서 분리되는지와 SAND 음성의 오거부율은 측정하지 않았다. 음악 입력은 임계값을 1%만 넘어 여유가 작다. 검증 분할 기반 재보정은 [`experiments/h7_multiseed/`](experiments/h7_multiseed/) 스크립트가 함께 산출한다(Colab 실행 필요). 점수 포화 자체(OOD 입력 0.9996 이상)는 모델 특성으로 남아 있다 |
 | Jitter·Shimmer·HNR | **해결.** Praat(parselmouth 0.4.7) local jitter·shimmer, cc HNR을 지속 모음 과제에서만 산출한다. /pa/ /ta/ /ka/ 과제와 0.5 s 미만 유성 구간에서는 사유와 함께 `null`을 반환한다 | 8 kHz 녹음은 대역 상한이 4 kHz라 HNR을 광대역 규준치와 직접 비교할 수 없다. 임상 기준값은 적용하지 않았다(기술 지표로만 표시) |
 | 외부 기준 모델 | 부분 — 수기 특징 + ElasticNet 기준 모델이 있으나 SAND 공식 분할 결과라 배포 모델과 직접 비교할 수 없다(§4.1) | 9bb28df8 분할에서 수기 특징 단독 모델을 학습해야 한다. Drive의 `EGEMAPS_V02_CACHE`로 가능하며 원본 음성은 필요 없다 |
-| 배포 구성의 seed 변동 | 미해결 — h7 구성은 seed 42 단일 학습뿐이며, 같은 설계를 재실행했을 때 선택된 층이 h4로 바뀌었다(§4.1) | Drive 특징 캐시 v1(약 0.8 GB 추정)으로 h7을 다중 seed로 학습해야 한다. 로컬 디스크가 부족해 Colab에서 수행해야 한다 |
+| 배포 구성의 seed 변동 | 미해결 — h7 구성은 seed 42 단일 학습뿐이며, 같은 설계를 재실행했을 때 선택된 층이 h4로 바뀌었다(§4.1) | 재현 스크립트 [`experiments/h7_multiseed/run_h7_multiseed.py`](experiments/h7_multiseed/run_h7_multiseed.py)를 준비했다. 배포 레시피 그대로 seed 42–46을 학습하고, 피험자 bootstrap CI와 **검증 분할 기반 OOD 임계값**(99 백분위, 학습·시험 오거부율)을 함께 산출한다. Drive 특징 캐시가 녹음당 파일 2,164개로 나뉘어 있어 Colab에서 실행해야 한다. 캐시의 h07 max 특징은 provenance 시험 특징과 일치함을 확인했다(최대 차이 7.3×10⁻⁵, 특징 크기 약 80). 저장된 배포 확률도 재현된다 |
 | 검정력 | 시험 41명(HC 16) | 외부 코호트·더 많은 대조군 필요; 교차검증은 미수행 |
 | 언어·녹음 조건 | 이탈리아어, 8 kHz 스마트폰 앱 | 한국어 화자·고음질 녹음 검증 필요 |
 | 점수 해석 | 상태 미분류, 보정 없음 | 의뢰 집단에서 운영 기준점·보정 검증 필요 |
@@ -738,7 +756,7 @@ INSIGHT가 기존 시스템보다 우수하다는 주장이 아니다. 운영 �
 | 영역 | 기여 내용 | 확인 근거 |
 |---|---|---|
 | 문제 정의·기획 | ALS 진단 지연과 연수 증상의 조기 포착을 진료 전 음성 선별 문제로 정의, 선별 보조로 범위 설정 | §1, 초기 커밋 `ce9d62b` |
-| 연구 방법론·실험 설계 | 피험자 단위 층화 분할, 검증 기반 층·하이퍼파라미터 선택, 시험 1회 평가, HPO seed와 평가 seed 분리, paired bootstrap·Holm 보정 비교 | `provenance/*/run_config.json`, `ALS_HC_7EXP_HPO_Research_Pipeline.ipynb`, `HuBERT_Frozen_CNN_Pooling_Reproduction (2).ipynb` |
+| 연구 방법론·실험 설계 | 피험자 단위 층화 분할, 검증 기반 층·하이퍼파라미터 선택, 시험 1회 평가, HPO seed와 평가 seed 분리, paired bootstrap·Holm 보정 비교 | `provenance/*/run_config.json`, `ALS_HC_7EXP_HPO_Research_Pipeline.ipynb`(Drive, 저장소 미포함), [`notebooks/HuBERT_Frozen_CNN_Pooling_Reproduction.ipynb`](notebooks/HuBERT_Frozen_CNN_Pooling_Reproduction.ipynb) |
 | 모델 선택·비교 실험 | HuBERT 25개 층 × pooling 3종 × head 2종(150개) 탐색, 9개 구성 × 3 seed 비교 후 비용 대비 성능으로 배포 모델 결정 | `provenance/run_20261005T055211_070474Z/validation_all_layers.csv`, `provenance/run_20261114T140021_240247Z_LOW_COST/` |
 | 데이터 전처리·평가 방법 | 학습 8 kHz 대역과 추론 전처리 일치, 녹음·피험자 단위 지표 분리, cluster bootstrap, 중증도별 민감도 | `src/backend/model.py`, `scripts/build_model_card.py` |
 | 시스템 아키텍처·통합 | 브라우저 ↔ Next.js ↔ FastAPI 추론 ↔ Firebase 데이터 흐름 설계, 문진·음성 결과의 가명 ID 결합 | §2, `src/` |
@@ -761,7 +779,7 @@ INSIGHT가 기존 시스템보다 우수하다는 주장이 아니다. 운영 �
 | CI: 웹 검사 + 모델 증명·재현 자동화 | [`f3d4037`](https://github.com/KYU-SW/INSIGHT/commit/f3d4037) |
 | Python 백엔드 자동 테스트 12개, CI 포함 | [`2c92ea8`](https://github.com/KYU-SW/INSIGHT/commit/2c92ea8) |
 | 피험자 AUROC·중증도별 민감도, 같은 분할 비교 실험(9구성 × 3 seed) 근거 연결 | [`2b82825`](https://github.com/KYU-SW/INSIGHT/commit/2b82825) |
-| Jitter·Shimmer·HNR(Praat), 추론 서버 Bearer 인증, 특징 공간 OOD 게이트, 테스트 29+21개 | [`8aec6e4`](https://github.com/KYU-SW/INSIGHT/commit/8aec6e4) |
+| Jitter·Shimmer·HNR(Praat), 추론 서버 Bearer 인증, 특징 공간 OOD 게이트, 테스트 29+21개(당시) | [`8aec6e4`](https://github.com/KYU-SW/INSIGHT/commit/8aec6e4) |
 | Drive 전체 실험 조사(층 재실행, eGeMAPS 결합 5 seed, 수기 특징·WavLM 기준 모델, 실패 실험)와 근거 사본 | [`afed8da`](https://github.com/KYU-SW/INSIGHT/commit/afed8da) |
 
 ---
