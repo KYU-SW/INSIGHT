@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { checkDatabaseConnection, loadDatabaseResults, uploadDatabaseResult } from "../src/lib/firebase-database";
+import { checkDatabaseConnection, loadDatabaseQuestionnaires, loadDatabaseResults, uploadDatabaseResult, uploadQuestionnaire } from "../src/lib/firebase-database";
 import type { ClinicalInference } from "../src/types";
 
 process.env.FIREBASE_DATABASE_URL = "https://example-default-rtdb.firebaseio.com";
@@ -60,6 +60,43 @@ test("upload writes the four schema records and never includes raw audio", async
     assert.match(String(writes[2].body.model_version), /^sha256:[a-f0-9]{64}$/);
     assert.equal(writes[3].body.analysis_id, ids.analysis_id);
     assert.equal(writes.some(write => "audio" in write.body || "file" in write.body), false);
+  } finally {
+    globalThis.fetch = original;
+  }
+});
+
+test("VHI upload recomputes scores on the server and ignores client-sent scores", async () => {
+  const writes: { path: string; body: Record<string, unknown> }[] = [];
+  const original = globalThis.fetch;
+  globalThis.fetch = async (input, init) => {
+    const path = new URL(String(input)).pathname;
+    if (init?.method === "PUT") writes.push({ path, body: JSON.parse(String(init.body)) as Record<string, unknown> });
+    return Response.json(init?.method === "PUT" ? {} : null);
+  };
+  try {
+    const forged = { subject_id: "s1", completed_at: "2026-11-26T00:00:00Z", answers: Array(30).fill(2), scores: { total: 0 } };
+    await uploadQuestionnaire(forged);
+    const stored = writes.find(write => write.path.startsWith("/questionnaires/"))!.body;
+    assert.equal(stored.subject_id, "S1");
+    assert.equal(stored.total_score, 60);
+    assert.equal(stored.functional_score, 20);
+    assert.equal("scores" in stored, false);
+    await assert.rejects(uploadQuestionnaire({ ...forged, answers: Array(29).fill(2) }), /30개/);
+  } finally {
+    globalThis.fetch = original;
+  }
+});
+
+test("stored questionnaires with malformed answers are skipped, not partially scored", async () => {
+  const original = globalThis.fetch;
+  globalThis.fetch = async () => Response.json({
+    Q1: { questionnaire_id: "Q1", subject_id: "S1", completed_at: "2026-11-26T00:00:00Z", answers: Array(30).fill(1) },
+    Q2: { questionnaire_id: "Q2", subject_id: "S1", completed_at: "2026-11-26T00:00:00Z", answers: [1, 2, 9] },
+  });
+  try {
+    const loaded = await loadDatabaseQuestionnaires();
+    assert.deepEqual(loaded.map(entry => entry.id), ["Q1"]);
+    assert.equal(loaded[0].scores.total, 30);
   } finally {
     globalThis.fetch = original;
   }

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Brain, ClipboardClock, Database, Users } from "lucide-react";
+import { Brain, ClipboardClock, ClipboardList, Database, Users } from "lucide-react";
 import type { ReactNode } from "react";
 import { useClinicalData } from "@/components/clinical-data-provider";
 
@@ -10,6 +10,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const { databaseConnected, databaseBusy, databaseError, connect } = useClinicalData();
   const navigation = [
+    { href: "/questionnaire", label: "VHI-30", icon: ClipboardList, active: pathname === "/questionnaire" },
     { href: "/analysis", label: "Voice Analysis", icon: Brain, active: pathname === "/" || pathname === "/analysis" },
     { href: "/patients", label: "Patient Registry", icon: Users, active: pathname.startsWith("/patients") },
     { href: "/history", label: "History", icon: ClipboardClock, active: pathname === "/history" },

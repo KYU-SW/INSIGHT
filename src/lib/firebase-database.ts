@@ -1,9 +1,11 @@
 import { createHash, randomUUID } from "node:crypto";
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
-import type { ClinicalInference, SessionResult } from "@/types";
+import type { ClinicalInference, SessionResult, VhiResult } from "@/types";
 import { VOICE_TASKS } from "@/data/tasks";
+import { VHI_INSTRUMENT } from "@/data/vhi";
 import { isValidSubjectId, normalizeSubjectId, requireSubjectId } from "@/lib/subject-id";
+import { scoreVhi } from "@/lib/vhi";
 
 const DEFAULT_URL = "Enter your Firebase URL";
 const COLLECTIONS = ["subjects", "recordings", "analyses", "acoustic_metrics"] as const;
@@ -132,9 +134,7 @@ export async function uploadDatabaseResult(result: ClinicalInference): Promise<{
     const value = number(result.acoustic[key]);
     if (value !== null) acoustic[key] = value;
   }
-  const subjectPath = `subjects/${encodeURIComponent(subjectId)}`;
-  const existing = await request(subjectPath);
-  if (existing === null) await put(subjectPath, { subject_id: subjectId, created_at: now });
+  await ensureSubject(subjectId, now);
   const written: string[] = [];
   try {
     for (const [path, value] of [
@@ -151,4 +151,42 @@ export async function uploadDatabaseResult(result: ClinicalInference): Promise<{
     throw error;
   }
   return { analysis_id: analysisId, recording_id: recordingId };
+}
+
+async function ensureSubject(subjectId: string, now: string) {
+  const subjectPath = `subjects/${encodeURIComponent(subjectId)}`;
+  if (await request(subjectPath) === null) await put(subjectPath, { subject_id: subjectId, created_at: now });
+}
+
+/** Stores one VHI-30 response. Scores are recomputed here from the raw answers; client-sent scores are ignored. */
+export async function uploadQuestionnaire(input: Pick<VhiResult, "subject_id" | "completed_at" | "answers">): Promise<{ questionnaire_id: string }> {
+  const subjectId = requireSubjectId(input?.subject_id ?? "");
+  if (typeof input.completed_at !== "string" || !Number.isFinite(Date.parse(input.completed_at))) throw new Error("문진 완료 시각이 올바르지 않습니다.");
+  const scores = scoreVhi(input.answers);
+  const questionnaireId = randomUUID();
+  const now = new Date().toISOString();
+  await ensureSubject(subjectId, now);
+  await put(`questionnaires/${questionnaireId}`, {
+    questionnaire_id: questionnaireId, subject_id: subjectId, completed_at: input.completed_at, uploaded_at: now,
+    instrument: "VHI-30", instrument_version: VHI_INSTRUMENT.version, usage_status: VHI_INSTRUMENT.usage_status,
+    answers: [...input.answers], functional_score: scores.functional, physical_score: scores.physical,
+    emotional_score: scores.emotional, total_score: scores.total,
+  });
+  return { questionnaire_id: questionnaireId };
+}
+
+export async function loadDatabaseQuestionnaires(): Promise<VhiResult[]> {
+  const loaded: VhiResult[] = [];
+  for (const row of records(await request("questionnaires"))) {
+    const id = text(row.questionnaire_id);
+    const subjectId = normalizeSubjectId(text(row.subject_id) ?? "");
+    const completedAt = text(row.completed_at);
+    const answers = Array.isArray(row.answers) ? row.answers : [];
+    if (!id || !isValidSubjectId(subjectId) || !completedAt || !Number.isFinite(Date.parse(completedAt))) continue;
+    let scores;
+    try { scores = scoreVhi(answers); } catch { continue; } // skip malformed rows rather than show partial scores
+    loaded.push({ id, databaseId: id, subject_id: subjectId, completed_at: completedAt,
+      instrument_version: text(row.instrument_version) ?? "unknown", answers: answers as number[], scores });
+  }
+  return loaded.sort((left, right) => right.completed_at.localeCompare(left.completed_at));
 }

@@ -1,8 +1,10 @@
 "use client";
 
 import { useEffect, useMemo, useState, type FormEvent } from "react";
+import Link from "next/link";
 import { Activity, CircleHelp, FileAudio, OctagonAlert, ShieldCheck, TriangleAlert } from "lucide-react";
 import { useClinicalData } from "@/components/clinical-data-provider";
+import { VhiSummary } from "@/components/questionnaire/vhi-questionnaire";
 import { VOICE_TASKS } from "@/data/tasks";
 import { convertToWav, needsConversion } from "@/lib/audio-convert";
 import { SUBJECT_ID_HINT, isValidSubjectId, normalizeSubjectId } from "@/lib/subject-id";
@@ -18,7 +20,9 @@ function Metric({ title, subtitle, value, compact = false }: { title: string; su
 }
 
 export function Result({ result, sessionId }: { result: ClinicalInference; sessionId?: string }) {
-  const { results, databaseConnected, databaseBusy, uploadToDatabase } = useClinicalData();
+  const { results, questionnaires, databaseConnected, databaseBusy, uploadToDatabase } = useClinicalData();
+  // Latest self-report for the same pseudonymous subject; shown beside, never merged into, the model score.
+  const vhi = questionnaires.find(entry => entry.subject_id === result.user_id);
   const [uploadError, setUploadError] = useState("");
   const entry = results.find(item => item.id === sessionId);
   const requiredMeasurements = [result.recording_quality.rms_dbfs, result.acoustic.mean_pitch_hz,
@@ -79,12 +83,13 @@ export function Result({ result, sessionId }: { result: ClinicalInference; sessi
       </dl>
       {sessionId && <div className="mt-unit-md flex flex-wrap items-center gap-3 border-t border-surface-container pt-unit-md"><button type="button" onClick={() => void upload()} disabled={!databaseConnected || databaseBusy || !canUpload || !!entry?.databaseAnalysisId} className="rounded bg-primary-container px-4 py-2 text-body-sm font-medium text-white disabled:opacity-50">{entry?.databaseAnalysisId ? "DB 업로드 완료" : databaseBusy ? "업로드 중…" : "DB 업로드"}</button>{uploadError && <p role="alert" className="w-full text-body-sm text-error">{uploadError}</p>}</div>}
     </section>
+    {vhi ? <VhiSummary entry={vhi} /> : <section className="rounded bg-surface-container-lowest p-unit-lg shadow-sm"><h2 className="text-headline-lg text-primary">VHI-30 자가보고 · Self-report</h2><p className="text-body-sm text-on-surface-variant">{result.user_id}의 VHI-30 문진 결과가 없습니다. <Link href="/questionnaire" className="font-medium text-secondary underline">문진 작성</Link></p></section>}
   </div>;
 }
 
 export function LiveAnalysis() {
-  const { analyze, liveResult, results } = useClinicalData();
-  const [userId, setUserId] = useState("");
+  const { analyze, liveResult, results, activeSubjectId } = useClinicalData();
+  const [userId, setUserId] = useState(activeSubjectId);
   const [taskCode, setTaskCode] = useState("vowel_a");
   const [recordingTime, setRecordingTime] = useState("");
   const [file, setFile] = useState<File | null>(null);
@@ -122,9 +127,10 @@ export function LiveAnalysis() {
     {!liveResult && <section className="idle-panel" aria-label="분석 진행 순서">
       <h2 className="text-headline-sm text-primary">분석 순서 · How it works</h2>
       <ol>
-        <li><b>1</b><span>Subject ID, Task, 녹음 시각을 입력하고 저장된 오디오 파일을 선택합니다.</span></li>
-        <li><b>2</b><span>Analyze recording을 누르면 서버에서 HuBERT 분석이 실행됩니다 (수십 초 소요).</span></li>
-        <li><b>3</b><span>음성이상점수와 음향 지표가 이 아래에 표시되고, Patient Registry와 History에 저장됩니다.</span></li>
+        <li><b>1</b><span>(선택) <Link href="/questionnaire" className="font-medium text-secondary underline">VHI-30 문진</Link>을 같은 Subject ID로 작성하면 결과 화면에 자가보고 점수가 함께 표시됩니다.</span></li>
+        <li><b>2</b><span>Subject ID, Task, 녹음 시각을 입력하고 저장된 오디오 파일을 선택합니다.</span></li>
+        <li><b>3</b><span>Analyze recording을 누르면 서버에서 HuBERT 분석이 실행됩니다 (수십 초 소요).</span></li>
+        <li><b>4</b><span>음성이상점수와 음향 지표가 이 아래에 표시되고, Patient Registry와 History에 저장됩니다.</span></li>
       </ol>
       <p>이 화면은 기존 오디오 파일을 분석합니다. 마이크 녹음 기능은 제공하지 않으며, 결과는 선별 보조 정보입니다.</p>
     </section>}

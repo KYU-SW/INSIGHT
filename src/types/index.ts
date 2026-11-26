@@ -18,3 +18,14 @@ export interface SessionResult {
   databaseAnalysisId?: string;
   result: ClinicalInference;
 }
+
+export interface VhiResult {
+  id: string;
+  subject_id: string;
+  completed_at: string;
+  instrument_version: string;
+  /** answers[i] is the 0-4 response to VHI item i + 1. */
+  answers: number[];
+  scores: { functional: number; physical: number; emotional: number; total: number };
+  databaseId?: string;
+}
