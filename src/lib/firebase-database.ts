@@ -107,7 +107,7 @@ export async function uploadDatabaseResult(result: ClinicalInference): Promise<{
   const recordingId = randomUUID();
   const analysisId = randomUUID();
   const now = new Date().toISOString();
-  const [head, scaler] = await Promise.all([readFile(join(process.cwd(), "head.pt")), readFile(join(process.cwd(), "scaler.npz"))]);
+  const [head, scaler, card] = await Promise.all(["head.pt", "scaler.npz", "model_card.json"].map(name => readFile(join(process.cwd(), name))));
   const headHash = createHash("sha256").update(head).digest("hex");
   const scalerHash = createHash("sha256").update(scaler).digest("hex");
   const recording: JsonRecord = {
@@ -124,6 +124,8 @@ export async function uploadDatabaseResult(result: ClinicalInference): Promise<{
     model_score: result.model.score, pipeline_version: PIPELINE_VERSION,
     backbone_revision: "ece5fabbf034c1073acae96d5401b25be96709d8",
     head_sha256: headHash, scaler_sha256: scalerHash,
+    // Links this stored score to the training config, split and validation/test evidence for these weights.
+    model_card_sha256: createHash("sha256").update(card).digest("hex"),
   };
   const acoustic: JsonRecord = {
     analysis_id: analysisId,

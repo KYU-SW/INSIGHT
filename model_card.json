@@ -1,0 +1,94 @@
+{
+  "model_name": "MLP_MAX_h07",
+  "intended_use": "Research screening support on anonymized/test data. Not a diagnosis; not validated for clinical use.",
+  "artifacts_sha256": {
+    "head.pt": "f46ad9e6130f4538dab2427b78b17d501f6358d5f7c88f400fe820a656da58c6",
+    "scaler.npz": "47e5e89c27eb51948bf692b225aa1cba2b72b8aab5877a3cf505ebdde0fe30e4",
+    "history.csv": "f6704e491111e313ac8f0b5332419c8a7ebd8a9116b6504ac592fb2c6f2ae631",
+    "validation.json": "f84f64209fc7a6881a1ed942f02b8e83d9623991f0d3687f7afb9c70ec5a102a",
+    "test_confusion_counts.npy": "673332202580efaad72d8fae58f66746830d0d42eb84529ce13d422913ef11c2"
+  },
+  "pipeline": {
+    "backbone": "facebook/hubert-large-ls960-ft",
+    "backbone_revision": "ece5fabbf034c1073acae96d5401b25be96709d8",
+    "backbone_frozen": true,
+    "hidden_state_index": 7,
+    "notebook_paper_layer": 8,
+    "sample_rate_hz": 16000,
+    "pooling": "max over all time frames (no chunking)",
+    "standardization": "StandardScaler fit on the training split only (scaler.npz)",
+    "head": "Linear(1024,128) - ReLU - Dropout(0.3, train only) - Linear(128,1); sigmoid = P(ALS)",
+    "decision_rule": "argmax over [1-p, p] (equivalent to p >= 0.5) for the reported test counts"
+  },
+  "training_config_from_notebook": {
+    "seed": 42,
+    "batch_size": 64,
+    "max_epochs": 20,
+    "early_stopping_patience": 3,
+    "optimizer": "Adam",
+    "learning_rate": 0.0005,
+    "weight_decay": 0.001,
+    "loss": "BCEWithLogits",
+    "checkpoint_selection": "minimum validation loss epoch"
+  },
+  "data_split": {
+    "dataset": "SAND Challenge Task 1 training sheet; Class 5 = HC (0), Class 1-4 = ALS (1)",
+    "unit": "subject (speaker) - no speaker appears in two splits",
+    "stratified_ratios": [
+      0.7,
+      0.15,
+      0.15
+    ],
+    "subjects": {
+      "train": 189,
+      "val": 41,
+      "test": 41
+    },
+    "recordings": {
+      "train": 1510,
+      "val": 326,
+      "test": 328
+    }
+  },
+  "validation": {
+    "val_ACC": 73.31288343558282,
+    "val_loss": 0.5241309565726233,
+    "best_epoch": 2,
+    "correct_over_n": "239/326",
+    "epochs_logged": 22
+  },
+  "test": {
+    "level": "recording (328 recordings from 41 held-out subjects); not subject-level aggregation",
+    "confusion_matrix_rows_true_HC_ALS": [
+      [
+        75,
+        53
+      ],
+      [
+        28,
+        172
+      ]
+    ],
+    "accuracy": 0.753,
+    "sensitivity_ALS": 0.86,
+    "specificity_HC": 0.5859,
+    "balanced_accuracy": 0.723,
+    "precision_ALS": 0.7644,
+    "f1_ALS": 0.8094
+  },
+  "consistency_checks": {
+    "validation_json_matches_history_best_epoch": true,
+    "validation_accuracy_is_integer_count_of_notebook_val_split": true,
+    "test_confusion_total_equals_notebook_test_split": true,
+    "history_epochs_within_notebook_max_epochs": false,
+    "history_stops_within_patience_after_best_epoch": false,
+    "validation_json_equals_notebook_printed_value_for_this_layer": false
+  },
+  "limitations": [
+    "history.csv has more epochs than the notebook's MAX_EPOCHS/PATIENCE allow, and validation.json differs from the notebook's printed value for this layer (72.09%). This indicates the supplied artifacts were not produced by the run whose output is saved in the notebook. The validation count (239/326) and test total (328) match the notebook's subject split, but no training run ID was saved, so the weights-to-run link is consistent, not proven.",
+    "test_confusion_counts.npy is taken to belong to head.pt because they were supplied together; re-running inference on the SAND test split is the only way to verify it.",
+    "Test metrics are internal (same SAND distribution, same recording protocol). They are not the performance of the deployed app on phone recordings, other microphones, or other populations.",
+    "Recordings are not independent: 8 recordings per subject on average, so recording-level metrics overstate the effective sample size.",
+    "Specificity is low relative to sensitivity at the 0.5 threshold; no clinical operating point was validated."
+  ]
+}

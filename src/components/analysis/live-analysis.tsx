@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Activity, CircleHelp, FileAudio, OctagonAlert, ShieldCheck, TriangleAlert } from "lucide-react";
 import { useClinicalData } from "@/components/clinical-data-provider";
 import { VhiSummary } from "@/components/questionnaire/vhi-questionnaire";
+import { ModelEvidence } from "@/components/analysis/model-evidence";
 import { VOICE_TASKS } from "@/data/tasks";
 import { convertToWav, needsConversion } from "@/lib/audio-convert";
 import { SUBJECT_ID_HINT, isValidSubjectId, normalizeSubjectId } from "@/lib/subject-id";
@@ -60,6 +61,7 @@ export function Result({ result, sessionId }: { result: ClinicalInference; sessi
         </dl>
       </div>
       <p className="mt-unit-sm text-[11px] text-on-surface-variant">Near-full-scale samples: {quality.near_full_scale_percent.toFixed(2)}%</p>
+      <ModelEvidence />
     </section>
     {result.task.code.startsWith("vowel_") && <section className="rounded bg-surface-container-lowest p-unit-lg shadow-sm">
       <h2 className="text-headline-lg text-primary">모음 발성 분석 <span className="block text-body-sm text-on-surface-variant">Sustained Vowel Analysis</span></h2>

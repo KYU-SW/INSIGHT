@@ -105,6 +105,7 @@ test("upload writes the four schema records and never includes raw audio", async
     assert.deepEqual(writes.map(write => write.path.split("/")[1]), ["subjects", "recordings", "analyses", "acoustic_metrics"]);
     assert.equal(writes[2].body.model_score, 0.42);
     assert.match(String(writes[2].body.model_version), /^sha256:[a-f0-9]{64}$/);
+    assert.match(String(writes[2].body.model_card_sha256), /^[a-f0-9]{64}$/);
     assert.equal(writes[3].body.analysis_id, ids.analysis_id);
     assert.equal(writes.some(write => "audio" in write.body || "file" in write.body), false);
   } finally {

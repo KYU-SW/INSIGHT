@@ -188,3 +188,11 @@
   .vhi-score-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .vhi-nav > button, .vhi-actions > * { flex: 1; }
 }
+/* Model evidence disclosure (model_card.json) */
+.model-evidence { margin-top: 8px; border: 1px solid var(--line); background: #f8fafb; font-size: 13px; }
+.model-evidence summary { cursor: pointer; padding: 7px 10px; font-weight: 600; color: var(--ink); }
+.model-evidence > :not(summary) { margin: 0 10px 8px; }
+.model-evidence dl { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 6px; }
+.model-evidence dt { font-size: 12px; font-weight: 600; color: var(--muted); }
+.model-evidence dd { margin: 1px 0 0; font-variant-numeric: tabular-nums; }
+.model-evidence ul { padding-left: 18px; color: var(--muted); font-size: 12px; line-height: 17px; }
