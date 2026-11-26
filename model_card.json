@@ -93,6 +93,74 @@
     "f1_ALS": 0.8094,
     "eer": 0.2344
   },
+  "test_uncertainty": {
+    "subject_aggregation": "mean P(ALS) over recordings, threshold 0.5 (fixed before evaluation)",
+    "bootstrap": "10000 subject-cluster resamples stratified by class, seed 42, percentile 95% CI",
+    "subjects": {
+      "HC": 16,
+      "ALS": 25
+    },
+    "recording": {
+      "accuracy": {
+        "value": 0.753,
+        "ci95": [
+          0.6829,
+          0.814
+        ]
+      },
+      "sensitivity_ALS": {
+        "value": 0.86,
+        "ci95": [
+          0.775,
+          0.9301
+        ]
+      },
+      "specificity_HC": {
+        "value": 0.5859,
+        "ci95": [
+          0.4688,
+          0.6953
+        ]
+      },
+      "balanced_accuracy": {
+        "value": 0.723,
+        "ci95": [
+          0.6506,
+          0.7888
+        ]
+      }
+    },
+    "subject": {
+      "accuracy": {
+        "value": 0.8537,
+        "ci95": [
+          0.7317,
+          0.9512
+        ]
+      },
+      "sensitivity_ALS": {
+        "value": 0.92,
+        "ci95": [
+          0.8,
+          1.0
+        ]
+      },
+      "specificity_HC": {
+        "value": 0.75,
+        "ci95": [
+          0.5,
+          0.9375
+        ]
+      },
+      "balanced_accuracy": {
+        "value": 0.835,
+        "ci95": [
+          0.71,
+          0.94
+        ]
+      }
+    }
+  },
   "provenance_checks": {
     "1_deployed_files_byte_identical_to_run": true,
     "2_split_hash_reproduced": true,
@@ -112,7 +180,7 @@
   ],
   "limitations": [
     "Test metrics are internal (same SAND distribution and recording protocol). They are not the performance of the deployed app on phone recordings, other microphones, or other populations.",
-    "About 8 recordings per subject: recording-level metrics overstate the effective sample size.",
+    "About 8 recordings per subject: recording-level metrics overstate the effective sample size; see test_uncertainty for subject-level metrics and subject-cluster bootstrap CIs (41 test subjects).",
     "Specificity (58.6%) is low relative to sensitivity at the 0.5 threshold; no clinical operating point was validated.",
     "Check 6 recomputes 4 of 328 test samples (2 HC, 2 ALS, one misclassified each) from cached features; the remaining samples are covered by checks 1 and 5."
   ]

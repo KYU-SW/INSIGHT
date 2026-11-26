@@ -25,7 +25,8 @@ export function ModelEvidence() {
     <dl>
       <div><dt>분할 (피험자 단위 70/15/15)</dt><dd>train {card.data_split.subjects.train} · val {card.data_split.subjects.val} · test {card.data_split.subjects.test}명</dd></div>
       <div><dt>검증 (checkpoint 선택용)</dt><dd>{card.validation.val_ACC.toFixed(2)}% ({card.validation.correct_over_n}) · best epoch {card.validation.best_epoch}</dd></div>
-      <div><dt>시험 (선택에 미사용)</dt><dd>민감도 {pct(card.test.sensitivity_ALS)} · 특이도 {pct(card.test.specificity_HC)} · 균형정확도 {pct(card.test.balanced_accuracy)}</dd></div>
+      <div><dt>시험 · 녹음 단위 (선택에 미사용)</dt><dd>민감도 {pct(card.test.sensitivity_ALS)} · 특이도 {pct(card.test.specificity_HC)} · 균형정확도 {pct(card.test.balanced_accuracy)}</dd></div>
+      <div><dt>시험 · 피험자 단위 (95% CI)</dt><dd>{(["sensitivity_ALS", "specificity_HC"] as const).map(key => { const m = card.test_uncertainty.subject[key]; return `${key === "sensitivity_ALS" ? "민감도" : "특이도"} ${pct(m.value)} [${pct(m.ci95[0])}–${pct(m.ci95[1])}]`; }).join(" · ")}</dd></div>
       <div><dt>학습 실행 (증명됨)</dt><dd className="font-data-sm">{card.training_run.run_id} · head.pt sha256:{card.artifacts_sha256["head.pt"].slice(0, 12)}…</dd></div>
     </dl>
     <ul>{card.limitations.map(item => <li key={item}>{item}</li>)}</ul>

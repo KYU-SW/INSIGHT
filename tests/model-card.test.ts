@@ -19,4 +19,9 @@ test("model card test counts are internally consistent with the subject split", 
   assert.ok(proofs.length >= 10);
   assert.deepEqual(proofs.filter(([, ok]) => !ok), []);
   assert.equal(card.training_run.run_id, "20261005T055211_070474Z");
+  // Subject-level uncertainty: 41 test subjects, every CI brackets its point estimate.
+  assert.equal(card.test_uncertainty.subjects.HC + card.test_uncertainty.subjects.ALS, card.data_split.subjects.test);
+  for (const level of ["recording", "subject"] as const)
+    for (const { value, ci95 } of Object.values(card.test_uncertainty[level])) assert.ok(ci95[0] <= value && value <= ci95[1]);
+  assert.equal(card.test_uncertainty.recording.accuracy.value, card.test.accuracy);
 });

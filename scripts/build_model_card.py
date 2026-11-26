@@ -74,6 +74,49 @@ def recompute_probabilities(features: dict) -> dict:
                 for sid, x in features.items()}
 
 
+BOOTSTRAP_ROUNDS, BOOTSTRAP_SEED = 10_000, 42
+
+
+def binary_metrics(y: np.ndarray, p: np.ndarray) -> dict:
+    pred = p >= 0.5
+    se = float(np.mean(pred[y == 1])) if np.any(y == 1) else np.nan
+    sp = float(np.mean(~pred[y == 0])) if np.any(y == 0) else np.nan
+    return {"accuracy": float(np.mean(pred == (y == 1))), "sensitivity_ALS": se, "specificity_HC": sp, "balanced_accuracy": (se + sp) / 2}
+
+
+def uncertainty(predictions: list[dict]) -> dict:
+    """Recording- and subject-level metrics with subject-cluster bootstrap 95% CIs.
+
+    Subject aggregation is fixed in advance: mean P(ALS) over a subject's recordings, threshold 0.5.
+    Bootstrap resamples subjects (not recordings), stratified by class, because recordings of one subject are dependent.
+    """
+    by_subject: dict[str, list] = defaultdict(list)
+    for p in predictions:
+        by_subject[p["speaker_id"]].append((int(p["y_true"]), json.loads(p["probabilities"])[1]))
+    ids = sorted(by_subject)
+    label = np.array([by_subject[i][0][0] for i in ids])
+    rec_y = [np.array([y for y, _ in by_subject[i]]) for i in ids]
+    rec_p = [np.array([q for _, q in by_subject[i]]) for i in ids]
+    subj_p = np.array([q.mean() for q in rec_p])
+
+    def both(index: np.ndarray) -> dict:
+        return {"recording": binary_metrics(np.concatenate([rec_y[i] for i in index]), np.concatenate([rec_p[i] for i in index])),
+                "subject": binary_metrics(label[index], subj_p[index])}
+
+    point = both(np.arange(len(ids)))
+    rng = np.random.default_rng(BOOTSTRAP_SEED)
+    groups = [np.flatnonzero(label == c) for c in (0, 1)]
+    samples = [both(np.concatenate([rng.choice(g, size=len(g), replace=True) for g in groups])) for _ in range(BOOTSTRAP_ROUNDS)]
+    result = {"subject_aggregation": "mean P(ALS) over recordings, threshold 0.5 (fixed before evaluation)",
+              "bootstrap": f"{BOOTSTRAP_ROUNDS} subject-cluster resamples stratified by class, seed {BOOTSTRAP_SEED}, percentile 95% CI",
+              "subjects": {"HC": int((label == 0).sum()), "ALS": int((label == 1).sum())}}
+    for level in ("recording", "subject"):
+        result[level] = {metric: {"value": round(value, 4),
+                                  "ci95": [round(float(np.percentile([s[level][metric] for s in samples], q)), 4) for q in (2.5, 97.5)]}
+                         for metric, value in point[level].items()}
+    return result
+
+
 def build() -> dict:
     sources = json.loads((RUN / "drive_sources.json").read_text())["sources"]
     config = json.loads((RUN / "run_config.json").read_text())
@@ -158,6 +201,7 @@ def build() -> dict:
             "precision_ALS": round(precision, 4), "f1_ALS": round(2 * precision * sensitivity / (precision + sensitivity), 4),
             "eer": round(float(test_row["EER"]), 4),
         },
+        "test_uncertainty": uncertainty(predictions),
         "provenance_checks": checks | {"6_max_abs_probability_difference": float(max_prob_diff), "6_samples_checked": len(features)},
         "notes": [
             "The repository notebook (MAX_EPOCHS 20, PATIENCE 3, LR 5e-4) is a later edit whose saved output is run "
@@ -167,7 +211,8 @@ def build() -> dict:
         "limitations": [
             "Test metrics are internal (same SAND distribution and recording protocol). They are not the performance of the "
             "deployed app on phone recordings, other microphones, or other populations.",
-            "About 8 recordings per subject: recording-level metrics overstate the effective sample size.",
+            "About 8 recordings per subject: recording-level metrics overstate the effective sample size; see test_uncertainty "
+            "for subject-level metrics and subject-cluster bootstrap CIs (41 test subjects).",
             "Specificity (58.6%) is low relative to sensitivity at the 0.5 threshold; no clinical operating point was validated.",
             "Check 6 recomputes 4 of 328 test samples (2 HC, 2 ALS, one misclassified each) from cached features; "
             "the remaining samples are covered by checks 1 and 5.",
